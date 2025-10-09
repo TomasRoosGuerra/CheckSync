@@ -4,17 +4,19 @@ import { auth } from "../firebase";
 import { useStore } from "../store";
 import UserConnections from "./UserConnections";
 import UserManagement from "./UserManagement";
+import AddMemberPanel from "./AddMemberPanel";
 
 interface SettingsProps {
   onClose: () => void;
 }
 
 export default function Settings({ onClose }: SettingsProps) {
-  const { user, setUser, users } = useStore();
+  const { user, setUser, users, currentWorkspace } = useStore();
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [showConnections, setShowConnections] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -93,28 +95,27 @@ export default function Settings({ onClose }: SettingsProps) {
             </div>
 
             {/* Admin: Manage All Users */}
-            {user?.role === "admin" && (
+            {currentWorkspace?.ownerId === user?.id && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  👑 Manage Team Roles
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <span>👑</span>
+                  Workspace Admin
                 </h3>
-                <div className="card">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        User Role Management
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Assign roles to {users.filter(u => u.id !== user.id).length} team member{users.filter(u => u.id !== user.id).length !== 1 ? 's' : ''}
-                      </div>
+                <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl p-4 border-2 border-primary/30">
+                  <div className="mb-3">
+                    <div className="font-semibold text-gray-900 mb-1">
+                      ➕ Add & Manage Team Members
                     </div>
-                    <button
-                      onClick={() => setShowUserManagement(true)}
-                      className="btn-primary text-sm py-2"
-                    >
-                      Manage Roles
-                    </button>
+                    <div className="text-sm text-gray-600">
+                      Search users by email and assign roles
+                    </div>
                   </div>
+                  <button
+                    onClick={() => setShowAddMember(true)}
+                    className="btn-primary w-full text-base py-3"
+                  >
+                    ➕ Add Team Members
+                  </button>
                 </div>
               </div>
             )}
@@ -222,6 +223,9 @@ export default function Settings({ onClose }: SettingsProps) {
       {/* User Management Modal (Admin Only) */}
       {showUserManagement && (
         <UserManagement onClose={() => setShowUserManagement(false)} />
+      )}
+      {showAddMember && (
+        <AddMemberPanel onClose={() => setShowAddMember(false)} />
       )}
     </div>
   );
