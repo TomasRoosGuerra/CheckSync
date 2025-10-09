@@ -26,16 +26,29 @@ A clean, minimalist web and mobile app for verified attendance check-ins through
 - **Build Tool**: Vite
 - **Date Handling**: date-fns
 
-## Role-Based Access Control
+## Workspace-Based Multi-Tenancy
 
-CheckSync uses a secure 4-tier permission system:
+CheckSync uses **workspaces** (teams/projects) for complete isolation:
 
-- **👑 Admin** - Full system access (first user becomes admin)
+### **How It Works:**
+1. **Create Workspace** - Anyone can create their own workspace
+2. **Become Admin** - Creator is automatically admin of their workspace
+3. **Invite Team** - Add members by email to your workspace
+4. **Assign Roles** - Workspace admin assigns roles to members
+5. **Isolated Data** - Each workspace has its own slots and members
+
+### **Example:**
+- **Tennis Club A** creates workspace → Their admin manages tennis coaches
+- **Tennis Club B** creates workspace → Their admin manages their coaches
+- **No data mixing** - Completely separate
+
+### **Role Hierarchy (Per Workspace):**
+- **👑 Admin** - Workspace owner, full control
 - **📊 Manager** - Create/manage slots, verify, export
 - **🔒 Verifier** - Verify attendance, check in
 - **👤 Participant** - Check in only
 
-**Security:** Only admins can assign roles to prevent self-promotion.
+**Security:** Only workspace admins can assign roles within their workspace.
 
 ---
 
