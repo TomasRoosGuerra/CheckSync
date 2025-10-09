@@ -55,12 +55,14 @@ CheckSync uses a secure 4-tier permission system:
    npm install
    ```
 
-3. Configure Firebase (optional - app works with mock data):
+3. Configure Firebase (**Required**):
 
    - Create a Firebase project at https://console.firebase.google.com
    - Enable Authentication (Email/Password and Google)
    - Enable Firestore Database
+   - Set security rules to: `allow read, write: if request.auth != null;`
    - Copy your Firebase config to `src/firebase.ts`
+   - Add authorized domain: `localhost` for development
 
 4. Start the development server:
 
