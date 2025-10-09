@@ -41,6 +41,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const [newWorkspaceDesc, setNewWorkspaceDesc] = useState("");
   const [newWorkspacePublic, setNewWorkspacePublic] = useState(false);
+  const [memberSearch, setMemberSearch] = useState("");
 
   // Get current workspace data
   const currentMembers = workspaceMembers.filter(
@@ -324,6 +325,30 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
           {/* Members Tab */}
           {activeTab === "members" && (
             <div className="space-y-3">
+              {/* Search Members */}
+              {currentWorkspaceUsers.length > 3 && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    placeholder="Search members by name or email..."
+                    className="input-field pl-10"
+                  />
+                  <svg
+                    className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+              )}
+
               {currentWorkspaceUsers.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">👥</div>
@@ -338,7 +363,13 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                 </div>
               ) : (
                 <>
-                  {currentWorkspaceUsers.map((member) => {
+                  {currentWorkspaceUsers
+                    .filter((m) => 
+                      !memberSearch ||
+                      m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
+                      m.email.toLowerCase().includes(memberSearch.toLowerCase())
+                    )
+                    .map((member) => {
                     const memberData = currentMembers.find(
                       (m) => m.userId === member.id
                     );

@@ -22,6 +22,15 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
     (m) => m.workspaceId === currentWorkspace?.id
   ).length;
   const slotCount = timeSlots.length;
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
+
+  const handleCopyWorkspaceId = () => {
+    if (currentWorkspace) {
+      navigator.clipboard.writeText(currentWorkspace.id);
+      setShowCopySuccess(true);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,6 +112,33 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
                 {isPublic ? "Public" : "Private"}
               </div>
             </div>
+          </div>
+
+          {/* Workspace ID (For Sharing) */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Workspace ID (for sharing)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={currentWorkspace?.id || ""}
+                readOnly
+                className="input-field flex-1 bg-white font-mono text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleCopyWorkspaceId}
+                className={`btn-secondary whitespace-nowrap transition-all ${
+                  showCopySuccess ? "bg-green-100 text-green-700" : ""
+                }`}
+              >
+                {showCopySuccess ? "✅ Copied!" : "📋 Copy"}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Share this ID with people to let them join your workspace
+            </p>
           </div>
 
           {/* Edit Form (Owner Only) */}
