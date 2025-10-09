@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { TimeSlot, User, UserRole, Workspace, WorkspaceMember } from "./types";
+import type { TimeSlot, User, UserRole, Workspace, WorkspaceMember, Notification } from "./types";
 
 interface AppStore {
   user: User | null;
@@ -8,6 +8,7 @@ interface AppStore {
   workspaceMembers: WorkspaceMember[];
   timeSlots: TimeSlot[];
   users: User[];
+  notifications: Notification[];
   selectedDate: Date;
   setUser: (user: User | null) => void;
   setCurrentWorkspace: (workspace: Workspace | null) => void;
@@ -18,6 +19,7 @@ interface AppStore {
   updateTimeSlot: (id: string, updates: Partial<TimeSlot>) => void;
   deleteTimeSlot: (id: string) => void;
   setUsers: (users: User[]) => void;
+  setNotifications: (notifications: Notification[]) => void;
   setSelectedDate: (date: Date) => void;
   getUserRole: (userId: string) => UserRole;
 }
@@ -29,6 +31,7 @@ export const useStore = create<AppStore>((set, get) => ({
   workspaceMembers: [],
   timeSlots: [],
   users: [],
+  notifications: [],
   selectedDate: new Date(),
   setUser: (user) => set({ user }),
   setCurrentWorkspace: (currentWorkspace) => set({ currentWorkspace }),
@@ -48,6 +51,7 @@ export const useStore = create<AppStore>((set, get) => ({
       timeSlots: state.timeSlots.filter((slot) => slot.id !== id),
     })),
   setUsers: (users) => set({ users }),
+  setNotifications: (notifications) => set({ notifications }),
   setSelectedDate: (selectedDate) => set({ selectedDate }),
   getUserRole: (userId: string) => {
     const state = get();

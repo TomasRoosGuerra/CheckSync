@@ -5,6 +5,7 @@ import {
 } from "../services/workspaceService";
 import { useStore } from "../store";
 import type { Workspace } from "../types";
+import PublicWorkspaceDiscovery from "./PublicWorkspaceDiscovery";
 
 interface WorkspaceSelectorProps {
   onWorkspaceSelected: () => void;
@@ -18,8 +19,10 @@ export default function WorkspaceSelector({
   const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [showDiscovery, setShowDiscovery] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const [newWorkspaceDesc, setNewWorkspaceDesc] = useState("");
+  const [newWorkspacePublic, setNewWorkspacePublic] = useState(false);
   const [joinCode, setJoinCode] = useState("");
 
   useEffect(() => {
@@ -54,7 +57,8 @@ export default function WorkspaceSelector({
       const workspaceId = await createWorkspace(
         user.id,
         newWorkspaceName.trim(),
-        newWorkspaceDesc.trim() || undefined
+        newWorkspaceDesc.trim() || undefined,
+        newWorkspacePublic
       );
 
       const newWorkspace: Workspace = {
@@ -62,6 +66,7 @@ export default function WorkspaceSelector({
         name: newWorkspaceName.trim(),
         description: newWorkspaceDesc.trim() || undefined,
         ownerId: user.id,
+        isPublic: newWorkspacePublic,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -69,6 +74,7 @@ export default function WorkspaceSelector({
       setWorkspaces([...workspaces, newWorkspace]);
       setNewWorkspaceName("");
       setNewWorkspaceDesc("");
+      setNewWorkspacePublic(false);
       setShowCreate(false);
 
       // Auto-select new workspace
@@ -146,10 +152,16 @@ export default function WorkspaceSelector({
                   ➕ Create New Workspace
                 </button>
                 <button
-                  onClick={() => setShowJoin(true)}
+                  onClick={() => setShowDiscovery(true)}
                   className="btn-secondary w-full"
                 >
-                  🔗 Join Existing Workspace
+                  🌐 Browse Public Workspaces
+                </button>
+                <button
+                  onClick={() => setShowJoin(true)}
+                  className="btn-secondary w-full text-sm"
+                >
+                  🔗 Join with Code
                 </button>
               </div>
             ) : showCreate ? (
@@ -183,6 +195,19 @@ export default function WorkspaceSelector({
                     placeholder="e.g., Weekly training sessions for tennis coaches"
                   />
                 </div>
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newWorkspacePublic}
+                      onChange={(e) => setNewWorkspacePublic(e.target.checked)}
+                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <span className="text-sm text-gray-700">
+                      🌐 Make this workspace public (anyone can request to join)
+                    </span>
+                  </label>
+                </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
@@ -193,7 +218,10 @@ export default function WorkspaceSelector({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowCreate(false)}
+                    onClick={() => {
+                      setShowCreate(false);
+                      setNewWorkspacePublic(false);
+                    }}
                     className="btn-secondary"
                   >
                     Cancel
@@ -248,12 +276,17 @@ export default function WorkspaceSelector({
 
             {workspaces.length === 0 && !showCreate && !showJoin && (
               <p className="text-xs text-gray-500 text-center mt-4">
-                Create your first workspace or join an existing one
+                Create your first workspace or discover public ones
               </p>
             )}
           </>
         )}
       </div>
+
+      {/* Public Workspace Discovery Modal */}
+      {showDiscovery && (
+        <PublicWorkspaceDiscovery onClose={() => setShowDiscovery(false)} />
+      )}
     </div>
   );
 }

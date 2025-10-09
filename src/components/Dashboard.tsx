@@ -8,18 +8,22 @@ import FriendsBrowser from "./FriendsBrowser";
 import Settings from "./Settings";
 import WeekCalendar from "./WeekCalendar";
 import WorkspaceBrowser from "./WorkspaceBrowser";
+import NotificationsPanel from "./NotificationsPanel";
 
 type ViewMode = "week" | "agenda";
 
 export default function Dashboard() {
-  const { user, currentWorkspace, workspaceMembers, setCurrentWorkspace } =
+  const { user, currentWorkspace, workspaceMembers, setCurrentWorkspace, notifications } =
     useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showWorkspaceBrowser, setShowWorkspaceBrowser] = useState(false);
   const [showFriendsBrowser, setShowFriendsBrowser] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("week");
+  
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   // Get user's role in current workspace
   const userRole =
@@ -64,6 +68,20 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
+              {/* Notifications Button */}
+              <button
+                onClick={() => setShowNotifications(true)}
+                className="btn-secondary py-2 px-2 sm:px-3 text-xs sm:text-sm touch-manipulation relative"
+                title="Notifications"
+              >
+                <span className="text-base">🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
               {/* Friends/Team Button */}
               <button
                 onClick={() => setShowFriendsBrowser(true)}
@@ -174,6 +192,9 @@ export default function Dashboard() {
       )}
       {showFriendsBrowser && (
         <FriendsBrowser onClose={() => setShowFriendsBrowser(false)} />
+      )}
+      {showNotifications && (
+        <NotificationsPanel onClose={() => setShowNotifications(false)} />
       )}
     </div>
   );

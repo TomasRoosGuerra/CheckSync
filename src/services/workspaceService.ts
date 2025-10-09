@@ -20,7 +20,8 @@ const WORKSPACE_MEMBERS_COLLECTION = "workspaceMembers";
 export const createWorkspace = async (
   ownerId: string,
   name: string,
-  description?: string
+  description?: string,
+  isPublic: boolean = false
 ): Promise<string> => {
   try {
     const workspaceRef = doc(collection(db, WORKSPACES_COLLECTION));
@@ -28,6 +29,7 @@ export const createWorkspace = async (
       name,
       description,
       ownerId,
+      isPublic,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };

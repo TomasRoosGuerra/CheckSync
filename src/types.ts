@@ -17,8 +17,32 @@ export interface Workspace {
   name: string;
   description?: string;
   ownerId: string; // Creator/Admin of this workspace
+  isPublic: boolean; // Public workspaces are discoverable
   createdAt: number;
   updatedAt: number;
+}
+
+export interface JoinRequest {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  status: "pending" | "approved" | "rejected";
+  message?: string;
+  createdAt: number;
+  resolvedAt?: number;
+  resolvedBy?: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: "join_request" | "request_approved" | "request_rejected" | "workspace_invite";
+  title: string;
+  message: string;
+  workspaceId?: string;
+  requestId?: string;
+  read: boolean;
+  createdAt: number;
 }
 
 export interface WorkspaceMember {
