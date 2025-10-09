@@ -190,9 +190,11 @@ export const updateTimeSlot = async (
 
 export const deleteTimeSlot = async (slotId: string) => {
   try {
+    console.log("🗑️ Deleting slot from Firestore:", slotId);
     await deleteDoc(doc(db, SLOTS_COLLECTION, slotId));
+    console.log("✅ Slot deleted from Firestore");
   } catch (error) {
-    console.error("Error deleting time slot:", error);
+    console.error("❌ Error deleting time slot:", error);
     throw error;
   }
 };
@@ -224,10 +226,14 @@ export const subscribeToUserTimeSlots = (
     q1,
     (snapshot) => {
       console.log(`📥 Participant slots received: ${snapshot.size} slots`);
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        slotsMap.set(doc.id, {
-          id: doc.id,
+      
+      // Track which docs were in previous snapshot
+      const currentIds = new Set<string>();
+      
+      snapshot.docChanges().forEach((change) => {
+        const data = change.doc.data();
+        const slotData = {
+          id: change.doc.id,
           ...data,
           createdAt:
             typeof data.createdAt?.toMillis === "function"
@@ -245,21 +251,22 @@ export const subscribeToUserTimeSlots = (
             typeof data.confirmedAt?.toMillis === "function"
               ? data.confirmedAt.toMillis()
               : data.confirmedAt,
-        } as TimeSlot);
+        } as TimeSlot;
+
+        if (change.type === "added" || change.type === "modified") {
+          console.log(`${change.type === "added" ? "➕" : "📝"} Slot ${change.type}:`, change.doc.id);
+          slotsMap.set(change.doc.id, slotData);
+          currentIds.add(change.doc.id);
+        } else if (change.type === "removed") {
+          console.log("🗑️ Slot removed:", change.doc.id);
+          slotsMap.delete(change.doc.id);
+        }
       });
 
-      // Remove deleted docs
-      const currentIds = new Set(snapshot.docs.map((doc) => doc.id));
-      for (const [id, slot] of slotsMap.entries()) {
-        if (slot.participantIds.includes(userId) && !currentIds.has(id)) {
-          // Only remove if this was the participant query's slot
-          const isVerifier = slot.verifierId === userId;
-          if (!isVerifier) {
-            slotsMap.delete(id);
-          }
-        }
-      }
+      // Also track existing docs to keep them
+      snapshot.docs.forEach(doc => currentIds.add(doc.id));
 
+      console.log(`✅ Participant query: ${slotsMap.size} total slots in map`);
       updateCallback();
     },
     (error) => {
@@ -272,10 +279,11 @@ export const subscribeToUserTimeSlots = (
     q2,
     (snapshot) => {
       console.log(`📥 Verifier slots received: ${snapshot.size} slots`);
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        slotsMap.set(doc.id, {
-          id: doc.id,
+      
+      snapshot.docChanges().forEach((change) => {
+        const data = change.doc.data();
+        const slotData = {
+          id: change.doc.id,
           ...data,
           createdAt:
             typeof data.createdAt?.toMillis === "function"
@@ -293,20 +301,16 @@ export const subscribeToUserTimeSlots = (
             typeof data.confirmedAt?.toMillis === "function"
               ? data.confirmedAt.toMillis()
               : data.confirmedAt,
-        } as TimeSlot);
-      });
+        } as TimeSlot;
 
-      // Remove deleted docs
-      const currentIds = new Set(snapshot.docs.map((doc) => doc.id));
-      for (const [id, slot] of slotsMap.entries()) {
-        if (slot.verifierId === userId && !currentIds.has(id)) {
-          // Only remove if this was the verifier query's slot
-          const isParticipant = slot.participantIds.includes(userId);
-          if (!isParticipant) {
-            slotsMap.delete(id);
-          }
+        if (change.type === "added" || change.type === "modified") {
+          console.log(`${change.type === "added" ? "➕" : "📝"} Verifier slot ${change.type}:`, change.doc.id);
+          slotsMap.set(change.doc.id, slotData);
+        } else if (change.type === "removed") {
+          console.log("🗑️ Verifier slot removed:", change.doc.id);
+          slotsMap.delete(change.doc.id);
         }
-      }
+      });
 
       console.log(`✅ Total unique slots: ${slotsMap.size}`);
       updateCallback();
