@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useStore } from "../store";
 import { doc, updateDoc } from "firebase/firestore";
+import { useState } from "react";
 import { db } from "../firebase";
+import { useStore } from "../store";
 import { isWorkspaceOwner } from "../utils/permissions";
 
 interface WorkspaceSettingsProps {
@@ -11,12 +11,16 @@ interface WorkspaceSettingsProps {
 export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
   const { user, currentWorkspace, workspaceMembers, timeSlots } = useStore();
   const [name, setName] = useState(currentWorkspace?.name || "");
-  const [description, setDescription] = useState(currentWorkspace?.description || "");
+  const [description, setDescription] = useState(
+    currentWorkspace?.description || ""
+  );
   const [isPublic, setIsPublic] = useState(currentWorkspace?.isPublic || false);
   const [saving, setSaving] = useState(false);
 
   const isOwner = isWorkspaceOwner(user, currentWorkspace);
-  const memberCount = workspaceMembers.filter(m => m.workspaceId === currentWorkspace?.id).length;
+  const memberCount = workspaceMembers.filter(
+    (m) => m.workspaceId === currentWorkspace?.id
+  ).length;
   const slotCount = timeSlots.length;
 
   const handleSave = async (e: React.FormEvent) => {
@@ -32,7 +36,7 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
         isPublic,
         updatedAt: Date.now(),
       });
-      
+
       alert("✅ Workspace settings updated!");
       window.location.reload();
     } catch (error) {
@@ -61,7 +65,15 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100"
             >
-              <svg className="w-6 h-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
@@ -72,11 +84,15 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
           {/* Workspace Stats */}
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-blue-700">{memberCount}</div>
+              <div className="text-3xl font-bold text-blue-700">
+                {memberCount}
+              </div>
               <div className="text-sm text-blue-600 mt-1">Members</div>
             </div>
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-green-700">{slotCount}</div>
+              <div className="text-3xl font-bold text-green-700">
+                {slotCount}
+              </div>
               <div className="text-sm text-green-600 mt-1">Time Slots</div>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 text-center">
@@ -172,12 +188,19 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
                 ⚠️ Danger Zone
               </h3>
               <p className="text-sm text-red-600 mb-4">
-                Deleting this workspace will remove all time slots and member associations. This action cannot be undone.
+                Deleting this workspace will remove all time slots and member
+                associations. This action cannot be undone.
               </p>
               <button
                 onClick={() => {
-                  if (confirm(`⚠️ Delete "${currentWorkspace?.name}"?\n\nThis will:\n- Remove all time slots\n- Remove all members\n- Cannot be undone!\n\nType the workspace name to confirm.`)) {
-                    alert("Workspace deletion coming soon. Please export your data first.");
+                  if (
+                    confirm(
+                      `⚠️ Delete "${currentWorkspace?.name}"?\n\nThis will:\n- Remove all time slots\n- Remove all members\n- Cannot be undone!\n\nType the workspace name to confirm.`
+                    )
+                  ) {
+                    alert(
+                      "Workspace deletion coming soon. Please export your data first."
+                    );
                   }
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
@@ -191,4 +214,3 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
     </div>
   );
 }
-

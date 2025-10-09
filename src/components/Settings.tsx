@@ -99,21 +99,47 @@ export default function Settings({ onClose }: SettingsProps) {
               </p>
             </div>
 
-            {/* Workspace Info */}
-            {currentWorkspace?.ownerId === user?.id && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <span>👑</span>
-                  Workspace Admin
-                </h3>
-                <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl p-4 border-2 border-primary/30">
-                  <div className="text-sm text-gray-600 mb-2">
-                    Manage team members via the <strong>👥 Team</strong> button
-                    in the header
+            {/* Workspace Settings */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span>🏢</span>
+                Workspace
+              </h3>
+              <div className="card">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {currentWorkspace?.name}
+                      {currentWorkspace?.ownerId === user?.id && (
+                        <span className="text-sm ml-2">👑</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {currentWorkspace?.description || "No description"}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      {currentWorkspace?.isPublic && (
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          🌐 Public
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <button
+                    onClick={() => setShowWorkspaceSettings(true)}
+                    className="btn-secondary text-sm py-2"
+                  >
+                    ⚙️ Edit
+                  </button>
                 </div>
               </div>
-            )}
+              {currentWorkspace?.ownerId === user?.id && (
+                <p className="text-xs text-gray-500 mt-2">
+                  💡 Manage team members via the <strong>👥 Team</strong> button
+                  in the header
+                </p>
+              )}
+            </div>
 
             {/* Notifications */}
             <div>

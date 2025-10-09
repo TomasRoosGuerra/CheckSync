@@ -4,10 +4,11 @@ import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
-import Settings from "./Settings";
-import WeekCalendar from "./WeekCalendar";
 import NotificationsPanel from "./NotificationsPanel";
+import QuickStats from "./QuickStats";
+import Settings from "./Settings";
 import TeamPanel from "./TeamPanel";
+import WeekCalendar from "./WeekCalendar";
 
 type ViewMode = "week" | "agenda";
 
@@ -20,7 +21,7 @@ export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showTeamPanel, setShowTeamPanel] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("week");
-  
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   // Get user's role in current workspace
@@ -141,6 +142,8 @@ export default function Dashboard() {
 
       {/* Main Content - Mobile Optimized */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 md:py-8">
+        {viewMode === "week" && <QuickStats />}
+
         {viewMode === "week" ? (
           <WeekCalendar onDayClick={setSelectedDay} />
         ) : (
@@ -168,9 +171,7 @@ export default function Dashboard() {
       {showNotifications && (
         <NotificationsPanel onClose={() => setShowNotifications(false)} />
       )}
-      {showTeamPanel && (
-        <TeamPanel onClose={() => setShowTeamPanel(false)} />
-      )}
+      {showTeamPanel && <TeamPanel onClose={() => setShowTeamPanel(false)} />}
     </div>
   );
 }
