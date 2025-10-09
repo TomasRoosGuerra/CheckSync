@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { useStore } from "../store";
+import { canExportData } from "../utils/permissions";
+import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
 import Settings from "./Settings";
 import WeekCalendar from "./WeekCalendar";
-import AgendaView from "./AgendaView";
-import { canExportData } from "../utils/permissions";
-import { useStore } from "../store";
 
 type ViewMode = "week" | "agenda";
 
@@ -24,41 +24,49 @@ export default function Dashboard() {
           <div className="flex items-center justify-between h-14 sm:h-16">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm sm:text-lg">✓</span>
+                <span className="text-white font-bold text-sm sm:text-lg">
+                  ✓
+                </span>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">CheckSync</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                CheckSync
+              </h1>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
               {/* View Toggle - Mobile */}
               <button
-                onClick={() => setViewMode(viewMode === "week" ? "agenda" : "week")}
+                onClick={() =>
+                  setViewMode(viewMode === "week" ? "agenda" : "week")
+                }
                 className="sm:hidden btn-secondary py-2 px-3 text-xs font-medium touch-manipulation"
-                title={viewMode === "week" ? "Switch to Agenda" : "Switch to Week"}
+                title={
+                  viewMode === "week" ? "Switch to Agenda" : "Switch to Week"
+                }
               >
                 {viewMode === "week" ? "📋" : "📅"}
               </button>
-              
+
               {canExportData(user) && (
                 <button
                   onClick={() => setShowExport(true)}
                   className="btn-secondary flex items-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 text-sm sm:text-base"
                 >
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <span className="hidden sm:inline">Export</span>
-              </button>
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">Export</span>
+                </button>
               )}
               <button
                 onClick={() => setShowSettings(true)}

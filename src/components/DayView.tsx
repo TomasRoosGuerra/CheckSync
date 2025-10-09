@@ -8,10 +8,10 @@ import type { TimeSlot } from "../types";
 import { formatDate, getDayName, isSameDayAs } from "../utils/dateUtils";
 import {
   canCheckIn,
-  canVerify,
-  canEditSlot,
-  canDeleteSlot,
   canCreateSlot,
+  canDeleteSlot,
+  canEditSlot,
+  canVerify,
 } from "../utils/permissions";
 import SlotModal from "./SlotModal";
 
@@ -34,7 +34,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
       alert("You don't have permission to check in to this slot.");
       return;
     }
-    
+
     try {
       const updates = {
         status: "checked-in" as const,
@@ -70,7 +70,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
       alert("You don't have permission to verify this slot.");
       return;
     }
-    
+
     try {
       const updates = {
         status: "confirmed" as const,
@@ -106,15 +106,15 @@ export default function DayView({ date, onClose }: DayViewProps) {
     if (slot.recurringGroupId && slot.isRecurring) {
       // Find all slots in the same recurring group
       const recurringSlotsCount = timeSlots.filter(
-        s => s.recurringGroupId === slot.recurringGroupId
+        (s) => s.recurringGroupId === slot.recurringGroupId
       ).length;
 
       if (recurringSlotsCount > 1) {
         // Ask user: delete this one or all?
         const choice = window.confirm(
           `This is part of a recurring series (${recurringSlotsCount} slots).\n\n` +
-          `Click OK to delete ALL ${recurringSlotsCount} slots in this series.\n` +
-          `Click Cancel to delete ONLY this occurrence.`
+            `Click OK to delete ALL ${recurringSlotsCount} slots in this series.\n` +
+            `Click Cancel to delete ONLY this occurrence.`
         );
 
         if (choice === null) return; // User cancelled
@@ -122,11 +122,13 @@ export default function DayView({ date, onClose }: DayViewProps) {
         try {
           if (choice) {
             // Delete all in series
-            console.log(`🗑️ Deleting all ${recurringSlotsCount} recurring slots...`);
-            const slotsToDelete = timeSlots.filter(
-              s => s.recurringGroupId === slot.recurringGroupId
+            console.log(
+              `🗑️ Deleting all ${recurringSlotsCount} recurring slots...`
             );
-            
+            const slotsToDelete = timeSlots.filter(
+              (s) => s.recurringGroupId === slot.recurringGroupId
+            );
+
             for (const s of slotsToDelete) {
               await deleteSlotFirestore(s.id);
             }
@@ -193,7 +195,9 @@ export default function DayView({ date, onClose }: DayViewProps) {
         <div className="bg-gradient-to-r from-primary to-primary-dark text-white p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold">{getDayName(date)}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold">
+                {getDayName(date)}
+              </h2>
               <p className="text-primary-light mt-1 text-sm sm:text-base">
                 {formatDate(date, "MMMM d, yyyy")}
               </p>
@@ -213,7 +217,9 @@ export default function DayView({ date, onClose }: DayViewProps) {
             <div className="text-center py-8 sm:py-12 text-gray-500">
               <div className="text-3xl sm:text-4xl mb-2">📅</div>
               <p className="text-sm sm:text-base">No time slots scheduled</p>
-              <p className="text-xs text-gray-400 mt-1">Tap "Add Time Slot" below</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Tap "Add Time Slot" below
+              </p>
             </div>
           ) : (
             <div className="space-y-2 sm:space-y-3">
@@ -321,7 +327,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                         onClick={() => handleDelete(slot)}
                         className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
                       >
-                        🗑️ {slot.isRecurring ? 'Delete Series' : 'Delete'}
+                        🗑️ {slot.isRecurring ? "Delete Series" : "Delete"}
                       </button>
                     )}
                   </div>
@@ -345,8 +351,8 @@ export default function DayView({ date, onClose }: DayViewProps) {
               Only Managers and Admins can create slots
             </div>
           )}
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="btn-secondary text-sm sm:text-base py-3 sm:py-2 px-6 sm:px-4 touch-manipulation min-h-[48px] sm:min-h-auto"
           >
             Close

@@ -1,4 +1,4 @@
-import type { UserRole, TimeSlot, User } from "../types";
+import type { TimeSlot, User, UserRole } from "../types";
 
 // Role hierarchy and permissions
 
@@ -60,9 +60,7 @@ export const canViewSlot = (user: User | null, slot: TimeSlot): boolean => {
   if (!user) return false;
   if (user.role === "admin" || user.role === "manager") return true;
   // Can view if participant or verifier
-  return (
-    slot.participantIds.includes(user.id) || slot.verifierId === user.id
-  );
+  return slot.participantIds.includes(user.id) || slot.verifierId === user.id;
 };
 
 export const canExportData = (user: User | null): boolean => {
@@ -106,4 +104,3 @@ export const getRoleIcon = (role: UserRole): string => {
       return "👤";
   }
 };
-

@@ -42,10 +42,10 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Prevent double submission
     if (saving) return;
-    
+
     setSaving(true);
 
     try {
@@ -65,23 +65,27 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           verifierId,
           notes,
         });
-        
-        const timeoutPromise = new Promise((_, reject) => 
+
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => {
             console.error("⏱️ Update timed out after 15 seconds");
             reject(new Error("Operation timed out"));
           }, 15000)
         );
-        
+
         await Promise.race([updatePromise, timeoutPromise]);
         console.log("✅ Slot updated successfully");
       } else {
         console.log("➕ Creating new slot(s)...");
 
         // Generate recurring group ID if creating multiple slots
-        const recurringGroupId = recurring && weeksAhead > 1 ? `recurring-${Date.now()}` : undefined;
-        
-        const baseSlot: Omit<TimeSlot, "id" | "date" | "createdAt" | "updatedAt"> = {
+        const recurringGroupId =
+          recurring && weeksAhead > 1 ? `recurring-${Date.now()}` : undefined;
+
+        const baseSlot: Omit<
+          TimeSlot,
+          "id" | "date" | "createdAt" | "updatedAt"
+        > = {
           title,
           startTime,
           endTime,
@@ -96,14 +100,14 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
         // Create recurring slots if requested
         const datesToCreate: string[] = [customDate];
-        
+
         if (recurring && weeksAhead > 1) {
           console.log(`📅 Creating recurring slots for ${weeksAhead} weeks`);
           const baseDate = new Date(customDate);
           for (let i = 1; i < weeksAhead; i++) {
             const futureDate = new Date(baseDate);
-            futureDate.setDate(baseDate.getDate() + (i * 7));
-            datesToCreate.push(futureDate.toISOString().split('T')[0]);
+            futureDate.setDate(baseDate.getDate() + i * 7);
+            datesToCreate.push(futureDate.toISOString().split("T")[0]);
           }
         }
 
@@ -119,16 +123,17 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           };
 
           const createPromise = createTimeSlot(newSlot);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => {
-              console.error("⏱️ Create timed out for date:", dateStr);
-              reject(new Error("Operation timed out"));
-            }, 8000) // Shorter timeout per slot
+          const timeoutPromise = new Promise(
+            (_, reject) =>
+              setTimeout(() => {
+                console.error("⏱️ Create timed out for date:", dateStr);
+                reject(new Error("Operation timed out"));
+              }, 8000) // Shorter timeout per slot
           );
-          
+
           await Promise.race([createPromise, timeoutPromise]);
         }
-        
+
         console.log(`✅ ${datesToCreate.length} slot(s) created successfully`);
       }
 
@@ -136,14 +141,17 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
       setSaving(false);
       onClose();
       console.log("✅ Modal closed");
-      
     } catch (error: any) {
       console.error("❌ Error saving time slot:", error);
 
       if (error.message === "Operation timed out") {
-        alert("Save timed out. The slot may have been created. Check your internet and refresh the page.");
+        alert(
+          "Save timed out. The slot may have been created. Check your internet and refresh the page."
+        );
       } else if (error.code === "permission-denied") {
-        alert("Permission denied. Check Firestore security rules in Firebase Console.");
+        alert(
+          "Permission denied. Check Firestore security rules in Firebase Console."
+        );
       } else {
         alert(`Failed to save: ${error.message || "Unknown error"}`);
       }
@@ -204,7 +212,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                 className="input-field text-base"
                 required
               />
-              
+
               {/* Recurring Option */}
               {!slot && (
                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -219,7 +227,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                       Repeat weekly
                     </span>
                   </label>
-                  
+
                   {recurring && (
                     <div className="mt-2 flex items-center gap-2">
                       <label className="text-xs text-gray-700">
@@ -230,11 +238,15 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                         min="1"
                         max="52"
                         value={weeksAhead}
-                        onChange={(e) => setWeeksAhead(Math.max(1, parseInt(e.target.value) || 1))}
+                        onChange={(e) =>
+                          setWeeksAhead(
+                            Math.max(1, parseInt(e.target.value) || 1)
+                          )
+                        }
                         className="input-field text-sm w-20 py-1 px-2"
                       />
                       <span className="text-xs text-gray-500">
-                        ({weeksAhead} {weeksAhead === 1 ? 'week' : 'weeks'})
+                        ({weeksAhead} {weeksAhead === 1 ? "week" : "weeks"})
                       </span>
                     </div>
                   )}
@@ -308,7 +320,9 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
               >
                 <option value="">Select verifier</option>
                 {users
-                  .filter((u) => ["verifier", "manager", "admin"].includes(u.role))
+                  .filter((u) =>
+                    ["verifier", "manager", "admin"].includes(u.role)
+                  )
                   .map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.role === "admin" && "👑 "}
@@ -318,14 +332,16 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                     </option>
                   ))}
               </select>
-              {users.filter((u) => ["verifier", "manager", "admin"].includes(u.role))
-                .length === 0 && (
+              {users.filter((u) =>
+                ["verifier", "manager", "admin"].includes(u.role)
+              ).length === 0 && (
                 <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-800">
                     <strong>No verifiers available.</strong>
                   </p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Set your role to Verifier/Manager/Admin in Settings, or add connections who can verify.
+                    Set your role to Verifier/Manager/Admin in Settings, or add
+                    connections who can verify.
                   </p>
                 </div>
               )}

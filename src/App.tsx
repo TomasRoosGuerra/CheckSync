@@ -34,6 +34,23 @@ function App() {
 
           // Create profile if it doesn't exist
           if (!userProfile) {
+            // Determine initial role
+            let initialRole: User["role"] = "participant";
+            
+            // Check if this is the first user (make them admin)
+            const allUsers = await getConnectedUsers(firebaseUser.uid);
+            if (allUsers.length === 0) {
+              console.log("🎉 First user signup - assigning Admin role");
+              initialRole = "admin";
+            }
+            
+            // Optional: Check environment variable for specific admin email
+            const firstAdminEmail = import.meta.env.VITE_FIRST_ADMIN_EMAIL;
+            if (firstAdminEmail && firebaseUser.email?.toLowerCase() === firstAdminEmail.toLowerCase()) {
+              console.log("🎉 First admin email matched - assigning Admin role");
+              initialRole = "admin";
+            }
+            
             const newUser: Omit<User, "id"> = {
               email: firebaseUser.email?.toLowerCase() || "",
               name:
@@ -41,11 +58,15 @@ function App() {
                 firebaseUser.email?.split("@")[0] ||
                 "User",
               photoURL: firebaseUser.photoURL || undefined,
-              role: "participant", // Default role
+              role: initialRole,
               timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             };
             await createUserProfile(firebaseUser.uid, newUser);
             userProfile = { id: firebaseUser.uid, ...newUser };
+            
+            if (initialRole === "admin") {
+              console.log("👑 Welcome, Admin! You have full system access.");
+            }
           }
 
           setUser(userProfile);

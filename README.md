@@ -26,11 +26,24 @@ A clean, minimalist web and mobile app for verified attendance check-ins through
 - **Build Tool**: Vite
 - **Date Handling**: date-fns
 
+## Role-Based Access Control
+
+CheckSync uses a secure 4-tier permission system:
+
+- **👑 Admin** - Full system access (first user becomes admin)
+- **📊 Manager** - Create/manage slots, verify, export
+- **🔒 Verifier** - Verify attendance, check in
+- **👤 Participant** - Check in only
+
+**Security:** Only admins can assign roles to prevent self-promotion.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ (Note: The project may show warnings with Node 18, but will work)
+- Node.js 20+ (Required for Vite 7 and Firebase)
 - npm or yarn
 
 ### Installation

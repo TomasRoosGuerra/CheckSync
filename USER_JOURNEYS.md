@@ -5,6 +5,7 @@
 CheckSync now has a **hierarchical permission system** perfect for businesses tracking attendance.
 
 ### **Role Hierarchy:**
+
 ```
 👑 ADMIN (Level 4)
   └─ Full system access
@@ -34,6 +35,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ## 👥 USER JOURNEYS
 
 ### **Journey 1: Business Owner Setup (Admin)**
+
 **Role:** Admin
 **Goal:** Set up CheckSync for gym classes
 
@@ -50,6 +52,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 2: New Trainer Joins (Participant)**
+
 **Role:** Participant
 **Goal:** Start attending classes
 
@@ -66,6 +69,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 3: Senior Trainer (Manager)**
+
 **Role:** Manager
 **Goal:** Create and manage classes
 
@@ -83,6 +87,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 4: Quality Control Person (Verifier)**
+
 **Role:** Verifier
 **Goal:** Verify attendance only
 
@@ -100,6 +105,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 5: Part-Time Coach (Participant)**
+
 **Role:** Participant
 **Goal:** Attend some classes
 
@@ -116,6 +122,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 6: Head Coach Covering Shift (Manager)**
+
 **Role:** Manager
 **Goal:** Cover last-minute absence
 
@@ -133,6 +140,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 7: Recurring Classes Setup (Manager)**
+
 **Role:** Manager
 **Goal:** Schedule semester classes
 
@@ -151,6 +159,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 8: Delete Recurring Series (Manager)**
+
 **Role:** Manager
 **Goal:** Cancel remaining classes
 
@@ -166,6 +175,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 9: Delete Single Occurrence (Manager)**
+
 **Role:** Manager
 **Goal:** Cancel one class due to holiday
 
@@ -181,6 +191,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 10: Late Arrival (Participant)**
+
 **Role:** Participant
 **Goal:** Check in after class started
 
@@ -198,6 +209,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 11: Accidental Check-In (Participant)**
+
 **Role:** Participant
 **Goal:** Undo wrong check-in
 
@@ -213,6 +225,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 12: Attendance Report (Manager)**
+
 **Role:** Manager
 **Goal:** Monthly payroll report
 
@@ -230,6 +243,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 13: Team Member Added Mid-Season (Manager)**
+
 **Role:** Manager
 **Goal:** Add new trainer to existing classes
 
@@ -246,6 +260,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 14: Admin Oversight (Admin)**
+
 **Role:** Admin
 **Goal:** Monitor all activity
 
@@ -262,6 +277,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 15: Mobile Quick Check-In (Participant)**
+
 **Role:** Participant
 **Goal:** Check in from parking lot
 
@@ -278,6 +294,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 16: Multi-Class Day (Participant)**
+
 **Role:** Participant
 **Goal:** Attend 3 classes today
 
@@ -293,6 +310,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 17: Past Date Recording (Manager)**
+
 **Role:** Manager
 **Goal:** Backfill attendance from last week
 
@@ -310,6 +328,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 18: Future Planning (Manager)**
+
 **Role:** Manager
 **Goal:** Plan next quarter
 
@@ -325,6 +344,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 19: Wrong Person Verified (Admin)**
+
 **Role:** Admin
 **Goal:** Fix verification mistake
 
@@ -340,6 +360,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ---
 
 ### **Journey 20: Agenda View for Busy Week (Any Role)**
+
 **Role:** Any
 **Goal:** See full week schedule
 
@@ -359,23 +380,24 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 
 ## 🔐 Permission Matrix
 
-| Action | Participant | Verifier | Manager | Admin |
-|--------|-------------|----------|---------|-------|
-| Check In (assigned) | ✅ | ✅ | ✅ | ✅ |
-| Undo Check-In (own) | ✅ | ✅ | ✅ | ✅ |
-| Verify Attendance | ❌ | ✅ (assigned) | ✅ | ✅ (any) |
-| Create Slots | ❌ | ❌ | ✅ | ✅ |
-| Edit Slots | ❌ (own only) | ❌ (own only) | ✅ | ✅ |
-| Delete Slots | ❌ (own only) | ❌ (own only) | ✅ | ✅ |
-| Export Data | ❌ | ❌ | ✅ | ✅ |
-| Manage Users | ❌ | ❌ | ❌ | ✅ |
-| View All Slots | ❌ (assigned) | ❌ (assigned) | ✅ | ✅ |
+| Action              | Participant   | Verifier      | Manager | Admin    |
+| ------------------- | ------------- | ------------- | ------- | -------- |
+| Check In (assigned) | ✅            | ✅            | ✅      | ✅       |
+| Undo Check-In (own) | ✅            | ✅            | ✅      | ✅       |
+| Verify Attendance   | ❌            | ✅ (assigned) | ✅      | ✅ (any) |
+| Create Slots        | ❌            | ❌            | ✅      | ✅       |
+| Edit Slots          | ❌ (own only) | ❌ (own only) | ✅      | ✅       |
+| Delete Slots        | ❌ (own only) | ❌ (own only) | ✅      | ✅       |
+| Export Data         | ❌            | ❌            | ✅      | ✅       |
+| Manage Users        | ❌            | ❌            | ❌      | ✅       |
+| View All Slots      | ❌ (assigned) | ❌ (assigned) | ✅      | ✅       |
 
 ---
 
 ## 🏢 Business Use Cases
 
 ### **Gym/Fitness Studio**
+
 - **Admin:** Owner
 - **Managers:** Senior trainers
 - **Verifiers:** Front desk staff
@@ -384,6 +406,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 **Benefit:** Track trainer attendance for classes
 
 ### **Corporate Training**
+
 - **Admin:** HR Director
 - **Managers:** Department heads
 - **Verifiers:** Supervisors
@@ -392,6 +415,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 **Benefit:** Training compliance tracking
 
 ### **Sports Coaching (Tennis, etc.)**
+
 - **Admin:** Club owner
 - **Managers:** Head coaches
 - **Verifiers:** Assistant coaches
@@ -400,6 +424,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 **Benefit:** Coach scheduling and verification
 
 ### **Consulting Firm**
+
 - **Admin:** Managing partner
 - **Managers:** Project managers
 - **Verifiers:** Team leads
@@ -408,6 +433,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 **Benefit:** Client meeting attendance
 
 ### **Education/Tutoring**
+
 - **Admin:** School administrator
 - **Managers:** Senior teachers
 - **Verifiers:** Department heads
@@ -420,6 +446,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ## ✨ Key Features by Role
 
 ### **Participant Experience:**
+
 - ✅ Simple interface
 - ✅ Only see assigned slots
 - ✅ One-tap check-in
@@ -427,6 +454,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 - ✅ Mobile-optimized
 
 ### **Verifier Experience:**
+
 - ✅ See slots needing verification
 - ✅ Yellow badge on pending
 - ✅ Quick confirm button
@@ -434,6 +462,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 - ✅ Focused on verification
 
 ### **Manager Experience:**
+
 - ✅ Create slots (single or recurring)
 - ✅ Edit any slot details
 - ✅ Delete slots (smart series delete)
@@ -442,6 +471,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 - ✅ Full schedule visibility
 
 ### **Admin Experience:**
+
 - ✅ Everything managers can do
 - ✅ Override any verification
 - ✅ See all slots system-wide
@@ -454,30 +484,35 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ## 🚀 Why This Works for Business
 
 ### **Clear Accountability**
+
 - Every action tied to a user
 - Timestamps for all check-ins/verifications
 - Cannot fake attendance
 - Full audit trail
 
 ### **Flexible Hierarchy**
+
 - Delegate scheduling to managers
 - Delegate verification to supervisors
 - Keep participants focused on checking in
 - Admin can override anything
 
 ### **Scalable**
+
 - 5 people or 500 people
 - Add users as needed
 - Permissions prevent chaos
 - Real-time coordination
 
 ### **Mobile-First**
+
 - Participants check in from phones
 - Managers schedule on the go
 - Verifiers confirm from anywhere
 - Export to desktop
 
 ### **Data Integrity**
+
 - Role-based permissions prevent errors
 - Undo functionality for mistakes
 - Recurring slots prevent duplication
@@ -503,6 +538,7 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 ## 🎯 Perfect For
 
 ✅ **Any business tracking attendance with verification:**
+
 - Gyms & fitness studios
 - Sports coaching facilities
 - Corporate training programs
@@ -515,4 +551,3 @@ CheckSync now has a **hierarchical permission system** perfect for businesses tr
 - Any verified attendance scenario
 
 **CheckSync provides the complete solution for verified, role-based attendance tracking!** 🎉
-

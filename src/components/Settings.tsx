@@ -1,10 +1,9 @@
 import { signOut } from "firebase/auth";
 import { useState } from "react";
 import { auth } from "../firebase";
-import { updateUserProfile } from "../services/firestoreService";
 import { useStore } from "../store";
-import type { UserRole } from "../types";
 import UserConnections from "./UserConnections";
+import UserManagement from "./UserManagement";
 
 interface SettingsProps {
   onClose: () => void;
@@ -15,6 +14,7 @@ export default function Settings({ onClose }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [showConnections, setShowConnections] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -22,18 +22,6 @@ export default function Settings({ onClose }: SettingsProps) {
       setUser(null);
     } catch (error) {
       console.error("Logout error:", error);
-    }
-  };
-
-  const handleRoleChange = async (role: UserRole) => {
-    if (user) {
-      try {
-        await updateUserProfile(user.id, { role });
-        setUser({ ...user, role });
-      } catch (error) {
-        console.error("Error updating role:", error);
-        alert("Failed to update role. Please try again.");
-      }
     }
   };
 
@@ -73,43 +61,63 @@ export default function Settings({ onClose }: SettingsProps) {
               </div>
             </div>
 
-            {/* Role Selection */}
+            {/* Your Role (Read-Only) */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Role & Permissions</h3>
-              <div className="space-y-2">
-                {(["participant", "verifier", "manager", "admin"] as UserRole[]).map(
-                  (role) => (
-                    <label
-                      key={role}
-                      className="flex items-center gap-3 p-3 rounded-lg border-2 border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <input
-                        type="radio"
-                        name="role"
-                        checked={user?.role === role}
-                        onChange={() => handleRoleChange(role)}
-                        className="w-4 h-4 text-primary"
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900 capitalize flex items-center gap-2">
-                          {role === "admin" && "👑"}
-                          {role === "manager" && "📊"}
-                          {role === "verifier" && "🔒"}
-                          {role === "participant" && "👤"}
-                          {role}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {role === "participant" && "Check in to assigned slots"}
-                          {role === "verifier" && "Verify attendance + check in"}
-                          {role === "manager" && "Create slots, verify, check in"}
-                          {role === "admin" && "Full access to everything"}
-                        </div>
-                      </div>
-                    </label>
-                  )
-                )}
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Your Role</h3>
+              <div className="card bg-gradient-to-r from-gray-50 to-white">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl">
+                    {user?.role === "admin" && "👑"}
+                    {user?.role === "manager" && "📊"}
+                    {user?.role === "verifier" && "🔒"}
+                    {user?.role === "participant" && "👤"}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold text-lg text-gray-900 capitalize">
+                      {user?.role}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {user?.role === "participant" && "Check in to assigned slots"}
+                      {user?.role === "verifier" && "Verify attendance + check in"}
+                      {user?.role === "manager" && "Create slots, verify, check in"}
+                      {user?.role === "admin" && "Full system access"}
+                    </div>
+                  </div>
+                </div>
               </div>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {user?.role === "admin" 
+                  ? "You can manage other users' roles below" 
+                  : "Contact an administrator to change your role"}
+              </p>
             </div>
+
+            {/* Admin: Manage All Users */}
+            {user?.role === "admin" && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  👑 Manage Team Roles
+                </h3>
+                <div className="card">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        User Role Management
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Assign roles to {users.filter(u => u.id !== user.id).length} team member{users.filter(u => u.id !== user.id).length !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowUserManagement(true)}
+                      className="btn-primary text-sm py-2"
+                    >
+                      Manage Roles
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Notifications */}
             <div>
@@ -209,6 +217,11 @@ export default function Settings({ onClose }: SettingsProps) {
       {/* User Connections Modal */}
       {showConnections && (
         <UserConnections onClose={() => setShowConnections(false)} />
+      )}
+      
+      {/* User Management Modal (Admin Only) */}
+      {showUserManagement && (
+        <UserManagement onClose={() => setShowUserManagement(false)} />
       )}
     </div>
   );
