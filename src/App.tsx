@@ -17,8 +17,16 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let unsubscribeSlots: (() => void) | null = null;
+
     // Monitor auth state
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Clean up previous subscription if exists
+      if (unsubscribeSlots) {
+        unsubscribeSlots();
+        unsubscribeSlots = null;
+      }
+
       if (firebaseUser) {
         try {
           // Check if user profile exists in Firestore
@@ -47,7 +55,7 @@ function App() {
           setUsers([userProfile, ...connectedUsers]);
 
           // Subscribe to time slots
-          const unsubscribeSlots = subscribeToUserTimeSlots(
+          unsubscribeSlots = subscribeToUserTimeSlots(
             firebaseUser.uid,
             (slots) => {
               // Merge and deduplicate slots
@@ -57,8 +65,6 @@ function App() {
               setTimeSlots(uniqueSlots);
             }
           );
-
-          return () => unsubscribeSlots();
         } catch (error) {
           console.error("Error loading user data:", error);
         }
@@ -70,7 +76,12 @@ function App() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (unsubscribeSlots) {
+        unsubscribeSlots();
+      }
+    };
   }, [setUser, setUsers, setTimeSlots]);
 
   if (loading) {
