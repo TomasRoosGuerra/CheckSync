@@ -38,6 +38,24 @@ export default function DayView({ date, onClose }: DayViewProps) {
     }
   };
 
+  const handleUndoCheckIn = async (slot: TimeSlot) => {
+    if (slot.participantIds.includes(user?.id || "")) {
+      if (confirm("Undo check-in and return to planned status?")) {
+        try {
+          const updates = {
+            status: "planned" as const,
+            checkedInAt: undefined,
+          };
+          await updateSlotFirestore(slot.id, updates);
+          updateTimeSlot(slot.id, updates);
+        } catch (error) {
+          console.error("Error undoing check-in:", error);
+          alert("Failed to undo check-in. Please try again.");
+        }
+      }
+    }
+  };
+
   const handleConfirm = async (slot: TimeSlot) => {
     if (slot.verifierId === user?.id) {
       try {
@@ -50,6 +68,24 @@ export default function DayView({ date, onClose }: DayViewProps) {
       } catch (error) {
         console.error("Error confirming:", error);
         alert("Failed to confirm attendance. Please try again.");
+      }
+    }
+  };
+
+  const handleUndoConfirmation = async (slot: TimeSlot) => {
+    if (slot.verifierId === user?.id) {
+      if (confirm("Undo confirmation and return to checked-in status?")) {
+        try {
+          const updates = {
+            status: "checked-in" as const,
+            confirmedAt: undefined,
+          };
+          await updateSlotFirestore(slot.id, updates);
+          updateTimeSlot(slot.id, updates);
+        } catch (error) {
+          console.error("Error undoing confirmation:", error);
+          alert("Failed to undo confirmation. Please try again.");
+        }
       }
     }
   };
@@ -160,6 +196,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
 
                   {/* Actions */}
                   <div className="flex gap-2 flex-wrap">
+                    {/* Check In Button (Planned status) */}
                     {slot.participantIds.includes(user?.id || "") &&
                       slot.status === "planned" && (
                         <button
@@ -170,6 +207,18 @@ export default function DayView({ date, onClose }: DayViewProps) {
                         </button>
                       )}
 
+                    {/* Undo Check-In Button (Checked-in status) */}
+                    {slot.participantIds.includes(user?.id || "") &&
+                      slot.status === "checked-in" && (
+                        <button
+                          onClick={() => handleUndoCheckIn(slot)}
+                          className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1.5 px-4 rounded-full transition-colors text-sm"
+                        >
+                          ↩️ Undo Check-In
+                        </button>
+                      )}
+
+                    {/* Confirm Attendance Button (Checked-in status) */}
                     {slot.verifierId === user?.id &&
                       slot.status === "checked-in" && (
                         <button
@@ -180,6 +229,18 @@ export default function DayView({ date, onClose }: DayViewProps) {
                         </button>
                       )}
 
+                    {/* Undo Confirmation Button (Confirmed status) */}
+                    {slot.verifierId === user?.id &&
+                      slot.status === "confirmed" && (
+                        <button
+                          onClick={() => handleUndoConfirmation(slot)}
+                          className="bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-4 rounded-full transition-colors text-sm"
+                        >
+                          ↩️ Undo Confirmation
+                        </button>
+                      )}
+
+                    {/* Edit Button (Always available) */}
                     <button
                       onClick={() => setEditingSlot(slot)}
                       className="btn-secondary text-sm py-1.5"
@@ -187,6 +248,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                       ✏️ Edit
                     </button>
 
+                    {/* Delete Button (Always available) */}
                     <button
                       onClick={() => handleDelete(slot.id)}
                       className="bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1.5 px-4 rounded-full transition-colors text-sm"
