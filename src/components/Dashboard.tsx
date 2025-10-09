@@ -5,10 +5,10 @@ import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
 import NotificationsPanel from "./NotificationsPanel";
-import QuickStats from "./QuickStats";
 import Settings from "./Settings";
 import TeamPanel from "./TeamPanel";
 import WeekCalendar from "./WeekCalendar";
+import WorkspaceQuickSwitcher from "./WorkspaceQuickSwitcher";
 
 type ViewMode = "week" | "agenda";
 
@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showTeamPanel, setShowTeamPanel] = useState(false);
+  const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("week");
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -42,14 +43,28 @@ export default function Dashboard() {
                   ✓
                 </span>
               </div>
-              <div className="text-left">
-                <h1 className="text-base sm:text-xl font-bold text-gray-900">
+              <button
+                onClick={() => setShowWorkspaceSwitcher(true)}
+                className="text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+              >
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 flex items-center gap-2">
                   {currentWorkspace?.name || "CheckSync"}
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d="M19 9l-7 7-7-7"></path>
+                  </svg>
                 </h1>
                 <p className="text-xs text-gray-600">
                   {user?.name} · <span className="capitalize">{userRole}</span>
                 </p>
-              </div>
+              </button>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
@@ -142,8 +157,6 @@ export default function Dashboard() {
 
       {/* Main Content - Mobile Optimized */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 md:py-8">
-        {viewMode === "week" && <QuickStats />}
-
         {viewMode === "week" ? (
           <WeekCalendar onDayClick={setSelectedDay} />
         ) : (
@@ -172,6 +185,9 @@ export default function Dashboard() {
         <NotificationsPanel onClose={() => setShowNotifications(false)} />
       )}
       {showTeamPanel && <TeamPanel onClose={() => setShowTeamPanel(false)} />}
+      {showWorkspaceSwitcher && (
+        <WorkspaceQuickSwitcher onClose={() => setShowWorkspaceSwitcher(false)} />
+      )}
     </div>
   );
 }
