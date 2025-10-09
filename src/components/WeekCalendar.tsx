@@ -67,8 +67,12 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
         </div>
       </div>
 
-      {/* Calendar Grid - Mobile Responsive */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-3">
+      {/* Mobile: Horizontal Scroll | Desktop: Grid */}
+      <div className="sm:grid sm:grid-cols-7 sm:gap-2 md:gap-3 
+                      overflow-x-auto sm:overflow-x-visible 
+                      flex sm:block gap-3 sm:gap-0 
+                      pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0
+                      snap-x snap-mandatory sm:snap-none">
         {weekDays.map((day) => {
           const daySlots = getDaySlots(day);
           const isToday = isSameDayAs(day, new Date());
@@ -77,41 +81,46 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
             <div
               key={day.toString()}
               className={`
-                rounded-lg sm:rounded-xl border-2 transition-all 
-                min-h-[140px] sm:min-h-[180px] md:min-h-[200px] 
+                flex-shrink-0 w-[85vw] sm:w-auto
+                snap-center sm:snap-none
+                rounded-xl border-2 transition-all 
+                min-h-[240px] sm:min-h-[180px] md:min-h-[200px] 
                 flex flex-col
-                ${isToday ? "border-primary bg-primary/5" : "border-gray-200"}
+                ${isToday ? "border-primary bg-primary/5 shadow-lg sm:shadow-none" : "border-gray-200"}
               `}
             >
-              {/* Day Header - Mobile Optimized */}
+              {/* Day Header */}
               <button
                 onClick={() => onDayClick(day)}
-                className="p-2 sm:p-3 text-center hover:bg-gray-50/50 rounded-t-lg sm:rounded-t-xl transition-colors active:bg-gray-100 touch-manipulation"
+                className="p-4 sm:p-3 text-center hover:bg-gray-50/50 rounded-t-xl transition-colors active:bg-gray-100 touch-manipulation"
               >
-                <div className="text-[10px] sm:text-xs font-medium text-gray-600 mb-0.5 sm:mb-1">
-                  {getDayName(day, true)}
+                <div className="text-xs font-medium text-gray-600 mb-1">
+                  {getDayName(day, false)}
                 </div>
                 <div
-                  className={`text-lg sm:text-xl md:text-2xl font-bold ${
+                  className={`text-2xl sm:text-xl md:text-2xl font-bold ${
                     isToday ? "text-primary" : "text-gray-900"
                   }`}
                 >
                   {getMonthDay(day)}
                 </div>
+                <div className="text-[10px] sm:hidden text-gray-500 mt-1">
+                  {formatDate(day, "MMM yyyy")}
+                </div>
               </button>
 
-              {/* Time Slot Cards - Mobile Optimized */}
-              <div className="flex-1 p-1 sm:p-2 space-y-0.5 sm:space-y-1 overflow-y-auto">
-                {daySlots.slice(0, 4).map((slot) => (
+              {/* Time Slot Cards */}
+              <div className="flex-1 p-3 sm:p-2 space-y-2 sm:space-y-1 overflow-y-auto">
+                {daySlots.slice(0, 5).map((slot) => (
                   <button
                     key={slot.id}
                     onClick={() => onDayClick(day)}
                     className={`
-                      w-full text-left px-1.5 sm:px-2 py-1.5 sm:py-2 
-                      rounded-md text-[10px] sm:text-xs
-                      transition-all hover:shadow-sm active:scale-95
-                      border-l-2 sm:border-l-3
-                      touch-manipulation min-h-[44px] sm:min-h-auto
+                      w-full text-left px-3 sm:px-2 py-2.5 sm:py-2 
+                      rounded-lg sm:rounded-md text-sm sm:text-xs
+                      transition-all hover:shadow-md active:scale-98
+                      border-l-3 font-medium
+                      touch-manipulation min-h-[52px] sm:min-h-auto
                       ${
                         slot.status === "planned"
                           ? "bg-gray-100 border-gray-400 text-gray-700 active:bg-gray-200"
@@ -135,29 +144,34 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                     `}
                     title={slot.title}
                   >
-                    <div className="font-bold text-xs sm:text-sm">{slot.startTime}</div>
-                    <div className="truncate text-[9px] sm:text-[10px] opacity-90 leading-tight">
+                    <div className="font-bold text-sm sm:text-xs mb-0.5">{slot.startTime}</div>
+                    <div className="truncate text-xs sm:text-[10px] opacity-90">
                       {slot.title}
                     </div>
                   </button>
                 ))}
-                {daySlots.length > 4 && (
+                {daySlots.length > 5 && (
                   <button
                     onClick={() => onDayClick(day)}
-                    className="w-full text-center text-[10px] sm:text-xs text-gray-500 hover:text-primary active:text-primary-dark py-2 font-medium touch-manipulation"
+                    className="w-full text-center text-xs sm:text-xs text-gray-500 hover:text-primary active:text-primary-dark py-2 font-semibold touch-manipulation"
                   >
-                    +{daySlots.length - 4} more
+                    +{daySlots.length - 5} more
                   </button>
                 )}
                 {daySlots.length === 0 && (
-                  <div className="text-center text-gray-400 text-[10px] sm:text-xs py-3 sm:py-4">
-                    No slots
+                  <div className="text-center text-gray-400 text-xs py-6 sm:py-4">
+                    —
                   </div>
                 )}
               </div>
             </div>
           );
         })}
+      </div>
+      
+      {/* Mobile Swipe Indicator */}
+      <div className="sm:hidden text-center mt-3 text-xs text-gray-400">
+        ← Swipe to see all days →
       </div>
 
       {/* Legend */}

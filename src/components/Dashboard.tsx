@@ -3,11 +3,15 @@ import DayView from "./DayView";
 import Export from "./Export";
 import Settings from "./Settings";
 import WeekCalendar from "./WeekCalendar";
+import AgendaView from "./AgendaView";
+
+type ViewMode = "week" | "agenda";
 
 export default function Dashboard() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("week");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -23,6 +27,15 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
+              {/* View Toggle - Mobile */}
+              <button
+                onClick={() => setViewMode(viewMode === "week" ? "agenda" : "week")}
+                className="sm:hidden btn-secondary py-2 px-3 text-xs font-medium touch-manipulation"
+                title={viewMode === "week" ? "Switch to Agenda" : "Switch to Week"}
+              >
+                {viewMode === "week" ? "📋" : "📅"}
+              </button>
+              
               <button
                 onClick={() => setShowExport(true)}
                 className="btn-secondary flex items-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 text-sm sm:text-base"
@@ -73,7 +86,22 @@ export default function Dashboard() {
 
       {/* Main Content - Mobile Optimized */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 md:py-8">
-        <WeekCalendar onDayClick={setSelectedDay} />
+        {viewMode === "week" ? (
+          <WeekCalendar onDayClick={setSelectedDay} />
+        ) : (
+          <div className="card">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Agenda View</h2>
+              <button
+                onClick={() => setViewMode("week")}
+                className="text-primary text-sm font-medium hover:underline"
+              >
+                ← Back to Week
+              </button>
+            </div>
+            <AgendaView onSlotClick={setSelectedDay} />
+          </div>
+        )}
       </main>
 
       {/* Modals */}

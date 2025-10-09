@@ -145,7 +145,7 @@ export const createTimeSlot = async (slot: Omit<TimeSlot, "id">) => {
       createdAt: Timestamp.fromMillis(slot.createdAt),
       updatedAt: Timestamp.fromMillis(slot.updatedAt),
     };
-    
+
     console.log("Creating slot in Firestore:", slotData);
     await setDoc(docRef, slotData);
     console.log("Slot created successfully with ID:", docRef.id);
@@ -166,7 +166,7 @@ export const updateTimeSlot = async (
       ...updates,
       updatedAt: serverTimestamp(),
     };
-    
+
     // Convert number timestamps to Firestore Timestamps
     if (updates.checkedInAt !== undefined) {
       firestoreUpdates.checkedInAt = updates.checkedInAt
@@ -178,7 +178,7 @@ export const updateTimeSlot = async (
         ? Timestamp.fromMillis(updates.confirmedAt)
         : null;
     }
-    
+
     console.log("Updating slot in Firestore:", slotId, firestoreUpdates);
     await updateDoc(doc(db, SLOTS_COLLECTION, slotId), firestoreUpdates);
     console.log("✅ Slot updated successfully");
@@ -229,21 +229,25 @@ export const subscribeToUserTimeSlots = (
         slotsMap.set(doc.id, {
           id: doc.id,
           ...data,
-          createdAt: typeof data.createdAt?.toMillis === 'function' 
-            ? data.createdAt.toMillis() 
-            : data.createdAt || Date.now(),
-          updatedAt: typeof data.updatedAt?.toMillis === 'function'
-            ? data.updatedAt.toMillis()
-            : data.updatedAt || Date.now(),
-          checkedInAt: typeof data.checkedInAt?.toMillis === 'function'
-            ? data.checkedInAt.toMillis()
-            : data.checkedInAt,
-          confirmedAt: typeof data.confirmedAt?.toMillis === 'function'
-            ? data.confirmedAt.toMillis()
-            : data.confirmedAt,
+          createdAt:
+            typeof data.createdAt?.toMillis === "function"
+              ? data.createdAt.toMillis()
+              : data.createdAt || Date.now(),
+          updatedAt:
+            typeof data.updatedAt?.toMillis === "function"
+              ? data.updatedAt.toMillis()
+              : data.updatedAt || Date.now(),
+          checkedInAt:
+            typeof data.checkedInAt?.toMillis === "function"
+              ? data.checkedInAt.toMillis()
+              : data.checkedInAt,
+          confirmedAt:
+            typeof data.confirmedAt?.toMillis === "function"
+              ? data.confirmedAt.toMillis()
+              : data.confirmedAt,
         } as TimeSlot);
       });
-      
+
       // Remove deleted docs
       const currentIds = new Set(snapshot.docs.map((doc) => doc.id));
       for (const [id, slot] of slotsMap.entries()) {
@@ -255,7 +259,7 @@ export const subscribeToUserTimeSlots = (
           }
         }
       }
-      
+
       updateCallback();
     },
     (error) => {
@@ -273,21 +277,25 @@ export const subscribeToUserTimeSlots = (
         slotsMap.set(doc.id, {
           id: doc.id,
           ...data,
-          createdAt: typeof data.createdAt?.toMillis === 'function'
-            ? data.createdAt.toMillis()
-            : data.createdAt || Date.now(),
-          updatedAt: typeof data.updatedAt?.toMillis === 'function'
-            ? data.updatedAt.toMillis()
-            : data.updatedAt || Date.now(),
-          checkedInAt: typeof data.checkedInAt?.toMillis === 'function'
-            ? data.checkedInAt.toMillis()
-            : data.checkedInAt,
-          confirmedAt: typeof data.confirmedAt?.toMillis === 'function'
-            ? data.confirmedAt.toMillis()
-            : data.confirmedAt,
+          createdAt:
+            typeof data.createdAt?.toMillis === "function"
+              ? data.createdAt.toMillis()
+              : data.createdAt || Date.now(),
+          updatedAt:
+            typeof data.updatedAt?.toMillis === "function"
+              ? data.updatedAt.toMillis()
+              : data.updatedAt || Date.now(),
+          checkedInAt:
+            typeof data.checkedInAt?.toMillis === "function"
+              ? data.checkedInAt.toMillis()
+              : data.checkedInAt,
+          confirmedAt:
+            typeof data.confirmedAt?.toMillis === "function"
+              ? data.confirmedAt.toMillis()
+              : data.confirmedAt,
         } as TimeSlot);
       });
-      
+
       // Remove deleted docs
       const currentIds = new Set(snapshot.docs.map((doc) => doc.id));
       for (const [id, slot] of slotsMap.entries()) {
@@ -299,7 +307,7 @@ export const subscribeToUserTimeSlots = (
           }
         }
       }
-      
+
       console.log(`✅ Total unique slots: ${slotsMap.size}`);
       updateCallback();
     },

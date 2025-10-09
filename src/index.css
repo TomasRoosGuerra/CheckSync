@@ -84,6 +84,27 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Smooth horizontal scrolling */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  /* Snap scrolling */
+  .snap-x {
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0.5rem;
+  }
+  
+  .snap-center {
+    scroll-snap-align: center;
+  }
+
   .status-dot {
     width: 0.75rem;
     height: 0.75rem;
