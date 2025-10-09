@@ -161,12 +161,29 @@ export const updateTimeSlot = async (
   updates: Partial<TimeSlot>
 ) => {
   try {
-    await updateDoc(doc(db, SLOTS_COLLECTION, slotId), {
+    // Convert timestamp fields to Timestamp objects
+    const firestoreUpdates: any = {
       ...updates,
       updatedAt: serverTimestamp(),
-    });
+    };
+    
+    // Convert number timestamps to Firestore Timestamps
+    if (updates.checkedInAt !== undefined) {
+      firestoreUpdates.checkedInAt = updates.checkedInAt
+        ? Timestamp.fromMillis(updates.checkedInAt)
+        : null;
+    }
+    if (updates.confirmedAt !== undefined) {
+      firestoreUpdates.confirmedAt = updates.confirmedAt
+        ? Timestamp.fromMillis(updates.confirmedAt)
+        : null;
+    }
+    
+    console.log("Updating slot in Firestore:", slotId, firestoreUpdates);
+    await updateDoc(doc(db, SLOTS_COLLECTION, slotId), firestoreUpdates);
+    console.log("✅ Slot updated successfully");
   } catch (error) {
-    console.error("Error updating time slot:", error);
+    console.error("❌ Error updating time slot:", error);
     throw error;
   }
 };
@@ -212,10 +229,18 @@ export const subscribeToUserTimeSlots = (
         slotsMap.set(doc.id, {
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toMillis() || Date.now(),
-          updatedAt: data.updatedAt?.toMillis() || Date.now(),
-          checkedInAt: data.checkedInAt?.toMillis(),
-          confirmedAt: data.confirmedAt?.toMillis(),
+          createdAt: typeof data.createdAt?.toMillis === 'function' 
+            ? data.createdAt.toMillis() 
+            : data.createdAt || Date.now(),
+          updatedAt: typeof data.updatedAt?.toMillis === 'function'
+            ? data.updatedAt.toMillis()
+            : data.updatedAt || Date.now(),
+          checkedInAt: typeof data.checkedInAt?.toMillis === 'function'
+            ? data.checkedInAt.toMillis()
+            : data.checkedInAt,
+          confirmedAt: typeof data.confirmedAt?.toMillis === 'function'
+            ? data.confirmedAt.toMillis()
+            : data.confirmedAt,
         } as TimeSlot);
       });
       
@@ -248,10 +273,18 @@ export const subscribeToUserTimeSlots = (
         slotsMap.set(doc.id, {
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toMillis() || Date.now(),
-          updatedAt: data.updatedAt?.toMillis() || Date.now(),
-          checkedInAt: data.checkedInAt?.toMillis(),
-          confirmedAt: data.confirmedAt?.toMillis(),
+          createdAt: typeof data.createdAt?.toMillis === 'function'
+            ? data.createdAt.toMillis()
+            : data.createdAt || Date.now(),
+          updatedAt: typeof data.updatedAt?.toMillis === 'function'
+            ? data.updatedAt.toMillis()
+            : data.updatedAt || Date.now(),
+          checkedInAt: typeof data.checkedInAt?.toMillis === 'function'
+            ? data.checkedInAt.toMillis()
+            : data.checkedInAt,
+          confirmedAt: typeof data.confirmedAt?.toMillis === 'function'
+            ? data.confirmedAt.toMillis()
+            : data.confirmedAt,
         } as TimeSlot);
       });
       
