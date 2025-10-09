@@ -11,24 +11,24 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">✓</span>
+      {/* Header - Mobile Optimized */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm sm:text-lg">✓</span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">CheckSync</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">CheckSync</h1>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={() => setShowExport(true)}
-                className="btn-secondary flex items-center gap-2 py-2"
+                className="btn-secondary flex items-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 text-sm sm:text-base"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -40,11 +40,11 @@ export default function Dashboard() {
                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                Export
+                <span className="hidden sm:inline">Export</span>
               </button>
               <button
                 onClick={() => setShowSettings(true)}
-                className="btn-secondary py-2 px-3"
+                className="btn-secondary py-2 px-3 min-w-[44px]"
               >
                 <svg
                   className="w-5 h-5"
@@ -71,8 +71,8 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content - Mobile Optimized */}
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 md:py-8">
         <WeekCalendar onDayClick={setSelectedDay} />
       </main>
 

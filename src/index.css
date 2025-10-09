@@ -63,16 +63,25 @@
 
   .input-field {
     width: 100%;
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1rem;
     border-radius: 0.5rem;
     border: 1px solid rgb(209 213 219);
     outline: none;
     transition: all 0.15s;
+    font-size: 16px; /* Prevents zoom on iOS */
+    -webkit-appearance: none;
+    appearance: none;
   }
-
+  
   .input-field:focus {
     border-color: #0ea5e9;
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  }
+
+  /* Better mobile touch targets */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .status-dot {

@@ -124,51 +124,52 @@ export default function DayView({ date, onClose }: DayViewProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-primary to-primary-dark text-white p-6">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden">
+        {/* Header - Mobile Optimized */}
+        <div className="bg-gradient-to-r from-primary to-primary-dark text-white p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">{getDayName(date)}</h2>
-              <p className="text-primary-light mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold">{getDayName(date)}</h2>
+              <p className="text-primary-light mt-1 text-sm sm:text-base">
                 {formatDate(date, "MMMM d, yyyy")}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              className="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/30 active:bg-white/40 flex items-center justify-center transition-colors touch-manipulation"
             >
-              ✕
+              <span className="text-xl sm:text-base">✕</span>
             </button>
           </div>
         </div>
 
-        {/* Slots List */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+        {/* Slots List - Mobile Optimized */}
+        <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(92vh-180px)] sm:max-h-[calc(90vh-180px)]">
           {daySlots.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <div className="text-4xl mb-2">📅</div>
-              <p>No time slots for this day</p>
+            <div className="text-center py-8 sm:py-12 text-gray-500">
+              <div className="text-3xl sm:text-4xl mb-2">📅</div>
+              <p className="text-sm sm:text-base">No practices scheduled</p>
+              <p className="text-xs text-gray-400 mt-1">Tap "Add Time Slot" below</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {daySlots.map((slot) => (
                 <div
                   key={slot.id}
-                  className="card hover:shadow-md transition-shadow relative border-l-4 border-l-primary/30"
+                  className="card hover:shadow-md transition-shadow relative border-l-4 border-l-primary/30 p-3 sm:p-4"
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">
+                      <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
+                        <span className="text-xs sm:text-sm font-bold text-primary bg-primary/10 px-2 sm:px-3 py-1 rounded">
                           {slot.startTime}
                         </span>
-                        <h3 className="font-semibold text-lg text-gray-900">
+                        <h3 className="font-semibold text-base sm:text-lg text-gray-900">
                           {slot.title}
                         </h3>
                       </div>
-                      <div className="text-sm text-gray-500 ml-[4.5rem]">
+                      <div className="text-xs sm:text-sm text-gray-500 ml-0 sm:ml-[4.5rem]">
                         Ends at {slot.endTime}
                       </div>
                     </div>
@@ -179,15 +180,15 @@ export default function DayView({ date, onClose }: DayViewProps) {
                     <p className="text-sm text-gray-600 mb-3">{slot.notes}</p>
                   )}
 
-                  <div className="flex items-center gap-4 mb-4 text-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-500">👤 Participants:</span>
+                      <span className="text-gray-500">👤</span>
                       <span className="font-medium">
                         {slot.participantIds.map(getUserName).join(", ")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-500">🔒 Verifier:</span>
+                      <span className="text-gray-500">🔒</span>
                       <span className="font-medium">
                         {getUserName(slot.verifierId)}
                       </span>
@@ -196,62 +197,62 @@ export default function DayView({ date, onClose }: DayViewProps) {
 
                   {/* Actions */}
                   <div className="flex gap-2 flex-wrap">
-                    {/* Check In Button (Planned status) */}
+                    {/* Check In Button - Mobile Optimized */}
                     {slot.participantIds.includes(user?.id || "") &&
                       slot.status === "planned" && (
                         <button
                           onClick={() => handleCheckIn(slot)}
-                          className="btn-accent text-sm py-1.5"
+                          className="btn-accent text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
                         >
                           ✅ Check In
                         </button>
                       )}
 
-                    {/* Undo Check-In Button (Checked-in status) */}
+                    {/* Undo Check-In Button - Mobile Optimized */}
                     {slot.participantIds.includes(user?.id || "") &&
                       slot.status === "checked-in" && (
                         <button
                           onClick={() => handleUndoCheckIn(slot)}
-                          className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 font-medium py-1.5 px-4 rounded-full transition-colors text-sm"
+                          className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
                         >
                           ↩️ Undo Check-In
                         </button>
                       )}
 
-                    {/* Confirm Attendance Button (Checked-in status) */}
+                    {/* Confirm Attendance - Mobile Optimized */}
                     {slot.verifierId === user?.id &&
                       slot.status === "checked-in" && (
                         <button
                           onClick={() => handleConfirm(slot)}
-                          className="btn-primary text-sm py-1.5"
+                          className="btn-primary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
                         >
-                          🔒 Confirm Attendance
+                          🔒 Confirm
                         </button>
                       )}
 
-                    {/* Undo Confirmation Button (Confirmed status) */}
+                    {/* Undo Confirmation - Mobile Optimized */}
                     {slot.verifierId === user?.id &&
                       slot.status === "confirmed" && (
                         <button
                           onClick={() => handleUndoConfirmation(slot)}
-                          className="bg-green-50 hover:bg-green-100 text-green-700 font-medium py-1.5 px-4 rounded-full transition-colors text-sm"
+                          className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
                         >
-                          ↩️ Undo Confirmation
+                          ↩️ Undo
                         </button>
                       )}
 
-                    {/* Edit Button (Always available) */}
+                    {/* Edit Button - Mobile Optimized */}
                     <button
                       onClick={() => setEditingSlot(slot)}
-                      className="btn-secondary text-sm py-1.5"
+                      className="btn-secondary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 touch-manipulation min-h-[44px] sm:min-h-auto"
                     >
                       ✏️ Edit
                     </button>
 
-                    {/* Delete Button (Always available) */}
+                    {/* Delete Button - Mobile Optimized */}
                     <button
                       onClick={() => handleDelete(slot.id)}
-                      className="bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1.5 px-4 rounded-full transition-colors text-sm"
+                      className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
                     >
                       🗑️ Delete
                     </button>
@@ -262,15 +263,18 @@ export default function DayView({ date, onClose }: DayViewProps) {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="border-t border-gray-200 p-4 flex gap-2">
+        {/* Footer - Mobile Optimized */}
+        <div className="border-t border-gray-200 p-3 sm:p-4 flex gap-2 bg-white sticky bottom-0">
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="btn-primary flex-1"
+            className="btn-primary flex-1 text-sm sm:text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"
           >
-            ➕ Add Time Slot
+            ➕ Add Practice
           </button>
-          <button onClick={onClose} className="btn-secondary">
+          <button 
+            onClick={onClose} 
+            className="btn-secondary text-sm sm:text-base py-3 sm:py-2 px-6 sm:px-4 touch-manipulation min-h-[48px] sm:min-h-auto"
+          >
             Close
           </button>
         </div>

@@ -44,6 +44,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
         // Update existing slot in Firestore
         await updateSlotFirestore(slot.id, {
           title,
+          date: customDate,
           startTime,
           endTime,
           participantIds,
@@ -55,7 +56,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
         // Create new slot in Firestore
         const newSlot: Omit<TimeSlot, "id"> = {
           title,
-          date: formatDate(date),
+          date: customDate,
           startTime,
           endTime,
           participantIds,
@@ -84,38 +85,58 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
     }
   };
 
+  const [customDate, setCustomDate] = useState(
+    slot?.date || formatDate(date)
+  );
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {slot ? "Edit Time Slot" : "Add Time Slot"}
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-lg w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              {slot ? "Edit Practice" : "Add Practice"}
             </h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              className="w-10 h-10 sm:w-8 sm:h-8 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center transition-colors touch-manipulation"
             >
-              ✕
+              <span className="text-lg sm:text-base">✕</span>
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title *
+                Practice Name *
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="input-field"
-                placeholder="e.g., Gym training"
+                className="input-field text-base"
+                placeholder="e.g., Tennis Practice"
                 required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date *
+              </label>
+              <input
+                type="date"
+                value={customDate}
+                onChange={(e) => setCustomDate(e.target.value)}
+                className="input-field text-base"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                You can select past or future dates
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Start Time *
@@ -124,7 +145,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="input-field"
+                  className="input-field text-base"
                   required
                 />
               </div>
@@ -136,7 +157,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="input-field"
+                  className="input-field text-base"
                   required
                 />
               </div>
@@ -144,22 +165,22 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Participants *
+                Tennis Coaches * (Select who's attending)
               </label>
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2 max-h-48 overflow-y-auto">
                 {users.map((u) => (
                   <label
                     key={u.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer"
+                    className="flex items-center gap-3 p-3 sm:p-3 rounded-lg border border-gray-200 hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors touch-manipulation min-h-[52px]"
                   >
                     <input
                       type="checkbox"
                       checked={participantIds.includes(u.id)}
                       onChange={() => toggleParticipant(u.id)}
-                      className="w-4 h-4 text-primary rounded focus:ring-primary"
+                      className="w-5 h-5 sm:w-4 sm:h-4 text-primary rounded focus:ring-primary"
                     />
-                    <span className="flex-1">{u.name}</span>
-                    <span className="text-xs text-gray-500">{u.role}</span>
+                    <span className="flex-1 text-base sm:text-sm">{u.name}</span>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{u.role}</span>
                   </label>
                 ))}
               </div>
@@ -167,12 +188,12 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Verifier *
+                Verifier * (Who confirms attendance)
               </label>
               <select
                 value={verifierId}
                 onChange={(e) => setVerifierId(e.target.value)}
-                className="input-field"
+                className="input-field text-base"
                 required
               >
                 <option value="">Select verifier</option>
@@ -200,22 +221,29 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Notes
+                Notes (optional)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="input-field resize-none"
+                className="input-field resize-none text-base"
                 rows={3}
-                placeholder="Additional details..."
+                placeholder="e.g., Bring tennis rackets, meet at court 3..."
               />
             </div>
 
-            <div className="flex gap-3 pt-4">
-              <button type="submit" className="btn-primary flex-1">
-                {slot ? "Update" : "Create"} Slot
+            <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+              <button 
+                type="submit" 
+                className="btn-primary flex-1 text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"
+              >
+                {slot ? "Update" : "Create"} Practice
               </button>
-              <button type="button" onClick={onClose} className="btn-secondary">
+              <button 
+                type="button" 
+                onClick={onClose} 
+                className="btn-secondary text-base py-3 sm:py-2 px-6 sm:px-4 touch-manipulation min-h-[48px] sm:min-h-auto"
+              >
                 Cancel
               </button>
             </div>
