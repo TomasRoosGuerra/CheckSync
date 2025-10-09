@@ -24,6 +24,8 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
   );
   const [verifierId, setVerifierId] = useState(slot?.verifierId || "");
   const [notes, setNotes] = useState(slot?.notes || "");
+  const [recurring, setRecurring] = useState(false);
+  const [weeksAhead, setWeeksAhead] = useState(1);
 
   useEffect(() => {
     if (slot) {
@@ -74,11 +76,10 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
         await Promise.race([updatePromise, timeoutPromise]);
         console.log("✅ Slot updated successfully");
       } else {
-        console.log("➕ Creating new slot...");
+        console.log("➕ Creating new slot(s)...");
 
-        const newSlot: Omit<TimeSlot, "id"> = {
+        const baseSlot: Omit<TimeSlot, "id" | "date" | "createdAt" | "updatedAt"> = {
           title,
-          date: customDate,
           startTime,
           endTime,
           participantIds,
@@ -86,22 +87,44 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           status: "planned",
           notes,
           createdBy: user?.id || "",
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
         };
 
-        console.log("Slot data to save:", newSlot);
+        // Create recurring slots if requested
+        const datesToCreate: string[] = [customDate];
         
-        const createPromise = createTimeSlot(newSlot);
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => {
-            console.error("⏱️ Create timed out after 15 seconds");
-            reject(new Error("Operation timed out"));
-          }, 15000)
-        );
+        if (recurring && weeksAhead > 1) {
+          console.log(`📅 Creating recurring slots for ${weeksAhead} weeks`);
+          const baseDate = new Date(customDate);
+          for (let i = 1; i < weeksAhead; i++) {
+            const futureDate = new Date(baseDate);
+            futureDate.setDate(baseDate.getDate() + (i * 7));
+            datesToCreate.push(futureDate.toISOString().split('T')[0]);
+          }
+        }
+
+        console.log(`Creating ${datesToCreate.length} slot(s)...`);
+
+        // Create all slots with reduced timeout per slot
+        for (const dateStr of datesToCreate) {
+          const newSlot: Omit<TimeSlot, "id"> = {
+            ...baseSlot,
+            date: dateStr,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+
+          const createPromise = createTimeSlot(newSlot);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => {
+              console.error("⏱️ Create timed out for date:", dateStr);
+              reject(new Error("Operation timed out"));
+            }, 8000) // Shorter timeout per slot
+          );
+          
+          await Promise.race([createPromise, timeoutPromise]);
+        }
         
-        await Promise.race([createPromise, timeoutPromise]);
-        console.log("✅ Slot created successfully");
+        console.log(`✅ ${datesToCreate.length} slot(s) created successfully`);
       }
 
       console.log("🚪 Closing modal...");
@@ -176,9 +199,42 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                 className="input-field text-base"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">
-                You can select past or future dates
-              </p>
+              
+              {/* Recurring Option */}
+              {!slot && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={recurring}
+                      onChange={(e) => setRecurring(e.target.checked)}
+                      className="w-4 h-4 text-primary rounded"
+                    />
+                    <span className="text-sm font-medium text-gray-900">
+                      Repeat weekly
+                    </span>
+                  </label>
+                  
+                  {recurring && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <label className="text-xs text-gray-700">
+                        For how many weeks?
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="52"
+                        value={weeksAhead}
+                        onChange={(e) => setWeeksAhead(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="input-field text-sm w-20 py-1 px-2"
+                      />
+                      <span className="text-xs text-gray-500">
+                        ({weeksAhead} {weeksAhead === 1 ? 'week' : 'weeks'})
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -291,6 +347,8 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                   ? "Saving..."
                   : slot
                   ? "✓ Update Slot"
+                  : recurring && weeksAhead > 1
+                  ? `✓ Create ${weeksAhead} Slots`
                   : "✓ Create Slot"}
               </button>
               <button
