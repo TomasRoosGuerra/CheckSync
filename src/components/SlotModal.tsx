@@ -308,22 +308,24 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
               >
                 <option value="">Select verifier</option>
                 {users
-                  .filter((u) => u.role === "verifier" || u.role === "both")
+                  .filter((u) => ["verifier", "manager", "admin"].includes(u.role))
                   .map((u) => (
                     <option key={u.id} value={u.id}>
+                      {u.role === "admin" && "👑 "}
+                      {u.role === "manager" && "📊 "}
+                      {u.role === "verifier" && "🔒 "}
                       {u.name}
                     </option>
                   ))}
               </select>
-              {users.filter((u) => u.role === "verifier" || u.role === "both")
+              {users.filter((u) => ["verifier", "manager", "admin"].includes(u.role))
                 .length === 0 && (
                 <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-800">
                     <strong>No verifiers available.</strong>
                   </p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Go to Settings and change your role to "Verifier" or "Both",
-                    or add connections who can verify.
+                    Set your role to Verifier/Manager/Admin in Settings, or add connections who can verify.
                   </p>
                 </div>
               )}

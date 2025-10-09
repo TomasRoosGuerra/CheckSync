@@ -75,9 +75,9 @@ export default function Settings({ onClose }: SettingsProps) {
 
             {/* Role Selection */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Role</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Role & Permissions</h3>
               <div className="space-y-2">
-                {(["participant", "verifier", "both"] as UserRole[]).map(
+                {(["participant", "verifier", "manager", "admin"] as UserRole[]).map(
                   (role) => (
                     <label
                       key={role}
@@ -91,14 +91,18 @@ export default function Settings({ onClose }: SettingsProps) {
                         className="w-4 h-4 text-primary"
                       />
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900 capitalize">
+                        <div className="font-medium text-gray-900 capitalize flex items-center gap-2">
+                          {role === "admin" && "👑"}
+                          {role === "manager" && "📊"}
+                          {role === "verifier" && "🔒"}
+                          {role === "participant" && "👤"}
                           {role}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {role === "participant" &&
-                            "Can check in to time slots"}
-                          {role === "verifier" && "Can verify attendance"}
-                          {role === "both" && "Can both check in and verify"}
+                          {role === "participant" && "Check in to assigned slots"}
+                          {role === "verifier" && "Verify attendance + check in"}
+                          {role === "manager" && "Create slots, verify, check in"}
+                          {role === "admin" && "Full access to everything"}
                         </div>
                       </div>
                     </label>

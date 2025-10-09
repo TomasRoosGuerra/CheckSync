@@ -6,6 +6,13 @@ import {
 import { useStore } from "../store";
 import type { TimeSlot } from "../types";
 import { formatDate, getDayName, isSameDayAs } from "../utils/dateUtils";
+import {
+  canCheckIn,
+  canVerify,
+  canEditSlot,
+  canDeleteSlot,
+  canCreateSlot,
+} from "../utils/permissions";
 import SlotModal from "./SlotModal";
 
 interface DayViewProps {
@@ -23,18 +30,20 @@ export default function DayView({ date, onClose }: DayViewProps) {
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const handleCheckIn = async (slot: TimeSlot) => {
-    if (slot.participantIds.includes(user?.id || "")) {
-      try {
-        const updates = {
-          status: "checked-in" as const,
-          checkedInAt: Date.now(),
-        };
-        await updateSlotFirestore(slot.id, updates);
-        // Real-time listener will update local state automatically
-      } catch (error) {
-        console.error("Error checking in:", error);
-        alert("Failed to check in. Please try again.");
-      }
+    if (!canCheckIn(user, slot)) {
+      alert("You don't have permission to check in to this slot.");
+      return;
+    }
+    
+    try {
+      const updates = {
+        status: "checked-in" as const,
+        checkedInAt: Date.now(),
+      };
+      await updateSlotFirestore(slot.id, updates);
+    } catch (error) {
+      console.error("Error checking in:", error);
+      alert("Failed to check in. Please try again.");
     }
   };
 
@@ -57,18 +66,20 @@ export default function DayView({ date, onClose }: DayViewProps) {
   };
 
   const handleConfirm = async (slot: TimeSlot) => {
-    if (slot.verifierId === user?.id) {
-      try {
-        const updates = {
-          status: "confirmed" as const,
-          confirmedAt: Date.now(),
-        };
-        await updateSlotFirestore(slot.id, updates);
-        // Real-time listener will update local state automatically
-      } catch (error) {
-        console.error("Error confirming:", error);
-        alert("Failed to confirm attendance. Please try again.");
-      }
+    if (!canVerify(user, slot)) {
+      alert("You don't have permission to verify this slot.");
+      return;
+    }
+    
+    try {
+      const updates = {
+        status: "confirmed" as const,
+        confirmedAt: Date.now(),
+      };
+      await updateSlotFirestore(slot.id, updates);
+    } catch (error) {
+      console.error("Error confirming:", error);
+      alert("Failed to confirm attendance. Please try again.");
     }
   };
 
@@ -255,64 +266,64 @@ export default function DayView({ date, onClose }: DayViewProps) {
                   {/* Actions */}
                   <div className="flex gap-2 flex-wrap">
                     {/* Check In Button - Mobile Optimized */}
-                    {slot.participantIds.includes(user?.id || "") &&
-                      slot.status === "planned" && (
-                        <button
-                          onClick={() => handleCheckIn(slot)}
-                          className="btn-accent text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
-                        >
-                          ✅ Check In
-                        </button>
-                      )}
+                    {canCheckIn(user, slot) && slot.status === "planned" && (
+                      <button
+                        onClick={() => handleCheckIn(slot)}
+                        className="btn-accent text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
+                      >
+                        ✅ Check In
+                      </button>
+                    )}
 
                     {/* Undo Check-In Button - Mobile Optimized */}
-                    {slot.participantIds.includes(user?.id || "") &&
-                      slot.status === "checked-in" && (
-                        <button
-                          onClick={() => handleUndoCheckIn(slot)}
-                          className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
-                        >
-                          ↩️ Undo Check-In
-                        </button>
-                      )}
+                    {canCheckIn(user, slot) && slot.status === "checked-in" && (
+                      <button
+                        onClick={() => handleUndoCheckIn(slot)}
+                        className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                      >
+                        ↩️ Undo Check-In
+                      </button>
+                    )}
 
                     {/* Confirm Attendance - Mobile Optimized */}
-                    {slot.verifierId === user?.id &&
-                      slot.status === "checked-in" && (
-                        <button
-                          onClick={() => handleConfirm(slot)}
-                          className="btn-primary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
-                        >
-                          🔒 Confirm
-                        </button>
-                      )}
+                    {canVerify(user, slot) && slot.status === "checked-in" && (
+                      <button
+                        onClick={() => handleConfirm(slot)}
+                        className="btn-primary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
+                      >
+                        🔒 Confirm
+                      </button>
+                    )}
 
                     {/* Undo Confirmation - Mobile Optimized */}
-                    {slot.verifierId === user?.id &&
-                      slot.status === "confirmed" && (
-                        <button
-                          onClick={() => handleUndoConfirmation(slot)}
-                          className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
-                        >
-                          ↩️ Undo
-                        </button>
-                      )}
+                    {canVerify(user, slot) && slot.status === "confirmed" && (
+                      <button
+                        onClick={() => handleUndoConfirmation(slot)}
+                        className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                      >
+                        ↩️ Undo
+                      </button>
+                    )}
 
                     {/* Edit Button - Mobile Optimized */}
-                    <button
-                      onClick={() => setEditingSlot(slot)}
-                      className="btn-secondary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 touch-manipulation min-h-[44px] sm:min-h-auto"
-                    >
-                      ✏️ Edit
-                    </button>
+                    {canEditSlot(user, slot) && (
+                      <button
+                        onClick={() => setEditingSlot(slot)}
+                        className="btn-secondary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 touch-manipulation min-h-[44px] sm:min-h-auto"
+                      >
+                        ✏️ Edit
+                      </button>
+                    )}
 
                     {/* Delete Button - Mobile Optimized */}
-                    <button
-                      onClick={() => handleDelete(slot)}
-                      className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
-                    >
-                      🗑️ {slot.isRecurring ? 'Delete Series' : 'Delete'}
-                    </button>
+                    {canDeleteSlot(user, slot) && (
+                      <button
+                        onClick={() => handleDelete(slot)}
+                        className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                      >
+                        🗑️ {slot.isRecurring ? 'Delete Series' : 'Delete'}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -322,12 +333,18 @@ export default function DayView({ date, onClose }: DayViewProps) {
 
         {/* Footer - Mobile Optimized */}
         <div className="border-t border-gray-200 p-3 sm:p-4 flex gap-2 bg-white sticky bottom-0">
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="btn-primary flex-1 text-sm sm:text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"
-          >
-            ➕ Add Time Slot
-          </button>
+          {canCreateSlot(user) ? (
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="btn-primary flex-1 text-sm sm:text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"
+            >
+              ➕ Add Time Slot
+            </button>
+          ) : (
+            <div className="flex-1 text-xs text-gray-500 text-center py-2">
+              Only Managers and Admins can create slots
+            </div>
+          )}
           <button 
             onClick={onClose} 
             className="btn-secondary text-sm sm:text-base py-3 sm:py-2 px-6 sm:px-4 touch-manipulation min-h-[48px] sm:min-h-auto"

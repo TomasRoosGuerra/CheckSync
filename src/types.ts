@@ -1,4 +1,4 @@
-export type UserRole = "participant" | "verifier" | "both";
+export type UserRole = "participant" | "verifier" | "manager" | "admin";
 
 export type SlotStatus = "planned" | "checked-in" | "confirmed" | "missed";
 

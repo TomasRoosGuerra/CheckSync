@@ -4,10 +4,13 @@ import Export from "./Export";
 import Settings from "./Settings";
 import WeekCalendar from "./WeekCalendar";
 import AgendaView from "./AgendaView";
+import { canExportData } from "../utils/permissions";
+import { useStore } from "../store";
 
 type ViewMode = "week" | "agenda";
 
 export default function Dashboard() {
+  const { user } = useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -36,10 +39,11 @@ export default function Dashboard() {
                 {viewMode === "week" ? "📋" : "📅"}
               </button>
               
-              <button
-                onClick={() => setShowExport(true)}
-                className="btn-secondary flex items-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 text-sm sm:text-base"
-              >
+              {canExportData(user) && (
+                <button
+                  onClick={() => setShowExport(true)}
+                  className="btn-secondary flex items-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 text-sm sm:text-base"
+                >
                 <svg
                   className="w-4 h-4 sm:w-5 sm:h-5"
                   fill="none"
@@ -55,6 +59,7 @@ export default function Dashboard() {
                 </svg>
                 <span className="hidden sm:inline">Export</span>
               </button>
+              )}
               <button
                 onClick={() => setShowSettings(true)}
                 className="btn-secondary py-2 px-3 min-w-[44px]"
