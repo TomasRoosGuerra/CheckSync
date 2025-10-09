@@ -78,6 +78,9 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
       } else {
         console.log("➕ Creating new slot(s)...");
 
+        // Generate recurring group ID if creating multiple slots
+        const recurringGroupId = recurring && weeksAhead > 1 ? `recurring-${Date.now()}` : undefined;
+        
         const baseSlot: Omit<TimeSlot, "id" | "date" | "createdAt" | "updatedAt"> = {
           title,
           startTime,
@@ -87,6 +90,8 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           status: "planned",
           notes,
           createdBy: user?.id || "",
+          recurringGroupId,
+          isRecurring: recurring && weeksAhead > 1,
         };
 
         // Create recurring slots if requested

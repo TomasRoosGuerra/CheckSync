@@ -90,14 +90,66 @@ export default function DayView({ date, onClose }: DayViewProps) {
     }
   };
 
-  const handleDelete = async (slotId: string) => {
-    if (confirm("Delete this time slot?")) {
-      try {
-        await deleteSlotFirestore(slotId);
-        // Real-time listener will remove from local state automatically
-      } catch (error) {
-        console.error("Error deleting:", error);
-        alert("Failed to delete time slot. Please try again.");
+  const handleDelete = async (slot: TimeSlot) => {
+    // Check if this is a recurring slot
+    if (slot.recurringGroupId && slot.isRecurring) {
+      // Find all slots in the same recurring group
+      const recurringSlotsCount = timeSlots.filter(
+        s => s.recurringGroupId === slot.recurringGroupId
+      ).length;
+
+      if (recurringSlotsCount > 1) {
+        // Ask user: delete this one or all?
+        const choice = window.confirm(
+          `This is part of a recurring series (${recurringSlotsCount} slots).\n\n` +
+          `Click OK to delete ALL ${recurringSlotsCount} slots in this series.\n` +
+          `Click Cancel to delete ONLY this occurrence.`
+        );
+
+        if (choice === null) return; // User cancelled
+
+        try {
+          if (choice) {
+            // Delete all in series
+            console.log(`🗑️ Deleting all ${recurringSlotsCount} recurring slots...`);
+            const slotsToDelete = timeSlots.filter(
+              s => s.recurringGroupId === slot.recurringGroupId
+            );
+            
+            for (const s of slotsToDelete) {
+              await deleteSlotFirestore(s.id);
+            }
+            console.log(`✅ Deleted ${slotsToDelete.length} recurring slots`);
+          } else {
+            // Delete just this one
+            console.log("🗑️ Deleting single occurrence...");
+            await deleteSlotFirestore(slot.id);
+            console.log("✅ Deleted single slot");
+          }
+        } catch (error) {
+          console.error("Error deleting:", error);
+          alert("Failed to delete time slot(s). Please try again.");
+        }
+      } else {
+        // Only one slot in series, just delete it
+        if (confirm("Delete this time slot?")) {
+          try {
+            await deleteSlotFirestore(slot.id);
+          } catch (error) {
+            console.error("Error deleting:", error);
+            alert("Failed to delete time slot. Please try again.");
+          }
+        }
+      }
+    } else {
+      // Not a recurring slot, normal delete
+      if (confirm("Delete this time slot?")) {
+        try {
+          await deleteSlotFirestore(slot.id);
+        } catch (error) {
+          console.error("Error deleting:", error);
+          alert("Failed to delete time slot. Please try again.");
+        }
       }
     }
   };
@@ -168,6 +220,11 @@ export default function DayView({ date, onClose }: DayViewProps) {
                         <h3 className="font-semibold text-base sm:text-lg text-gray-900">
                           {slot.title}
                         </h3>
+                        {slot.isRecurring && (
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                            🔁 Recurring
+                          </span>
+                        )}
                       </div>
                       <div className="text-xs sm:text-sm text-gray-500 ml-0 sm:ml-[4.5rem]">
                         Ends at {slot.endTime}
@@ -251,10 +308,10 @@ export default function DayView({ date, onClose }: DayViewProps) {
 
                     {/* Delete Button - Mobile Optimized */}
                     <button
-                      onClick={() => handleDelete(slot.id)}
+                      onClick={() => handleDelete(slot)}
                       className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
                     >
-                      🗑️ Delete
+                      🗑️ {slot.isRecurring ? 'Delete Series' : 'Delete'}
                     </button>
                   </div>
                 </div>

@@ -26,6 +26,8 @@ export interface TimeSlot {
   createdBy: string;
   createdAt: number;
   updatedAt: number;
+  recurringGroupId?: string; // ID linking recurring slots together
+  isRecurring?: boolean; // Flag for recurring slots
 }
 
 export interface AttendanceRecord {
