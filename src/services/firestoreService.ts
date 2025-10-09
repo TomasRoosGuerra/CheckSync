@@ -180,6 +180,14 @@ export const subscribeToUserTimeSlots = (
   userId: string,
   callback: (slots: TimeSlot[]) => void
 ) => {
+  // Use a Map to merge slots from both queries
+  const slotsMap = new Map<string, TimeSlot>();
+
+  const updateCallback = () => {
+    const mergedSlots = Array.from(slotsMap.values());
+    callback(mergedSlots);
+  };
+
   const q1 = query(
     collection(db, SLOTS_COLLECTION),
     where("participantIds", "array-contains", userId)
@@ -192,10 +200,9 @@ export const subscribeToUserTimeSlots = (
 
   // Subscribe to slots where user is participant
   const unsubscribe1 = onSnapshot(q1, (snapshot) => {
-    const slots: TimeSlot[] = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
-      slots.push({
+      slotsMap.set(doc.id, {
         id: doc.id,
         ...data,
         createdAt: data.createdAt?.toMillis() || Date.now(),
@@ -204,15 +211,27 @@ export const subscribeToUserTimeSlots = (
         confirmedAt: data.confirmedAt?.toMillis(),
       } as TimeSlot);
     });
-    callback(slots);
+    
+    // Remove deleted docs
+    const currentIds = new Set(snapshot.docs.map(doc => doc.id));
+    for (const [id, slot] of slotsMap.entries()) {
+      if (slot.participantIds.includes(userId) && !currentIds.has(id)) {
+        // Only remove if this was the participant query's slot
+        const isVerifier = slot.verifierId === userId;
+        if (!isVerifier) {
+          slotsMap.delete(id);
+        }
+      }
+    }
+    
+    updateCallback();
   });
 
   // Subscribe to slots where user is verifier
   const unsubscribe2 = onSnapshot(q2, (snapshot) => {
-    const slots: TimeSlot[] = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
-      slots.push({
+      slotsMap.set(doc.id, {
         id: doc.id,
         ...data,
         createdAt: data.createdAt?.toMillis() || Date.now(),
@@ -221,7 +240,20 @@ export const subscribeToUserTimeSlots = (
         confirmedAt: data.confirmedAt?.toMillis(),
       } as TimeSlot);
     });
-    callback(slots);
+    
+    // Remove deleted docs
+    const currentIds = new Set(snapshot.docs.map(doc => doc.id));
+    for (const [id, slot] of slotsMap.entries()) {
+      if (slot.verifierId === userId && !currentIds.has(id)) {
+        // Only remove if this was the verifier query's slot
+        const isParticipant = slot.participantIds.includes(userId);
+        if (!isParticipant) {
+          slotsMap.delete(id);
+        }
+      }
+    }
+    
+    updateCallback();
   });
 
   return () => {

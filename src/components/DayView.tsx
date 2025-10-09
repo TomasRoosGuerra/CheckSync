@@ -14,7 +14,7 @@ interface DayViewProps {
 }
 
 export default function DayView({ date, onClose }: DayViewProps) {
-  const { timeSlots, user, updateTimeSlot, deleteTimeSlot, users } = useStore();
+  const { timeSlots, user, users } = useStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
 
@@ -30,7 +30,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
           checkedInAt: Date.now(),
         };
         await updateSlotFirestore(slot.id, updates);
-        updateTimeSlot(slot.id, updates);
+        // Real-time listener will update local state automatically
       } catch (error) {
         console.error("Error checking in:", error);
         alert("Failed to check in. Please try again.");
@@ -47,7 +47,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
             checkedInAt: undefined,
           };
           await updateSlotFirestore(slot.id, updates);
-          updateTimeSlot(slot.id, updates);
+          // Real-time listener will update local state automatically
         } catch (error) {
           console.error("Error undoing check-in:", error);
           alert("Failed to undo check-in. Please try again.");
@@ -64,7 +64,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
           confirmedAt: Date.now(),
         };
         await updateSlotFirestore(slot.id, updates);
-        updateTimeSlot(slot.id, updates);
+        // Real-time listener will update local state automatically
       } catch (error) {
         console.error("Error confirming:", error);
         alert("Failed to confirm attendance. Please try again.");
@@ -81,7 +81,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
             confirmedAt: undefined,
           };
           await updateSlotFirestore(slot.id, updates);
-          updateTimeSlot(slot.id, updates);
+          // Real-time listener will update local state automatically
         } catch (error) {
           console.error("Error undoing confirmation:", error);
           alert("Failed to undo confirmation. Please try again.");
@@ -94,7 +94,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
     if (confirm("Delete this time slot?")) {
       try {
         await deleteSlotFirestore(slotId);
-        deleteTimeSlot(slotId);
+        // Real-time listener will remove from local state automatically
       } catch (error) {
         console.error("Error deleting:", error);
         alert("Failed to delete time slot. Please try again.");

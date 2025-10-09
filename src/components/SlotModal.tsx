@@ -14,7 +14,7 @@ interface SlotModalProps {
 }
 
 export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
-  const { user, users, addTimeSlot, updateTimeSlot } = useStore();
+  const { user, users } = useStore();
 
   const [title, setTitle] = useState(slot?.title || "");
   const [startTime, setStartTime] = useState(slot?.startTime || "09:00");
@@ -50,15 +50,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           verifierId,
           notes,
         });
-        // Also update local state
-        updateTimeSlot(slot.id, {
-          title,
-          startTime,
-          endTime,
-          participantIds,
-          verifierId,
-          notes,
-        });
+        // Real-time listener will update local state automatically
       } else {
         // Create new slot in Firestore
         const newSlot: Omit<TimeSlot, "id"> = {
@@ -74,9 +66,8 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
-        const slotId = await createTimeSlot(newSlot);
-        // Add to local state with the new ID
-        addTimeSlot({ ...newSlot, id: slotId });
+        await createTimeSlot(newSlot);
+        // Real-time listener will automatically add it to local state
       }
       onClose();
     } catch (error) {
