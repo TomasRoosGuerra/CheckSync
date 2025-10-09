@@ -55,18 +55,23 @@ function App() {
           setUsers([userProfile, ...connectedUsers]);
 
           // Subscribe to time slots
+          console.log("🔔 Setting up Firestore subscription for user:", firebaseUser.uid);
           unsubscribeSlots = subscribeToUserTimeSlots(
             firebaseUser.uid,
             (slots) => {
+              console.log("📦 Received slots update from Firestore:", slots.length, "slots");
+              console.log("Slots data:", slots);
               // Merge and deduplicate slots
               const uniqueSlots = Array.from(
                 new Map(slots.map((slot) => [slot.id, slot])).values()
               );
+              console.log("✅ Setting", uniqueSlots.length, "unique slots to state");
               setTimeSlots(uniqueSlots);
             }
           );
         } catch (error) {
-          console.error("Error loading user data:", error);
+          console.error("❌ Error loading user data:", error);
+          alert("Error loading data. Check console and Firestore setup.");
         }
       } else {
         setUser(null);

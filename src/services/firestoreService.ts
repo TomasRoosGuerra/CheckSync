@@ -140,14 +140,18 @@ export const searchUserByEmail = async (
 export const createTimeSlot = async (slot: Omit<TimeSlot, "id">) => {
   try {
     const docRef = doc(collection(db, SLOTS_COLLECTION));
-    await setDoc(docRef, {
+    const slotData = {
       ...slot,
       createdAt: Timestamp.fromMillis(slot.createdAt),
       updatedAt: Timestamp.fromMillis(slot.updatedAt),
-    });
+    };
+    
+    console.log("Creating slot in Firestore:", slotData);
+    await setDoc(docRef, slotData);
+    console.log("Slot created successfully with ID:", docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error("Error creating time slot:", error);
+    console.error("❌ Error creating time slot:", error);
     throw error;
   }
 };
@@ -199,62 +203,77 @@ export const subscribeToUserTimeSlots = (
   );
 
   // Subscribe to slots where user is participant
-  const unsubscribe1 = onSnapshot(q1, (snapshot) => {
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      slotsMap.set(doc.id, {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toMillis() || Date.now(),
-        updatedAt: data.updatedAt?.toMillis() || Date.now(),
-        checkedInAt: data.checkedInAt?.toMillis(),
-        confirmedAt: data.confirmedAt?.toMillis(),
-      } as TimeSlot);
-    });
-    
-    // Remove deleted docs
-    const currentIds = new Set(snapshot.docs.map(doc => doc.id));
-    for (const [id, slot] of slotsMap.entries()) {
-      if (slot.participantIds.includes(userId) && !currentIds.has(id)) {
-        // Only remove if this was the participant query's slot
-        const isVerifier = slot.verifierId === userId;
-        if (!isVerifier) {
-          slotsMap.delete(id);
+  const unsubscribe1 = onSnapshot(
+    q1,
+    (snapshot) => {
+      console.log(`📥 Participant slots received: ${snapshot.size} slots`);
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        slotsMap.set(doc.id, {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toMillis() || Date.now(),
+          updatedAt: data.updatedAt?.toMillis() || Date.now(),
+          checkedInAt: data.checkedInAt?.toMillis(),
+          confirmedAt: data.confirmedAt?.toMillis(),
+        } as TimeSlot);
+      });
+      
+      // Remove deleted docs
+      const currentIds = new Set(snapshot.docs.map((doc) => doc.id));
+      for (const [id, slot] of slotsMap.entries()) {
+        if (slot.participantIds.includes(userId) && !currentIds.has(id)) {
+          // Only remove if this was the participant query's slot
+          const isVerifier = slot.verifierId === userId;
+          if (!isVerifier) {
+            slotsMap.delete(id);
+          }
         }
       }
+      
+      updateCallback();
+    },
+    (error) => {
+      console.error("❌ Error in participant subscription:", error);
     }
-    
-    updateCallback();
-  });
+  );
 
   // Subscribe to slots where user is verifier
-  const unsubscribe2 = onSnapshot(q2, (snapshot) => {
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      slotsMap.set(doc.id, {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toMillis() || Date.now(),
-        updatedAt: data.updatedAt?.toMillis() || Date.now(),
-        checkedInAt: data.checkedInAt?.toMillis(),
-        confirmedAt: data.confirmedAt?.toMillis(),
-      } as TimeSlot);
-    });
-    
-    // Remove deleted docs
-    const currentIds = new Set(snapshot.docs.map(doc => doc.id));
-    for (const [id, slot] of slotsMap.entries()) {
-      if (slot.verifierId === userId && !currentIds.has(id)) {
-        // Only remove if this was the verifier query's slot
-        const isParticipant = slot.participantIds.includes(userId);
-        if (!isParticipant) {
-          slotsMap.delete(id);
+  const unsubscribe2 = onSnapshot(
+    q2,
+    (snapshot) => {
+      console.log(`📥 Verifier slots received: ${snapshot.size} slots`);
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        slotsMap.set(doc.id, {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toMillis() || Date.now(),
+          updatedAt: data.updatedAt?.toMillis() || Date.now(),
+          checkedInAt: data.checkedInAt?.toMillis(),
+          confirmedAt: data.confirmedAt?.toMillis(),
+        } as TimeSlot);
+      });
+      
+      // Remove deleted docs
+      const currentIds = new Set(snapshot.docs.map((doc) => doc.id));
+      for (const [id, slot] of slotsMap.entries()) {
+        if (slot.verifierId === userId && !currentIds.has(id)) {
+          // Only remove if this was the verifier query's slot
+          const isParticipant = slot.participantIds.includes(userId);
+          if (!isParticipant) {
+            slotsMap.delete(id);
+          }
         }
       }
+      
+      console.log(`✅ Total unique slots: ${slotsMap.size}`);
+      updateCallback();
+    },
+    (error) => {
+      console.error("❌ Error in verifier subscription:", error);
     }
-    
-    updateCallback();
-  });
+  );
 
   return () => {
     unsubscribe1();

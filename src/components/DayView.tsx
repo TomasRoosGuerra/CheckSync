@@ -149,7 +149,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
           {daySlots.length === 0 ? (
             <div className="text-center py-8 sm:py-12 text-gray-500">
               <div className="text-3xl sm:text-4xl mb-2">📅</div>
-              <p className="text-sm sm:text-base">No practices scheduled</p>
+              <p className="text-sm sm:text-base">No time slots scheduled</p>
               <p className="text-xs text-gray-400 mt-1">Tap "Add Time Slot" below</p>
             </div>
           ) : (
@@ -269,7 +269,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
             onClick={() => setIsAddModalOpen(true)}
             className="btn-primary flex-1 text-sm sm:text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"
           >
-            ➕ Add Practice
+            ➕ Add Time Slot
           </button>
           <button 
             onClick={onClose} 

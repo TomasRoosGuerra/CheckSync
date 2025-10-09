@@ -95,7 +95,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
         <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              {slot ? "Edit Practice" : "Add Practice"}
+              {slot ? "Edit Time Slot" : "Add Time Slot"}
             </h2>
             <button
               onClick={onClose}
@@ -108,14 +108,14 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Practice Name *
+                Title *
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="input-field text-base"
-                placeholder="e.g., Tennis Practice"
+                placeholder="e.g., Team Meeting"
                 required
               />
             </div>
@@ -165,7 +165,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tennis Coaches * (Select who's attending)
+                Participants * (Select who's attending)
               </label>
               <div className="space-y-1.5 sm:space-y-2 max-h-48 overflow-y-auto">
                 {users.map((u) => (
@@ -228,7 +228,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                 onChange={(e) => setNotes(e.target.value)}
                 className="input-field resize-none text-base"
                 rows={3}
-                placeholder="e.g., Bring tennis rackets, meet at court 3..."
+                placeholder="Additional details or instructions..."
               />
             </div>
 
@@ -237,7 +237,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                 type="submit" 
                 className="btn-primary flex-1 text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"
               >
-                {slot ? "Update" : "Create"} Practice
+                {slot ? "Update" : "Create"} Slot
               </button>
               <button 
                 type="button" 
