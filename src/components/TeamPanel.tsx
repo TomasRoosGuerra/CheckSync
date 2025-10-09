@@ -146,20 +146,25 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col animate-in slide-in-from-bottom duration-300">
         {/* Header */}
         <div className="border-b border-gray-200 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Team & Workspaces</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                {currentWorkspace?.name} · {currentWorkspaceUsers.length} members
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl">👥</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Team & Workspaces</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {currentWorkspace?.name} · {currentWorkspaceUsers.length} members
+                </p>
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100"
+              className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-all"
             >
               <svg className="w-6 h-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                 <path d="M6 18L18 6M6 6l12 12"></path>
@@ -228,7 +233,17 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
           {/* Members Tab */}
           {activeTab === "members" && (
             <div className="space-y-3">
-              {currentWorkspaceUsers.map((member) => {
+              {currentWorkspaceUsers.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">👥</div>
+                  <p className="text-gray-500 font-medium mb-2">No team members yet</p>
+                  <p className="text-sm text-gray-400">
+                    {isOwner ? "Use the 'Add Member' tab to invite your team" : "Contact the workspace owner"}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {currentWorkspaceUsers.map((member) => {
                 const memberData = currentMembers.find((m) => m.userId === member.id);
                 const isCurrentUser = member.id === user?.id;
                 
@@ -279,6 +294,8 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                   </div>
                 );
               })}
+                </>
+              )}
             </div>
           )}
 
@@ -403,31 +420,55 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
             <div className="space-y-3">
               {workspaces.map((workspace) => {
                 const isCurrent = workspace.id === currentWorkspace?.id;
+                const members = workspaceMembers.filter(m => m.workspaceId === workspace.id);
+                
                 return (
                   <button
                     key={workspace.id}
                     onClick={() => {
-                      setCurrentWorkspace(workspace);
-                      localStorage.setItem("lastWorkspaceId", workspace.id);
-                      window.location.reload();
+                      if (!isCurrent) {
+                        setCurrentWorkspace(workspace);
+                        localStorage.setItem("lastWorkspaceId", workspace.id);
+                        window.location.reload();
+                      }
                     }}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                    disabled={isCurrent}
+                    className={`w-full text-left p-5 rounded-xl border-2 transition-all ${
                       isCurrent
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
+                        ? "border-primary bg-primary/5 cursor-default"
+                        : "border-gray-200 hover:border-primary/50 hover:bg-gray-50 hover:shadow-md"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                          {workspace.name}
-                          {workspace.ownerId === user?.id && <span>👑</span>}
-                          {isCurrent && <span className="text-sm text-primary">(Current)</span>}
-                        </h4>
-                        {workspace.description && (
-                          <p className="text-sm text-gray-600 mt-1">{workspace.description}</p>
-                        )}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold">
+                            {workspace.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                            {workspace.name}
+                            {workspace.ownerId === user?.id && <span className="text-sm">👑</span>}
+                          </h4>
+                          {workspace.isPublic && (
+                            <span className="text-xs text-green-600">🌐 Public</span>
+                          )}
+                        </div>
                       </div>
+                      {isCurrent && (
+                        <span className="bg-primary text-white text-xs font-medium px-3 py-1 rounded-full">
+                          Current
+                        </span>
+                      )}
+                    </div>
+                    {workspace.description && (
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{workspace.description}</p>
+                    )}
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>👥 {members.length} members</span>
+                      <span>·</span>
+                      <span className="capitalize">{getUserWorkspaceRole(user?.id || "", workspace.id, workspaceMembers)}</span>
                     </div>
                   </button>
                 );

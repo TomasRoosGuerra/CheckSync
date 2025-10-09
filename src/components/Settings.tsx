@@ -4,6 +4,7 @@ import { auth } from "../firebase";
 import { useStore } from "../store";
 import UserConnections from "./UserConnections";
 import UserManagement from "./UserManagement";
+import WorkspaceSettings from "./WorkspaceSettings";
 
 interface SettingsProps {
   onClose: () => void;
@@ -15,6 +16,7 @@ export default function Settings({ onClose }: SettingsProps) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [showConnections, setShowConnections] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -63,7 +65,9 @@ export default function Settings({ onClose }: SettingsProps) {
 
             {/* Your Role (Read-Only) */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Your Role</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Your Role
+              </h3>
               <div className="card bg-gradient-to-r from-gray-50 to-white">
                 <div className="flex items-center gap-3">
                   <div className="text-3xl">
@@ -77,17 +81,20 @@ export default function Settings({ onClose }: SettingsProps) {
                       {user?.role}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {user?.role === "participant" && "Check in to assigned slots"}
-                      {user?.role === "verifier" && "Verify attendance + check in"}
-                      {user?.role === "manager" && "Create slots, verify, check in"}
+                      {user?.role === "participant" &&
+                        "Check in to assigned slots"}
+                      {user?.role === "verifier" &&
+                        "Verify attendance + check in"}
+                      {user?.role === "manager" &&
+                        "Create slots, verify, check in"}
                       {user?.role === "admin" && "Full system access"}
                     </div>
                   </div>
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                {user?.role === "admin" 
-                  ? "You can manage other users' roles below" 
+                {user?.role === "admin"
+                  ? "You can manage other users' roles below"
                   : "Contact an administrator to change your role"}
               </p>
             </div>
@@ -101,7 +108,8 @@ export default function Settings({ onClose }: SettingsProps) {
                 </h3>
                 <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl p-4 border-2 border-primary/30">
                   <div className="text-sm text-gray-600 mb-2">
-                    Manage team members via the <strong>👥 Team</strong> button in the header
+                    Manage team members via the <strong>👥 Team</strong> button
+                    in the header
                   </div>
                 </div>
               </div>
@@ -206,10 +214,13 @@ export default function Settings({ onClose }: SettingsProps) {
       {showConnections && (
         <UserConnections onClose={() => setShowConnections(false)} />
       )}
-      
+
       {/* User Management Modal (Admin Only) */}
       {showUserManagement && (
         <UserManagement onClose={() => setShowUserManagement(false)} />
+      )}
+      {showWorkspaceSettings && (
+        <WorkspaceSettings onClose={() => setShowWorkspaceSettings(false)} />
       )}
     </div>
   );
