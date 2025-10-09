@@ -8,10 +8,9 @@ import {
 import {
   addWorkspaceMember,
   updateMemberRole,
-  createWorkspace,
 } from "../services/workspaceService";
 import { useStore } from "../store";
-import type { JoinRequest, UserRole, Workspace } from "../types";
+import type { JoinRequest, UserRole } from "../types";
 import { getUserWorkspaceRole, isWorkspaceOwner } from "../utils/permissions";
 
 interface TeamPanelProps {
@@ -28,7 +27,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
     workspaces,
   } = useStore();
   const [activeTab, setActiveTab] = useState<
-    "members" | "add" | "requests" | "workspaces" | "create"
+    "members" | "add" | "requests"
   >("members");
   const [searchEmail, setSearchEmail] = useState("");
   const [searchResult, setSearchResult] = useState<any>(null);
@@ -36,11 +35,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
   const [processing, setProcessing] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
   const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
-  
-  // Create workspace state
-  const [newWorkspaceName, setNewWorkspaceName] = useState("");
-  const [newWorkspaceDesc, setNewWorkspaceDesc] = useState("");
-  const [newWorkspacePublic, setNewWorkspacePublic] = useState(false);
   const [memberSearch, setMemberSearch] = useState("");
 
   // Get current workspace data
@@ -178,46 +172,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
     }
   };
 
-  const handleCreateWorkspace = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !newWorkspaceName.trim()) return;
-
-    setProcessing(true);
-    try {
-      const workspaceId = await createWorkspace(
-        user.id,
-        newWorkspaceName.trim(),
-        newWorkspaceDesc.trim() || undefined,
-        newWorkspacePublic
-      );
-
-      const newWorkspace: Workspace = {
-        id: workspaceId,
-        name: newWorkspaceName.trim(),
-        description: newWorkspaceDesc.trim() || undefined,
-        ownerId: user.id,
-        isPublic: newWorkspacePublic,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-
-      alert(`✅ Workspace "${newWorkspace.name}" created!`);
-      setNewWorkspaceName("");
-      setNewWorkspaceDesc("");
-      setNewWorkspacePublic(false);
-      
-      // Switch to new workspace
-      setCurrentWorkspace(newWorkspace);
-      localStorage.setItem("lastWorkspaceId", newWorkspace.id);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error creating workspace:", error);
-      alert("Failed to create workspace. Please try again.");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col animate-in slide-in-from-bottom duration-300">
@@ -228,15 +182,14 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-xl">👥</span>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Team & Workspaces
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  {currentWorkspace?.name} · {currentWorkspaceUsers.length}{" "}
-                  members
-                </p>
-              </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Team Members
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                {currentWorkspace?.name} · {currentWorkspaceUsers.length} members
+              </p>
+            </div>
             </div>
             <button
               onClick={onClose}
@@ -257,7 +210,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setActiveTab("members")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
@@ -297,26 +250,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                 )}
               </>
             )}
-            <button
-              onClick={() => setActiveTab("workspaces")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                activeTab === "workspaces"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              🏢 Workspaces ({workspaces.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("create")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                activeTab === "create"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              ➕ New Workspace
-            </button>
           </div>
         </div>
 
@@ -378,28 +311,28 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                     return (
                       <div
                         key={member.id}
-                        className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                        className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-lg border-2 transition-all ${
                           isCurrentUser
                             ? "border-primary/50 bg-primary/5"
                             : "border-gray-200 hover:border-primary/30"
                         }`}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           {member.photoURL ? (
                             <img
                               src={member.photoURL}
                               alt={member.name}
-                              className="w-12 h-12 rounded-full"
+                              className="w-12 h-12 rounded-full flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-lg">
                                 {member.name.charAt(0).toUpperCase()}
                               </span>
                             </div>
                           )}
-                          <div>
-                            <h4 className="font-semibold text-gray-900">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-semibold text-gray-900 truncate">
                               {member.name}
                               {isCurrentUser && (
                                 <span className="text-sm font-normal text-primary ml-2">
@@ -410,34 +343,36 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                                 <span className="text-base ml-2">👑</span>
                               )}
                             </h4>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 truncate">
                               {member.email}
                             </p>
                           </div>
                         </div>
 
-                        {isOwner && !isCurrentUser ? (
-                          <select
-                            value={memberData?.role || "participant"}
-                            onChange={(e) =>
-                              handleRoleChange(
-                                member.id,
-                                e.target.value as UserRole
-                              )
-                            }
-                            disabled={updating === member.id}
-                            className="input-field py-2 px-3 text-sm"
-                          >
-                            <option value="participant">👤 Participant</option>
-                            <option value="verifier">🔒 Verifier</option>
-                            <option value="manager">📊 Manager</option>
-                            <option value="admin">👑 Admin</option>
-                          </select>
-                        ) : (
-                          <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm capitalize">
-                            {memberData?.role || userRole}
-                          </span>
-                        )}
+                        <div className="w-full sm:w-auto flex-shrink-0">
+                          {isOwner && !isCurrentUser ? (
+                            <select
+                              value={memberData?.role || "participant"}
+                              onChange={(e) =>
+                                handleRoleChange(
+                                  member.id,
+                                  e.target.value as UserRole
+                                )
+                              }
+                              disabled={updating === member.id}
+                              className="input-field py-2 px-3 text-sm w-full sm:w-auto"
+                            >
+                              <option value="participant">👤 Participant</option>
+                              <option value="verifier">🔒 Verifier</option>
+                              <option value="manager">📊 Manager</option>
+                              <option value="admin">👑 Admin</option>
+                            </select>
+                          ) : (
+                            <span className="block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm capitalize text-center">
+                              {memberData?.role || userRole}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -593,149 +528,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
             </div>
           )}
 
-          {/* Workspaces Tab */}
-          {activeTab === "workspaces" && (
-            <div className="space-y-3">
-              {workspaces.map((workspace) => {
-                const isCurrent = workspace.id === currentWorkspace?.id;
-                const members = workspaceMembers.filter(
-                  (m) => m.workspaceId === workspace.id
-                );
-
-                return (
-                  <button
-                    key={workspace.id}
-                    onClick={() => {
-                      if (!isCurrent) {
-                        setCurrentWorkspace(workspace);
-                        localStorage.setItem("lastWorkspaceId", workspace.id);
-                        window.location.reload();
-                      }
-                    }}
-                    disabled={isCurrent}
-                    className={`w-full text-left p-5 rounded-xl border-2 transition-all ${
-                      isCurrent
-                        ? "border-primary bg-primary/5 cursor-default"
-                        : "border-gray-200 hover:border-primary/50 hover:bg-gray-50 hover:shadow-md"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold">
-                            {workspace.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-gray-900 flex items-center gap-2">
-                            {workspace.name}
-                            {workspace.ownerId === user?.id && (
-                              <span className="text-sm">👑</span>
-                            )}
-                          </h4>
-                          {workspace.isPublic && (
-                            <span className="text-xs text-green-600">
-                              🌐 Public
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {isCurrent && (
-                        <span className="bg-primary text-white text-xs font-medium px-3 py-1 rounded-full">
-                          Current
-                        </span>
-                      )}
-                    </div>
-                    {workspace.description && (
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {workspace.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span>👥 {members.length} members</span>
-                      <span>·</span>
-                      <span className="capitalize">
-                        {getUserWorkspaceRole(
-                          user?.id || "",
-                          workspace.id,
-                          workspaceMembers
-                        )}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Create Workspace Tab */}
-          {activeTab === "create" && (
-            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl p-6 border-2 border-primary/20">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Create New Workspace</h3>
-              
-              <form onSubmit={handleCreateWorkspace} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Workspace Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={newWorkspaceName}
-                    onChange={(e) => setNewWorkspaceName(e.target.value)}
-                    className="input-field"
-                    placeholder="e.g., Tennis Club, Gym Team, Consulting Group"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    value={newWorkspaceDesc}
-                    onChange={(e) => setNewWorkspaceDesc(e.target.value)}
-                    className="input-field resize-none"
-                    rows={3}
-                    placeholder="Describe your workspace..."
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-3 p-4 rounded-lg border-2 border-gray-200 hover:border-primary/50 cursor-pointer transition-all">
-                    <input
-                      type="checkbox"
-                      checked={newWorkspacePublic}
-                      onChange={(e) => setNewWorkspacePublic(e.target.checked)}
-                      className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">
-                        🌐 Public Workspace
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        Anyone can discover and request to join
-                      </div>
-                    </div>
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={processing}
-                  className="btn-primary w-full py-3"
-                >
-                  {processing ? "Creating..." : "✨ Create Workspace"}
-                </button>
-              </form>
-
-              <div className="mt-4 bg-blue-50 rounded-lg p-4">
-                <p className="text-sm text-blue-900">
-                  <strong>💡 Tip:</strong> You'll become the owner and admin of this new workspace automatically!
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
