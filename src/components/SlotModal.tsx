@@ -36,8 +36,11 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
     }
   }, [slot]);
 
+  const [saving, setSaving] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
 
     try {
       if (slot) {
@@ -51,7 +54,6 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           verifierId,
           notes,
         });
-        // Real-time listener will update local state automatically
       } else {
         // Create new slot in Firestore
         const newSlot: Omit<TimeSlot, "id"> = {
@@ -68,12 +70,14 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           updatedAt: Date.now(),
         };
         await createTimeSlot(newSlot);
-        // Real-time listener will automatically add it to local state
       }
+      
+      // Close modal immediately after save
       onClose();
     } catch (error) {
       console.error("Error saving time slot:", error);
       alert("Failed to save time slot. Please try again.");
+      setSaving(false);
     }
   };
 
@@ -235,14 +239,16 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
             <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
               <button 
                 type="submit" 
-                className="btn-primary flex-1 text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"
+                disabled={saving}
+                className="btn-primary flex-1 text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg"
               >
-                {slot ? "Update" : "Create"} Slot
+                {saving ? "Saving..." : slot ? "✓ Update Slot" : "✓ Create Slot"}
               </button>
               <button 
                 type="button" 
                 onClick={onClose} 
-                className="btn-secondary text-base py-3 sm:py-2 px-6 sm:px-4 touch-manipulation min-h-[48px] sm:min-h-auto"
+                disabled={saving}
+                className="btn-secondary text-base py-3 sm:py-2 px-6 sm:px-4 touch-manipulation min-h-[48px] sm:min-h-auto disabled:opacity-50"
               >
                 Cancel
               </button>

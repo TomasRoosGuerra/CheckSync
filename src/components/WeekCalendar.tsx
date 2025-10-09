@@ -92,7 +92,12 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
               {/* Day Header */}
               <button
                 onClick={() => onDayClick(day)}
-                className="p-4 sm:p-3 text-center hover:bg-gray-50/50 rounded-t-xl transition-colors active:bg-gray-100 touch-manipulation"
+                className={`
+                  p-4 sm:p-3 text-center rounded-t-xl transition-all touch-manipulation
+                  ${daySlots.length === 0 
+                    ? 'hover:bg-primary/5 active:bg-primary/10 border-b border-dashed border-primary/30' 
+                    : 'hover:bg-gray-50/50 active:bg-gray-100'}
+                `}
               >
                 <div className="text-xs font-medium text-gray-600 mb-1">
                   {getDayName(day, false)}
@@ -159,8 +164,11 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                   </button>
                 )}
                 {daySlots.length === 0 && (
-                  <div className="text-center text-gray-400 text-xs py-6 sm:py-4">
-                    —
+                  <div className="text-center text-gray-400 py-4 sm:py-3">
+                    <div className="text-2xl sm:text-xl mb-1 opacity-40">➕</div>
+                    <div className="text-[10px] sm:text-[9px] font-medium opacity-60">
+                      Tap to add
+                    </div>
                   </div>
                 )}
               </div>
@@ -174,9 +182,23 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
         ← Swipe to see all days →
       </div>
 
-      {/* Legend */}
+      {/* Add Time Slot CTA */}
       <div className="mt-6 pt-4 border-t border-gray-200">
-        <div className="flex flex-wrap gap-4 justify-center text-sm">
+        <div className="text-center mb-4">
+          <button
+            onClick={() => onDayClick(new Date())}
+            className="btn-primary text-base sm:text-sm py-4 sm:py-3 px-8 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all touch-manipulation inline-flex items-center gap-2"
+          >
+            <span className="text-2xl sm:text-xl">➕</span>
+            <span className="font-semibold">Add Time Slot</span>
+          </button>
+          <p className="text-xs text-gray-500 mt-2">
+            Tap any day above or click here to schedule
+          </p>
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-3 sm:gap-4 justify-center text-xs sm:text-sm pt-3 border-t border-gray-100">
           <div className="flex items-center gap-2">
             <span className="status-dot bg-gray-400" />
             <span className="text-gray-700">Planned</span>
