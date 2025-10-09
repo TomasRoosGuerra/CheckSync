@@ -40,21 +40,21 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (saving) return;
+    
     setSaving(true);
-
-    // Timeout protection
-    const timeout = setTimeout(() => {
-      console.error("⏱️ Save operation timed out after 10 seconds");
-      alert("Save operation timed out. Check your internet connection and Firestore security rules.");
-      setSaving(false);
-    }, 10000);
 
     try {
       console.log("💾 Starting save operation...");
-      
+      console.log("User ID:", user?.id);
+      console.log("Participants:", participantIds);
+      console.log("Verifier:", verifierId);
+
       if (slot) {
-        console.log("Updating existing slot:", slot.id);
-        await updateSlotFirestore(slot.id, {
+        console.log("📝 Updating existing slot:", slot.id);
+        const updatePromise = updateSlotFirestore(slot.id, {
           title,
           date: customDate,
           startTime,
@@ -63,17 +63,19 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           verifierId,
           notes,
         });
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => {
+            console.error("⏱️ Update timed out after 15 seconds");
+            reject(new Error("Operation timed out"));
+          }, 15000)
+        );
+        
+        await Promise.race([updatePromise, timeoutPromise]);
         console.log("✅ Slot updated successfully");
       } else {
-        console.log("Creating new slot with data:", {
-          title,
-          date: customDate,
-          startTime,
-          endTime,
-          participantIds,
-          verifierId,
-        });
-        
+        console.log("➕ Creating new slot...");
+
         const newSlot: Omit<TimeSlot, "id"> = {
           title,
           date: customDate,
@@ -87,28 +89,37 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
+
+        console.log("Slot data to save:", newSlot);
         
-        const slotId = await createTimeSlot(newSlot);
-        console.log("✅ Slot created successfully with ID:", slotId);
+        const createPromise = createTimeSlot(newSlot);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => {
+            console.error("⏱️ Create timed out after 15 seconds");
+            reject(new Error("Operation timed out"));
+          }, 15000)
+        );
+        
+        await Promise.race([createPromise, timeoutPromise]);
+        console.log("✅ Slot created successfully");
       }
-      
-      clearTimeout(timeout);
+
       console.log("🚪 Closing modal...");
+      setSaving(false);
       onClose();
+      console.log("✅ Modal closed");
+      
     } catch (error: any) {
-      clearTimeout(timeout);
       console.error("❌ Error saving time slot:", error);
-      console.error("Error details:", error.message, error.code);
-      
-      // More helpful error messages
-      if (error.code === 'permission-denied') {
-        alert("Permission denied. Please check Firestore security rules.");
-      } else if (error.message?.includes('offline')) {
-        alert("You appear to be offline. Check your internet connection.");
+
+      if (error.message === "Operation timed out") {
+        alert("Save timed out. The slot may have been created. Check your internet and refresh the page.");
+      } else if (error.code === "permission-denied") {
+        alert("Permission denied. Check Firestore security rules in Firebase Console.");
       } else {
-        alert(`Failed to save: ${error.message || 'Unknown error'}`);
+        alert(`Failed to save: ${error.message || "Unknown error"}`);
       }
-      
+
       setSaving(false);
     }
   };
