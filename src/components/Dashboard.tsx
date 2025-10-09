@@ -38,11 +38,11 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm sm:text-lg">
-                  ✓
-                </span>
-              </div>
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                      </div>
               <button
                 onClick={() => setShowWorkspaceSwitcher(true)}
                 className="text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"

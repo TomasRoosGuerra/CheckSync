@@ -23,12 +23,10 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
     users,
     currentWorkspace,
     workspaceMembers,
-    setCurrentWorkspace,
-    workspaces,
   } = useStore();
-  const [activeTab, setActiveTab] = useState<
-    "members" | "add" | "requests"
-  >("members");
+  const [activeTab, setActiveTab] = useState<"members" | "add" | "requests">(
+    "members"
+  );
   const [searchEmail, setSearchEmail] = useState("");
   const [searchResult, setSearchResult] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>("participant");
@@ -179,17 +177,20 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
         <div className="border-b border-gray-200 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">👥</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
               </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Team Members
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                {currentWorkspace?.name} · {currentWorkspaceUsers.length} members
-              </p>
-            </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Team Members
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {currentWorkspace?.name} · {currentWorkspaceUsers.length}{" "}
+                  members
+                </p>
+              </div>
             </div>
             <button
               onClick={onClose}
@@ -297,85 +298,92 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               ) : (
                 <>
                   {currentWorkspaceUsers
-                    .filter((m) => 
-                      !memberSearch ||
-                      m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
-                      m.email.toLowerCase().includes(memberSearch.toLowerCase())
+                    .filter(
+                      (m) =>
+                        !memberSearch ||
+                        m.name
+                          .toLowerCase()
+                          .includes(memberSearch.toLowerCase()) ||
+                        m.email
+                          .toLowerCase()
+                          .includes(memberSearch.toLowerCase())
                     )
                     .map((member) => {
-                    const memberData = currentMembers.find(
-                      (m) => m.userId === member.id
-                    );
-                    const isCurrentUser = member.id === user?.id;
+                      const memberData = currentMembers.find(
+                        (m) => m.userId === member.id
+                      );
+                      const isCurrentUser = member.id === user?.id;
 
-                    return (
-                      <div
-                        key={member.id}
-                        className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-lg border-2 transition-all ${
-                          isCurrentUser
-                            ? "border-primary/50 bg-primary/5"
-                            : "border-gray-200 hover:border-primary/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          {member.photoURL ? (
-                            <img
-                              src={member.photoURL}
-                              alt={member.name}
-                              className="w-12 h-12 rounded-full flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-lg">
-                                {member.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <h4 className="font-semibold text-gray-900 truncate">
-                              {member.name}
-                              {isCurrentUser && (
-                                <span className="text-sm font-normal text-primary ml-2">
-                                  (You)
+                      return (
+                        <div
+                          key={member.id}
+                          className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-lg border-2 transition-all ${
+                            isCurrentUser
+                              ? "border-primary/50 bg-primary/5"
+                              : "border-gray-200 hover:border-primary/30"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            {member.photoURL ? (
+                              <img
+                                src={member.photoURL}
+                                alt={member.name}
+                                className="w-12 h-12 rounded-full flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0">
+                                <span className="text-white font-bold text-lg">
+                                  {member.name.charAt(0).toUpperCase()}
                                 </span>
-                              )}
-                              {currentWorkspace?.ownerId === member.id && (
-                                <span className="text-base ml-2">👑</span>
-                              )}
-                            </h4>
-                            <p className="text-sm text-gray-600 truncate">
-                              {member.email}
-                            </p>
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-semibold text-gray-900 truncate">
+                                {member.name}
+                                {isCurrentUser && (
+                                  <span className="text-sm font-normal text-primary ml-2">
+                                    (You)
+                                  </span>
+                                )}
+                                {currentWorkspace?.ownerId === member.id && (
+                                  <span className="text-base ml-2">👑</span>
+                                )}
+                              </h4>
+                              <p className="text-sm text-gray-600 truncate">
+                                {member.email}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="w-full sm:w-auto flex-shrink-0">
+                            {isOwner && !isCurrentUser ? (
+                              <select
+                                value={memberData?.role || "participant"}
+                                onChange={(e) =>
+                                  handleRoleChange(
+                                    member.id,
+                                    e.target.value as UserRole
+                                  )
+                                }
+                                disabled={updating === member.id}
+                                className="input-field py-2 px-3 text-sm w-full sm:w-auto"
+                              >
+                                <option value="participant">
+                                  👤 Participant
+                                </option>
+                                <option value="verifier">🔒 Verifier</option>
+                                <option value="manager">📊 Manager</option>
+                                <option value="admin">👑 Admin</option>
+                              </select>
+                            ) : (
+                              <span className="block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm capitalize text-center">
+                                {memberData?.role || userRole}
+                              </span>
+                            )}
                           </div>
                         </div>
-
-                        <div className="w-full sm:w-auto flex-shrink-0">
-                          {isOwner && !isCurrentUser ? (
-                            <select
-                              value={memberData?.role || "participant"}
-                              onChange={(e) =>
-                                handleRoleChange(
-                                  member.id,
-                                  e.target.value as UserRole
-                                )
-                              }
-                              disabled={updating === member.id}
-                              className="input-field py-2 px-3 text-sm w-full sm:w-auto"
-                            >
-                              <option value="participant">👤 Participant</option>
-                              <option value="verifier">🔒 Verifier</option>
-                              <option value="manager">📊 Manager</option>
-                              <option value="admin">👑 Admin</option>
-                            </select>
-                          ) : (
-                            <span className="block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm capitalize text-center">
-                              {memberData?.role || userRole}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </>
               )}
             </div>
@@ -527,7 +535,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               )}
             </div>
           )}
-
         </div>
       </div>
     </div>
