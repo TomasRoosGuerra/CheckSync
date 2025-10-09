@@ -22,14 +22,16 @@ interface DayViewProps {
 }
 
 export default function DayView({ date, onClose }: DayViewProps) {
-  const { timeSlots, user, users, currentWorkspace, workspaceMembers } = useStore();
+  const { timeSlots, user, users, currentWorkspace, workspaceMembers } =
+    useStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
-  
+
   // Get user's role in current workspace
-  const userRole = user && currentWorkspace 
-    ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
-    : "participant";
+  const userRole =
+    user && currentWorkspace
+      ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
+      : "participant";
 
   const daySlots = timeSlots
     .filter((slot) => isSameDayAs(date, slot.date))

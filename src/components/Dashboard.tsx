@@ -4,22 +4,28 @@ import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
+import FriendsBrowser from "./FriendsBrowser";
 import Settings from "./Settings";
 import WeekCalendar from "./WeekCalendar";
+import WorkspaceBrowser from "./WorkspaceBrowser";
 
 type ViewMode = "week" | "agenda";
 
 export default function Dashboard() {
-  const { user, currentWorkspace, workspaceMembers } = useStore();
+  const { user, currentWorkspace, workspaceMembers, setCurrentWorkspace } =
+    useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showWorkspaceBrowser, setShowWorkspaceBrowser] = useState(false);
+  const [showFriendsBrowser, setShowFriendsBrowser] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("week");
 
   // Get user's role in current workspace
-  const userRole = user && currentWorkspace 
-    ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
-    : "participant";
+  const userRole =
+    user && currentWorkspace
+      ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
+      : "participant";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -33,17 +39,41 @@ export default function Dashboard() {
                   ✓
                 </span>
               </div>
-              <div>
-                <h1 className="text-base sm:text-xl font-bold text-gray-900">
+              <button
+                onClick={() => setShowWorkspaceBrowser(true)}
+                className="text-left hover:opacity-80 transition-opacity"
+              >
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 flex items-center gap-2">
                   {currentWorkspace?.name || "CheckSync"}
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d="M19 9l-7 7-7-7"></path>
+                  </svg>
                 </h1>
                 <p className="text-xs text-gray-600">
                   {user?.name} · <span className="capitalize">{userRole}</span>
                 </p>
-              </div>
+              </button>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
+              {/* Friends/Team Button */}
+              <button
+                onClick={() => setShowFriendsBrowser(true)}
+                className="btn-secondary py-2 px-2 sm:px-3 text-xs sm:text-sm touch-manipulation"
+                title="Team Members"
+              >
+                <span className="hidden sm:inline">👥 Team</span>
+                <span className="sm:hidden">👥</span>
+              </button>
+
               {/* View Toggle - Mobile */}
               <button
                 onClick={() =>
@@ -133,6 +163,18 @@ export default function Dashboard() {
       )}
       {showExport && <Export onClose={() => setShowExport(false)} />}
       {showSettings && <Settings onClose={() => setShowSettings(false)} />}
+      {showWorkspaceBrowser && (
+        <WorkspaceBrowser
+          onClose={() => setShowWorkspaceBrowser(false)}
+          onSelectWorkspace={(workspace) => {
+            setCurrentWorkspace(workspace);
+            localStorage.setItem("lastWorkspaceId", workspace.id);
+          }}
+        />
+      )}
+      {showFriendsBrowser && (
+        <FriendsBrowser onClose={() => setShowFriendsBrowser(false)} />
+      )}
     </div>
   );
 }

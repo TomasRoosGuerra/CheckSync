@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
-import { useStore } from "../store";
-import { 
-  createWorkspace, 
+import { useEffect, useState } from "react";
+import {
+  createWorkspace,
   getUserWorkspaces,
 } from "../services/workspaceService";
+import { useStore } from "../store";
 import type { Workspace } from "../types";
 
 interface WorkspaceSelectorProps {
   onWorkspaceSelected: () => void;
 }
 
-export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSelectorProps) {
+export default function WorkspaceSelector({
+  onWorkspaceSelected,
+}: WorkspaceSelectorProps) {
   const { user, setCurrentWorkspace, workspaces, setWorkspaces } = useStore();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -26,12 +28,12 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
 
   const loadWorkspaces = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
       const userWorkspaces = await getUserWorkspaces(user.id);
       setWorkspaces(userWorkspaces);
-      
+
       // Auto-select if only one workspace
       if (userWorkspaces.length === 1) {
         handleSelectWorkspace(userWorkspaces[0]);
@@ -54,7 +56,7 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
         newWorkspaceName.trim(),
         newWorkspaceDesc.trim() || undefined
       );
-      
+
       const newWorkspace: Workspace = {
         id: workspaceId,
         name: newWorkspaceName.trim(),
@@ -63,12 +65,12 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
-      
+
       setWorkspaces([...workspaces, newWorkspace]);
       setNewWorkspaceName("");
       setNewWorkspaceDesc("");
       setShowCreate(false);
-      
+
       // Auto-select new workspace
       handleSelectWorkspace(newWorkspace);
     } catch (error) {
@@ -92,7 +94,9 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl">✓</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Select Workspace</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Select Workspace
+          </h1>
           <p className="text-sm text-gray-600">
             Choose a team or create a new one
           </p>
@@ -112,7 +116,9 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
                     className="w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:border-primary hover:bg-primary/5 transition-all"
                   >
                     <div className="font-semibold text-gray-900 flex items-center gap-2">
-                      {workspace.ownerId === user?.id && <span className="text-sm">👑</span>}
+                      {workspace.ownerId === user?.id && (
+                        <span className="text-sm">👑</span>
+                      )}
                       {workspace.name}
                     </div>
                     {workspace.description && (
@@ -121,7 +127,9 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
                       </div>
                     )}
                     {workspace.ownerId === user?.id && (
-                      <div className="text-xs text-primary mt-1">You're the admin</div>
+                      <div className="text-xs text-primary mt-1">
+                        You're the admin
+                      </div>
                     )}
                   </button>
                 ))}
@@ -215,7 +223,9 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
                     type="button"
                     onClick={() => {
                       if (joinCode.trim()) {
-                        alert("Join workspace feature coming soon! Ask your admin to invite you via email.");
+                        alert(
+                          "Join workspace feature coming soon! Ask your admin to invite you via email."
+                        );
                       }
                     }}
                     className="btn-primary flex-1"
@@ -247,4 +257,3 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
     </div>
   );
 }
-

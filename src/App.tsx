@@ -9,16 +9,14 @@ import {
   getUserProfile,
   subscribeToWorkspaceTimeSlots,
 } from "./services/firestoreService";
-import {
-  subscribeToWorkspaceMembers,
-} from "./services/workspaceService";
+import { subscribeToWorkspaceMembers } from "./services/workspaceService";
 import { useStore } from "./store";
 import type { User } from "./types";
 
 function App() {
-  const { 
-    user, 
-    setUser, 
+  const {
+    user,
+    setUser,
     currentWorkspace,
     setTimeSlots,
     setWorkspaceMembers,
@@ -83,7 +81,7 @@ function App() {
       async (members) => {
         console.log("👥 Workspace members updated:", members.length);
         setWorkspaceMembers(members);
-        
+
         // Load user profiles for all members
         const memberProfiles = await Promise.all(
           members.map(async (member) => {
@@ -91,8 +89,10 @@ function App() {
             return profile;
           })
         );
-        
-        const validProfiles = memberProfiles.filter((p): p is User => p !== null);
+
+        const validProfiles = memberProfiles.filter(
+          (p): p is User => p !== null
+        );
         setUsers(validProfiles);
       }
     );
@@ -118,7 +118,8 @@ function App() {
   }
 
   if (!user) return <Login />;
-  if (!currentWorkspace) return <WorkspaceSelector onWorkspaceSelected={() => {}} />;
+  if (!currentWorkspace)
+    return <WorkspaceSelector onWorkspaceSelected={() => {}} />;
   return <Dashboard />;
 }
 
