@@ -52,8 +52,8 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
           >
             ←
           </button>
-          <button 
-            onClick={handleToday} 
+          <button
+            onClick={handleToday}
             className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm"
           >
             Today
@@ -68,11 +68,13 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
       </div>
 
       {/* Mobile: Horizontal Scroll | Desktop: Grid */}
-      <div className="sm:grid sm:grid-cols-7 sm:gap-2 md:gap-3 
+      <div
+        className="sm:grid sm:grid-cols-7 sm:gap-2 md:gap-3 
                       overflow-x-auto sm:overflow-x-visible 
                       flex sm:block gap-3 sm:gap-0 
                       pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0
-                      snap-x snap-mandatory sm:snap-none">
+                      snap-x snap-mandatory sm:snap-none"
+      >
         {weekDays.map((day) => {
           const daySlots = getDaySlots(day);
           const isToday = isSameDayAs(day, new Date());
@@ -86,7 +88,11 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                 rounded-xl border-2 transition-all 
                 min-h-[240px] sm:min-h-[180px] md:min-h-[200px] 
                 flex flex-col
-                ${isToday ? "border-primary bg-primary/5 shadow-lg sm:shadow-none" : "border-gray-200"}
+                ${
+                  isToday
+                    ? "border-primary bg-primary/5 shadow-lg sm:shadow-none"
+                    : "border-gray-200"
+                }
               `}
             >
               {/* Day Header */}
@@ -94,9 +100,11 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                 onClick={() => onDayClick(day)}
                 className={`
                   p-4 sm:p-3 text-center rounded-t-xl transition-all touch-manipulation
-                  ${daySlots.length === 0 
-                    ? 'hover:bg-primary/5 active:bg-primary/10 border-b border-dashed border-primary/30' 
-                    : 'hover:bg-gray-50/50 active:bg-gray-100'}
+                  ${
+                    daySlots.length === 0
+                      ? "hover:bg-primary/5 active:bg-primary/10 border-b border-dashed border-primary/30"
+                      : "hover:bg-gray-50/50 active:bg-gray-100"
+                  }
                 `}
               >
                 <div className="text-xs font-medium text-gray-600 mb-1">
@@ -149,7 +157,9 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                     `}
                     title={slot.title}
                   >
-                    <div className="font-bold text-sm sm:text-xs mb-0.5">{slot.startTime}</div>
+                    <div className="font-bold text-sm sm:text-xs mb-0.5">
+                      {slot.startTime}
+                    </div>
                     <div className="truncate text-xs sm:text-[10px] opacity-90">
                       {slot.title}
                     </div>
@@ -165,7 +175,9 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                 )}
                 {daySlots.length === 0 && (
                   <div className="text-center text-gray-400 py-4 sm:py-3">
-                    <div className="text-2xl sm:text-xl mb-1 opacity-40">➕</div>
+                    <div className="text-2xl sm:text-xl mb-1 opacity-40">
+                      ➕
+                    </div>
                     <div className="text-[10px] sm:text-[9px] font-medium opacity-60">
                       Tap to add
                     </div>
@@ -176,7 +188,7 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
           );
         })}
       </div>
-      
+
       {/* Mobile Swipe Indicator */}
       <div className="sm:hidden text-center mt-3 text-xs text-gray-400">
         ← Swipe to see all days →

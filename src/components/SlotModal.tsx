@@ -42,9 +42,18 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
     e.preventDefault();
     setSaving(true);
 
+    // Timeout protection
+    const timeout = setTimeout(() => {
+      console.error("⏱️ Save operation timed out after 10 seconds");
+      alert("Save operation timed out. Check your internet connection and Firestore security rules.");
+      setSaving(false);
+    }, 10000);
+
     try {
+      console.log("💾 Starting save operation...");
+      
       if (slot) {
-        // Update existing slot in Firestore
+        console.log("Updating existing slot:", slot.id);
         await updateSlotFirestore(slot.id, {
           title,
           date: customDate,
@@ -54,8 +63,17 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           verifierId,
           notes,
         });
+        console.log("✅ Slot updated successfully");
       } else {
-        // Create new slot in Firestore
+        console.log("Creating new slot with data:", {
+          title,
+          date: customDate,
+          startTime,
+          endTime,
+          participantIds,
+          verifierId,
+        });
+        
         const newSlot: Omit<TimeSlot, "id"> = {
           title,
           date: customDate,
@@ -69,14 +87,28 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
-        await createTimeSlot(newSlot);
+        
+        const slotId = await createTimeSlot(newSlot);
+        console.log("✅ Slot created successfully with ID:", slotId);
       }
       
-      // Close modal immediately after save
+      clearTimeout(timeout);
+      console.log("🚪 Closing modal...");
       onClose();
-    } catch (error) {
-      console.error("Error saving time slot:", error);
-      alert("Failed to save time slot. Please try again.");
+    } catch (error: any) {
+      clearTimeout(timeout);
+      console.error("❌ Error saving time slot:", error);
+      console.error("Error details:", error.message, error.code);
+      
+      // More helpful error messages
+      if (error.code === 'permission-denied') {
+        alert("Permission denied. Please check Firestore security rules.");
+      } else if (error.message?.includes('offline')) {
+        alert("You appear to be offline. Check your internet connection.");
+      } else {
+        alert(`Failed to save: ${error.message || 'Unknown error'}`);
+      }
+      
       setSaving(false);
     }
   };
@@ -89,9 +121,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
     }
   };
 
-  const [customDate, setCustomDate] = useState(
-    slot?.date || formatDate(date)
-  );
+  const [customDate, setCustomDate] = useState(slot?.date || formatDate(date));
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
@@ -183,8 +213,12 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                       onChange={() => toggleParticipant(u.id)}
                       className="w-5 h-5 sm:w-4 sm:h-4 text-primary rounded focus:ring-primary"
                     />
-                    <span className="flex-1 text-base sm:text-sm">{u.name}</span>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{u.role}</span>
+                    <span className="flex-1 text-base sm:text-sm">
+                      {u.name}
+                    </span>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                      {u.role}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -216,8 +250,8 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                     <strong>No verifiers available.</strong>
                   </p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Go to Settings and change your role to "Verifier" or "Both", or
-                    add connections who can verify.
+                    Go to Settings and change your role to "Verifier" or "Both",
+                    or add connections who can verify.
                   </p>
                 </div>
               )}
@@ -237,16 +271,20 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
             </div>
 
             <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={saving}
                 className="btn-primary flex-1 text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg"
               >
-                {saving ? "Saving..." : slot ? "✓ Update Slot" : "✓ Create Slot"}
+                {saving
+                  ? "Saving..."
+                  : slot
+                  ? "✓ Update Slot"
+                  : "✓ Create Slot"}
               </button>
-              <button 
-                type="button" 
-                onClick={onClose} 
+              <button
+                type="button"
+                onClick={onClose}
                 disabled={saving}
                 className="btn-secondary text-base py-3 sm:py-2 px-6 sm:px-4 touch-manipulation min-h-[48px] sm:min-h-auto disabled:opacity-50"
               >
