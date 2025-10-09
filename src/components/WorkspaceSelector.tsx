@@ -15,8 +15,10 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const [newWorkspaceDesc, setNewWorkspaceDesc] = useState("");
+  const [joinCode, setJoinCode] = useState("");
 
   useEffect(() => {
     loadWorkspaces();
@@ -126,34 +128,51 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
               </div>
             )}
 
-            {/* Create New Workspace */}
-            {!showCreate ? (
-              <button
-                onClick={() => setShowCreate(true)}
-                className="btn-primary w-full"
-              >
-                ➕ Create New Workspace
-              </button>
-            ) : (
+            {/* Create or Join Workspace */}
+            {!showCreate && !showJoin ? (
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowCreate(true)}
+                  className="btn-primary w-full"
+                >
+                  ➕ Create New Workspace
+                </button>
+                <button
+                  onClick={() => setShowJoin(true)}
+                  className="btn-secondary w-full"
+                >
+                  🔗 Join Existing Workspace
+                </button>
+              </div>
+            ) : showCreate ? (
               <form onSubmit={handleCreateWorkspace} className="space-y-3">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Workspace Name *
+                  </label>
                   <input
                     type="text"
                     value={newWorkspaceName}
                     onChange={(e) => setNewWorkspaceName(e.target.value)}
                     className="input-field"
-                    placeholder="Workspace name (e.g., Tennis Club)"
+                    placeholder="e.g., Tennis Club, Gym Team, Consulting Group"
                     required
                     autoFocus
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This will be your team's workspace
+                  </p>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description (Optional)
+                  </label>
                   <textarea
                     value={newWorkspaceDesc}
                     onChange={(e) => setNewWorkspaceDesc(e.target.value)}
                     className="input-field resize-none"
                     rows={2}
-                    placeholder="Description (optional)"
+                    placeholder="e.g., Weekly training sessions for tennis coaches"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -173,11 +192,53 @@ export default function WorkspaceSelector({ onWorkspaceSelected }: WorkspaceSele
                   </button>
                 </div>
               </form>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Workspace ID
+                  </label>
+                  <input
+                    type="text"
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value)}
+                    className="input-field"
+                    placeholder="Enter workspace ID to join"
+                    autoFocus
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Ask your admin for the workspace ID
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (joinCode.trim()) {
+                        alert("Join workspace feature coming soon! Ask your admin to invite you via email.");
+                      }
+                    }}
+                    className="btn-primary flex-1"
+                  >
+                    Join Workspace
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowJoin(false);
+                      setJoinCode("");
+                    }}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             )}
 
-            {workspaces.length === 0 && !showCreate && (
+            {workspaces.length === 0 && !showCreate && !showJoin && (
               <p className="text-xs text-gray-500 text-center mt-4">
-                Create your first workspace to get started
+                Create your first workspace or join an existing one
               </p>
             )}
           </>

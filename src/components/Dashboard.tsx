@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useStore } from "../store";
-import { canExportData } from "../utils/permissions";
+import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
@@ -10,11 +10,16 @@ import WeekCalendar from "./WeekCalendar";
 type ViewMode = "week" | "agenda";
 
 export default function Dashboard() {
-  const { user } = useStore();
+  const { user, currentWorkspace, workspaceMembers } = useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("week");
+
+  // Get user's role in current workspace
+  const userRole = user && currentWorkspace 
+    ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
+    : "participant";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -28,9 +33,14 @@ export default function Dashboard() {
                   ✓
                 </span>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-                CheckSync
-              </h1>
+              <div>
+                <h1 className="text-base sm:text-xl font-bold text-gray-900">
+                  {currentWorkspace?.name || "CheckSync"}
+                </h1>
+                <p className="text-xs text-gray-600">
+                  {user?.name} · <span className="capitalize">{userRole}</span>
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
@@ -47,7 +57,7 @@ export default function Dashboard() {
                 {viewMode === "week" ? "📋" : "📅"}
               </button>
 
-              {canExportData(user) && (
+              {canExportData(user, userRole) && (
                 <button
                   onClick={() => setShowExport(true)}
                   className="btn-secondary flex items-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 text-sm sm:text-base"

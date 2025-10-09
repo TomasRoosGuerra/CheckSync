@@ -12,6 +12,7 @@ import {
   canDeleteSlot,
   canEditSlot,
   canVerify,
+  getUserWorkspaceRole,
 } from "../utils/permissions";
 import SlotModal from "./SlotModal";
 
@@ -21,9 +22,14 @@ interface DayViewProps {
 }
 
 export default function DayView({ date, onClose }: DayViewProps) {
-  const { timeSlots, user, users } = useStore();
+  const { timeSlots, user, users, currentWorkspace, workspaceMembers } = useStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+  
+  // Get user's role in current workspace
+  const userRole = user && currentWorkspace 
+    ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
+    : "participant";
 
   const daySlots = timeSlots
     .filter((slot) => isSameDayAs(date, slot.date))
@@ -66,7 +72,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
   };
 
   const handleConfirm = async (slot: TimeSlot) => {
-    if (!canVerify(user, slot)) {
+    if (!canVerify(user, slot, userRole)) {
       alert("You don't have permission to verify this slot.");
       return;
     }
@@ -312,7 +318,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                     )}
 
                     {/* Edit Button - Mobile Optimized */}
-                    {canEditSlot(user, slot) && (
+                    {canEditSlot(user, slot, userRole) && (
                       <button
                         onClick={() => setEditingSlot(slot)}
                         className="btn-secondary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 touch-manipulation min-h-[44px] sm:min-h-auto"
@@ -322,7 +328,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                     )}
 
                     {/* Delete Button - Mobile Optimized */}
-                    {canDeleteSlot(user, slot) && (
+                    {canDeleteSlot(user, slot, userRole) && (
                       <button
                         onClick={() => handleDelete(slot)}
                         className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
@@ -339,7 +345,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
 
         {/* Footer - Mobile Optimized */}
         <div className="border-t border-gray-200 p-3 sm:p-4 flex gap-2 bg-white sticky bottom-0">
-          {canCreateSlot(user) ? (
+          {canCreateSlot(user, userRole) ? (
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="btn-primary flex-1 text-sm sm:text-base py-3 sm:py-2 touch-manipulation min-h-[48px] sm:min-h-auto"

@@ -199,6 +199,45 @@ export const deleteTimeSlot = async (slotId: string) => {
   }
 };
 
+// Subscribe to all time slots in a workspace
+export const subscribeToWorkspaceTimeSlots = (
+  workspaceId: string,
+  callback: (slots: TimeSlot[]) => void
+) => {
+  console.log("🔔 Subscribing to workspace slots:", workspaceId);
+  
+  const q = query(
+    collection(db, SLOTS_COLLECTION),
+    where("workspaceId", "==", workspaceId)
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      console.log(`📥 Workspace slots received: ${snapshot.size} slots`);
+      
+      const slots: TimeSlot[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        slots.push({
+          id: doc.id,
+          ...data,
+          createdAt: typeof data.createdAt?.toMillis === 'function' ? data.createdAt.toMillis() : data.createdAt || Date.now(),
+          updatedAt: typeof data.updatedAt?.toMillis === 'function' ? data.updatedAt.toMillis() : data.updatedAt || Date.now(),
+          checkedInAt: typeof data.checkedInAt?.toMillis === 'function' ? data.checkedInAt.toMillis() : data.checkedInAt,
+          confirmedAt: typeof data.confirmedAt?.toMillis === 'function' ? data.confirmedAt.toMillis() : data.confirmedAt,
+        } as TimeSlot);
+      });
+      
+      console.log("✅ Workspace slots processed:", slots.length);
+      callback(slots);
+    },
+    (error) => {
+      console.error("❌ Error in workspace subscription:", error);
+    }
+  );
+};
+
 export const subscribeToUserTimeSlots = (
   userId: string,
   callback: (slots: TimeSlot[]) => void
