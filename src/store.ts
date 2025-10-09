@@ -1,26 +1,39 @@
 import { create } from "zustand";
-import type { TimeSlot, User } from "./types";
+import type { TimeSlot, User, UserRole, Workspace, WorkspaceMember } from "./types";
 
 interface AppStore {
   user: User | null;
+  currentWorkspace: Workspace | null;
+  workspaces: Workspace[];
+  workspaceMembers: WorkspaceMember[];
   timeSlots: TimeSlot[];
   users: User[];
   selectedDate: Date;
   setUser: (user: User | null) => void;
+  setCurrentWorkspace: (workspace: Workspace | null) => void;
+  setWorkspaces: (workspaces: Workspace[]) => void;
+  setWorkspaceMembers: (members: WorkspaceMember[]) => void;
   setTimeSlots: (slots: TimeSlot[]) => void;
   addTimeSlot: (slot: TimeSlot) => void;
   updateTimeSlot: (id: string, updates: Partial<TimeSlot>) => void;
   deleteTimeSlot: (id: string) => void;
   setUsers: (users: User[]) => void;
   setSelectedDate: (date: Date) => void;
+  getUserRole: (userId: string) => UserRole;
 }
 
-export const useStore = create<AppStore>((set) => ({
+export const useStore = create<AppStore>((set, get) => ({
   user: null,
+  currentWorkspace: null,
+  workspaces: [],
+  workspaceMembers: [],
   timeSlots: [],
   users: [],
   selectedDate: new Date(),
   setUser: (user) => set({ user }),
+  setCurrentWorkspace: (currentWorkspace) => set({ currentWorkspace }),
+  setWorkspaces: (workspaces) => set({ workspaces }),
+  setWorkspaceMembers: (workspaceMembers) => set({ workspaceMembers }),
   setTimeSlots: (timeSlots) => set({ timeSlots }),
   addTimeSlot: (slot) =>
     set((state) => ({ timeSlots: [...state.timeSlots, slot] })),
@@ -36,4 +49,11 @@ export const useStore = create<AppStore>((set) => ({
     })),
   setUsers: (users) => set({ users }),
   setSelectedDate: (selectedDate) => set({ selectedDate }),
+  getUserRole: (userId: string) => {
+    const state = get();
+    const member = state.workspaceMembers.find(
+      (m) => m.userId === userId && m.workspaceId === state.currentWorkspace?.id
+    );
+    return member?.role || "participant";
+  },
 }));

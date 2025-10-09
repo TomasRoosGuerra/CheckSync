@@ -226,10 +226,10 @@ export const subscribeToUserTimeSlots = (
     q1,
     (snapshot) => {
       console.log(`📥 Participant slots received: ${snapshot.size} slots`);
-      
+
       // Track which docs were in previous snapshot
       const currentIds = new Set<string>();
-      
+
       snapshot.docChanges().forEach((change) => {
         const data = change.doc.data();
         const slotData = {
@@ -254,7 +254,10 @@ export const subscribeToUserTimeSlots = (
         } as TimeSlot;
 
         if (change.type === "added" || change.type === "modified") {
-          console.log(`${change.type === "added" ? "➕" : "📝"} Slot ${change.type}:`, change.doc.id);
+          console.log(
+            `${change.type === "added" ? "➕" : "📝"} Slot ${change.type}:`,
+            change.doc.id
+          );
           slotsMap.set(change.doc.id, slotData);
           currentIds.add(change.doc.id);
         } else if (change.type === "removed") {
@@ -264,7 +267,7 @@ export const subscribeToUserTimeSlots = (
       });
 
       // Also track existing docs to keep them
-      snapshot.docs.forEach(doc => currentIds.add(doc.id));
+      snapshot.docs.forEach((doc) => currentIds.add(doc.id));
 
       console.log(`✅ Participant query: ${slotsMap.size} total slots in map`);
       updateCallback();
@@ -279,7 +282,7 @@ export const subscribeToUserTimeSlots = (
     q2,
     (snapshot) => {
       console.log(`📥 Verifier slots received: ${snapshot.size} slots`);
-      
+
       snapshot.docChanges().forEach((change) => {
         const data = change.doc.data();
         const slotData = {
@@ -304,7 +307,12 @@ export const subscribeToUserTimeSlots = (
         } as TimeSlot;
 
         if (change.type === "added" || change.type === "modified") {
-          console.log(`${change.type === "added" ? "➕" : "📝"} Verifier slot ${change.type}:`, change.doc.id);
+          console.log(
+            `${change.type === "added" ? "➕" : "📝"} Verifier slot ${
+              change.type
+            }:`,
+            change.doc.id
+          );
           slotsMap.set(change.doc.id, slotData);
         } else if (change.type === "removed") {
           console.log("🗑️ Verifier slot removed:", change.doc.id);

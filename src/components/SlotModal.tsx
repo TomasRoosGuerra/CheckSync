@@ -14,7 +14,7 @@ interface SlotModalProps {
 }
 
 export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
-  const { user, users } = useStore();
+  const { user, users, currentWorkspace } = useStore();
 
   const [title, setTitle] = useState(slot?.title || "");
   const [startTime, setStartTime] = useState(slot?.startTime || "09:00");
@@ -78,6 +78,13 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
       } else {
         console.log("➕ Creating new slot(s)...");
 
+        // Ensure workspace exists
+        if (!currentWorkspace) {
+          alert("No workspace selected. Please select or create a workspace first.");
+          setSaving(false);
+          return;
+        }
+
         // Generate recurring group ID if creating multiple slots
         const recurringGroupId =
           recurring && weeksAhead > 1 ? `recurring-${Date.now()}` : undefined;
@@ -86,6 +93,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           TimeSlot,
           "id" | "date" | "createdAt" | "updatedAt"
         > = {
+          workspaceId: currentWorkspace.id,
           title,
           startTime,
           endTime,

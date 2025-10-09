@@ -1,4 +1,4 @@
-import type { TimeSlot, User, UserRole } from "../types";
+import type { TimeSlot, User, UserRole, WorkspaceMember, Workspace } from "../types";
 
 // Role hierarchy and permissions
 
@@ -13,27 +13,63 @@ export const ROLE_DESCRIPTIONS = {
   participant: "Can check in to time slots they're assigned to",
   verifier: "Can verify attendance + check in",
   manager: "Can create/edit slots, verify attendance, and check in",
-  admin: "Full access: manage users, slots, and all verifications",
+  admin: "Workspace owner - Full access to this workspace",
 };
 
-// Permission checks
-export const canCreateSlot = (user: User | null): boolean => {
-  if (!user) return false;
-  return ["manager", "admin"].includes(user.role);
+// Get user's role in current workspace
+export const getUserWorkspaceRole = (
+  userId: string,
+  workspaceId: string | undefined,
+  workspaceMembers: WorkspaceMember[]
+): UserRole => {
+  if (!workspaceId) return "participant";
+  const member = workspaceMembers.find(
+    (m) => m.userId === userId && m.workspaceId === workspaceId
+  );
+  return member?.role || "participant";
 };
 
-export const canEditSlot = (user: User | null, slot: TimeSlot): boolean => {
+// Check if user is workspace owner
+export const isWorkspaceOwner = (
+  user: User | null,
+  workspace: Workspace | null
+): boolean => {
+  if (!user || !workspace) return false;
+  return workspace.ownerId === user.id;
+};
+
+// Permission checks (workspace-aware)
+export const canCreateSlot = (
+  user: User | null,
+  workspaceRole?: UserRole
+): boolean => {
   if (!user) return false;
-  if (user.role === "admin") return true;
-  if (user.role === "manager") return true;
+  const role = workspaceRole || user.role;
+  return ["manager", "admin"].includes(role);
+};
+
+export const canEditSlot = (
+  user: User | null,
+  slot: TimeSlot,
+  workspaceRole?: UserRole
+): boolean => {
+  if (!user) return false;
+  const role = workspaceRole || user.role;
+  if (role === "admin") return true;
+  if (role === "manager") return true;
   // Creators can edit their own slots
   return slot.createdBy === user.id;
 };
 
-export const canDeleteSlot = (user: User | null, slot: TimeSlot): boolean => {
+export const canDeleteSlot = (
+  user: User | null,
+  slot: TimeSlot,
+  workspaceRole?: UserRole
+): boolean => {
   if (!user) return false;
-  if (user.role === "admin") return true;
-  if (user.role === "manager") return true;
+  const role = workspaceRole || user.role;
+  if (role === "admin") return true;
+  if (role === "manager") return true;
   // Only creator can delete (unless admin/manager)
   return slot.createdBy === user.id;
 };
@@ -44,16 +80,25 @@ export const canCheckIn = (user: User | null, slot: TimeSlot): boolean => {
   return slot.participantIds.includes(user.id);
 };
 
-export const canVerify = (user: User | null, slot: TimeSlot): boolean => {
+export const canVerify = (
+  user: User | null,
+  slot: TimeSlot,
+  workspaceRole?: UserRole
+): boolean => {
   if (!user) return false;
-  if (user.role === "admin") return true; // Admins can verify anything
+  const role = workspaceRole || user.role;
+  if (role === "admin") return true; // Workspace admins can verify anything
   // Must be the assigned verifier
   return slot.verifierId === user.id;
 };
 
-export const canManageUsers = (user: User | null): boolean => {
-  if (!user) return false;
-  return user.role === "admin";
+export const canManageUsers = (
+  user: User | null,
+  workspace: Workspace | null
+): boolean => {
+  if (!user || !workspace) return false;
+  // Only workspace owner can manage roles
+  return workspace.ownerId === user.id;
 };
 
 export const canViewSlot = (user: User | null, slot: TimeSlot): boolean => {
@@ -63,10 +108,14 @@ export const canViewSlot = (user: User | null, slot: TimeSlot): boolean => {
   return slot.participantIds.includes(user.id) || slot.verifierId === user.id;
 };
 
-export const canExportData = (user: User | null): boolean => {
+export const canExportData = (
+  user: User | null,
+  workspaceRole?: UserRole
+): boolean => {
   if (!user) return false;
+  const role = workspaceRole || user.role;
   // Manager and Admin can export
-  return ["manager", "admin"].includes(user.role);
+  return ["manager", "admin"].includes(role);
 };
 
 export const canManageConnections = (user: User | null): boolean => {
