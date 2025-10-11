@@ -1,21 +1,23 @@
+import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
-import { useStore } from "../store";
-import { 
-  subscribeToNotifications, 
-  markNotificationAsRead,
-  getPendingRequests,
+import {
   approveJoinRequest,
-  rejectJoinRequest,
   createNotification,
+  getPendingRequests,
+  markNotificationAsRead,
+  rejectJoinRequest,
+  subscribeToNotifications,
 } from "../services/requestService";
 import { addWorkspaceMember } from "../services/workspaceService";
-import { formatDistanceToNow } from "date-fns";
+import { useStore } from "../store";
 
 interface NotificationsPanelProps {
   onClose: () => void;
 }
 
-export default function NotificationsPanel({ onClose }: NotificationsPanelProps) {
+export default function NotificationsPanel({
+  onClose,
+}: NotificationsPanelProps) {
   const { user, notifications, setNotifications } = useStore();
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function NotificationsPanel({ onClose }: NotificationsPanelProps)
       // Get pending requests to find the user ID
       const requests = await getPendingRequests(notification.workspaceId);
       const request = requests.find((r) => r.id === notification.requestId);
-      
+
       if (!request) {
         alert("Request not found");
         return;
@@ -185,32 +187,34 @@ export default function NotificationsPanel({ onClose }: NotificationsPanelProps)
                       </p>
 
                       {/* Actions for join requests */}
-                      {notification.type === "join_request" && !notification.read && (
-                        <div className="flex gap-2 mt-3">
-                          <button
-                            onClick={() => handleApproveRequest(notification)}
-                            className="btn-primary text-sm py-2 px-4"
-                          >
-                            ✅ Approve
-                          </button>
-                          <button
-                            onClick={() => handleRejectRequest(notification)}
-                            className="btn-secondary text-sm py-2 px-4"
-                          >
-                            ❌ Reject
-                          </button>
-                        </div>
-                      )}
+                      {notification.type === "join_request" &&
+                        !notification.read && (
+                          <div className="flex gap-2 mt-3">
+                            <button
+                              onClick={() => handleApproveRequest(notification)}
+                              className="btn-primary text-sm py-2 px-4"
+                            >
+                              ✅ Approve
+                            </button>
+                            <button
+                              onClick={() => handleRejectRequest(notification)}
+                              className="btn-secondary text-sm py-2 px-4"
+                            >
+                              ❌ Reject
+                            </button>
+                          </div>
+                        )}
 
                       {/* Mark as read */}
-                      {!notification.read && notification.type !== "join_request" && (
-                        <button
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className="text-xs text-primary hover:text-primary-dark mt-2"
-                        >
-                          Mark as read
-                        </button>
-                      )}
+                      {!notification.read &&
+                        notification.type !== "join_request" && (
+                          <button
+                            onClick={() => handleMarkAsRead(notification.id)}
+                            className="text-xs text-primary hover:text-primary-dark mt-2"
+                          >
+                            Mark as read
+                          </button>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -222,4 +226,3 @@ export default function NotificationsPanel({ onClose }: NotificationsPanelProps)
     </div>
   );
 }
-

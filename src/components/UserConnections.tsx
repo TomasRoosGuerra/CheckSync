@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   addConnection,
   getConnectedUsers,
+  removeConnection,
   searchUserByEmail,
 } from "../services/firestoreService";
 import { useStore } from "../store";
@@ -57,6 +58,29 @@ export default function UserConnections({ onClose }: UserConnectionsProps) {
     } catch (error) {
       console.error("Error adding connection:", error);
       setMessage("Failed to add connection. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveConnection = async (userId: string) => {
+    if (!user) return;
+
+    const userName = users.find((u) => u.id === userId)?.name || "this user";
+    if (!confirm(`Remove ${userName} from your connections?`)) return;
+
+    setLoading(true);
+    try {
+      await removeConnection(user.id, userId);
+
+      // Refresh connected users
+      const updatedConnections = await getConnectedUsers(user.id);
+      setUsers([user, ...updatedConnections]);
+
+      setMessage(`Successfully removed ${userName} from connections.`);
+    } catch (error) {
+      console.error("Error removing connection:", error);
+      setMessage("Failed to remove connection. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -126,17 +150,35 @@ export default function UserConnections({ onClose }: UserConnectionsProps) {
                     <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">
                       {connectedUser.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="font-medium text-gray-900">
                         {connectedUser.name}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 truncate">
                         {connectedUser.email}
                       </div>
                     </div>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full flex-shrink-0">
                       {connectedUser.role}
                     </span>
+                    <button
+                      onClick={() => handleRemoveConnection(connectedUser.id)}
+                      disabled={loading}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors flex-shrink-0"
+                      title="Remove connection"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
                   </div>
                 ))}
               {users.filter((u) => u.id !== user?.id).length === 0 && (

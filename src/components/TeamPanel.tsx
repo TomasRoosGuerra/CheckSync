@@ -1,16 +1,10 @@
-import { useEffect, useState } from "react";
-import {
-  approveJoinRequest,
-  createNotification,
-  getPendingRequests,
-  rejectJoinRequest,
-} from "../services/requestService";
+import { useState } from "react";
 import {
   addWorkspaceMember,
   updateMemberRole,
 } from "../services/workspaceService";
 import { useStore } from "../store";
-import type { JoinRequest, UserRole } from "../types";
+import type { UserRole } from "../types";
 import { getUserWorkspaceRole, isWorkspaceOwner } from "../utils/permissions";
 
 interface TeamPanelProps {
@@ -18,21 +12,13 @@ interface TeamPanelProps {
 }
 
 export default function TeamPanel({ onClose }: TeamPanelProps) {
-  const {
-    user,
-    users,
-    currentWorkspace,
-    workspaceMembers,
-  } = useStore();
-  const [activeTab, setActiveTab] = useState<"members" | "add" | "requests">(
-    "members"
-  );
+  const { user, users, currentWorkspace, workspaceMembers } = useStore();
+  const [activeTab, setActiveTab] = useState<"members" | "add">("members");
   const [searchEmail, setSearchEmail] = useState("");
   const [searchResult, setSearchResult] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>("participant");
   const [processing, setProcessing] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
   const [memberSearch, setMemberSearch] = useState("");
 
   // Get current workspace data
@@ -48,19 +34,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
       : "participant";
 
   const isOwner = isWorkspaceOwner(user, currentWorkspace);
-
-  // Load pending requests
-  useEffect(() => {
-    if (currentWorkspace && isOwner) {
-      loadPendingRequests();
-    }
-  }, [currentWorkspace, isOwner]);
-
-  const loadPendingRequests = async () => {
-    if (!currentWorkspace) return;
-    const requests = await getPendingRequests(currentWorkspace.id);
-    setPendingRequests(requests);
-  };
 
   const handleSearchUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +78,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
       setSearchEmail("");
       setSearchResult(null);
       setActiveTab("members");
-      window.location.reload();
+      // State will update via subscription in App.tsx
     } catch (error) {
       alert("Failed to add member.");
     } finally {
@@ -120,53 +93,11 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
     try {
       await updateMemberRole(currentWorkspace.id, userId, newRole);
       alert("✅ Role updated!");
-      window.location.reload();
+      // State will update via subscription in App.tsx
     } catch (error) {
       alert("Failed to update role.");
     } finally {
       setUpdating(null);
-    }
-  };
-
-  const handleApproveRequest = async (request: JoinRequest) => {
-    if (!currentWorkspace || !user) return;
-
-    setProcessing(true);
-    try {
-      await approveJoinRequest(request.id, user.id);
-      await addWorkspaceMember(
-        currentWorkspace.id,
-        request.userId,
-        "participant"
-      );
-      await createNotification(
-        request.userId,
-        "request_approved",
-        "Request Approved! 🎉",
-        `Welcome to ${currentWorkspace.name}!`,
-        currentWorkspace.id
-      );
-      alert("✅ Request approved!");
-      loadPendingRequests();
-    } catch (error) {
-      alert("Failed to approve request.");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleRejectRequest = async (request: JoinRequest) => {
-    if (!user) return;
-
-    setProcessing(true);
-    try {
-      await rejectJoinRequest(request.id, user.id);
-      alert("Request rejected.");
-      loadPendingRequests();
-    } catch (error) {
-      alert("Failed to reject request.");
-    } finally {
-      setProcessing(false);
     }
   };
 
@@ -178,8 +109,12 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                <svg
+                  className="w-6 h-6 text-yellow-400"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                 </svg>
               </div>
               <div>
@@ -223,33 +158,16 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               👥 Members ({currentWorkspaceUsers.length})
             </button>
             {isOwner && (
-              <>
-                <button
-                  onClick={() => setActiveTab("add")}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                    activeTab === "add"
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  ➕ Add Member
-                </button>
-                {pendingRequests.length > 0 && (
-                  <button
-                    onClick={() => setActiveTab("requests")}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap relative ${
-                      activeTab === "requests"
-                        ? "bg-primary text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    🙋 Requests ({pendingRequests.length})
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                      {pendingRequests.length}
-                    </span>
-                  </button>
-                )}
-              </>
+              <button
+                onClick={() => setActiveTab("add")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+                  activeTab === "add"
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                ➕ Add Member
+              </button>
             )}
           </div>
         </div>
@@ -479,60 +397,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                   </div>
                 )}
               </form>
-            </div>
-          )}
-
-          {/* Requests Tab */}
-          {activeTab === "requests" && isOwner && (
-            <div className="space-y-3">
-              {pendingRequests.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">✅</div>
-                  <p className="text-gray-500">No pending requests</p>
-                </div>
-              ) : (
-                pendingRequests.map((request) => {
-                  const requestUser = users.find(
-                    (u) => u.id === request.userId
-                  );
-                  return (
-                    <div
-                      key={request.id}
-                      className="p-4 rounded-lg border-2 border-yellow-200 bg-yellow-50"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-semibold text-gray-900">
-                            {requestUser?.name || "Unknown User"}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {requestUser?.email}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {request.message}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleApproveRequest(request)}
-                            disabled={processing}
-                            className="btn-primary text-sm py-2 px-4"
-                          >
-                            ✅ Approve
-                          </button>
-                          <button
-                            onClick={() => handleRejectRequest(request)}
-                            disabled={processing}
-                            className="btn-secondary text-sm py-2 px-4"
-                          >
-                            ❌ Reject
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
             </div>
           )}
         </div>

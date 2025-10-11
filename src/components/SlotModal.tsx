@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useToggleSelection } from "../hooks/useToggleSelection";
 import {
   createTimeSlot,
   updateTimeSlot as updateSlotFirestore,
@@ -19,9 +20,12 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
   const [title, setTitle] = useState(slot?.title || "");
   const [startTime, setStartTime] = useState(slot?.startTime || "09:00");
   const [endTime, setEndTime] = useState(slot?.endTime || "10:00");
-  const [participantIds, setParticipantIds] = useState<string[]>(
-    slot?.participantIds || []
-  );
+  const {
+    selected: participantIds,
+    toggle: toggleParticipant,
+    isSelected,
+    setSelected: setParticipantIds,
+  } = useToggleSelection(slot?.participantIds || []);
   const [verifierId, setVerifierId] = useState(slot?.verifierId || "");
   const [notes, setNotes] = useState(slot?.notes || "");
   const [recurring, setRecurring] = useState(false);
@@ -80,7 +84,9 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
         // Ensure workspace exists
         if (!currentWorkspace) {
-          alert("No workspace selected. Please select or create a workspace first.");
+          alert(
+            "No workspace selected. Please select or create a workspace first."
+          );
           setSaving(false);
           return;
         }
@@ -165,14 +171,6 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
       }
 
       setSaving(false);
-    }
-  };
-
-  const toggleParticipant = (userId: string) => {
-    if (participantIds.includes(userId)) {
-      setParticipantIds(participantIds.filter((id) => id !== userId));
-    } else {
-      setParticipantIds([...participantIds, userId]);
     }
   };
 
@@ -301,7 +299,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                   >
                     <input
                       type="checkbox"
-                      checked={participantIds.includes(u.id)}
+                      checked={isSelected(u.id)}
                       onChange={() => toggleParticipant(u.id)}
                       className="w-5 h-5 sm:w-4 sm:h-4 text-primary rounded focus:ring-primary"
                     />

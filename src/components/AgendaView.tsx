@@ -1,7 +1,13 @@
+import { format } from "date-fns";
 import { useStore } from "../store";
 import type { TimeSlot } from "../types";
 import { isSameDayAs } from "../utils/dateUtils";
-import { format } from "date-fns";
+import {
+  formatStatusText,
+  getStatusBadgeClasses,
+  getStatusColorClasses,
+} from "../utils/slotUtils";
+import { getUserName } from "../utils/userUtils";
 
 interface AgendaViewProps {
   onSlotClick: (date: Date) => void;
@@ -16,40 +22,6 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
     if (dateCompare !== 0) return dateCompare;
     return a.startTime.localeCompare(b.startTime);
   });
-
-  const getUserName = (userId: string) => {
-    return users.find((u) => u.id === userId)?.name || "Unknown";
-  };
-
-  const getStatusColor = (status: TimeSlot["status"]) => {
-    switch (status) {
-      case "planned":
-        return "border-l-gray-400 bg-gray-50";
-      case "checked-in":
-        return "border-l-yellow-400 bg-yellow-50";
-      case "confirmed":
-        return "border-l-green-500 bg-green-50";
-      case "missed":
-        return "border-l-red-400 bg-red-50";
-      default:
-        return "border-l-gray-300 bg-gray-50";
-    }
-  };
-
-  const getStatusBadge = (status: TimeSlot["status"]) => {
-    const styles = {
-      planned: "bg-gray-100 text-gray-700",
-      "checked-in": "bg-yellow-100 text-yellow-700",
-      confirmed: "bg-green-100 text-green-700",
-      missed: "bg-red-100 text-red-700",
-    };
-
-    return (
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${styles[status]}`}>
-        {status === "checked-in" ? "Pending" : status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
-  };
 
   // Group by day
   const groupedSlots = sortedSlots.reduce((acc, slot) => {
@@ -71,9 +43,13 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
             {/* Date Header */}
             <div
               className={`
-                sticky top-14 sm:top-16 z-10 
+                sticky-mobile top-14 sm:top-16 z-10 
                 px-4 py-2 rounded-lg mb-2
-                ${isToday ? "bg-primary text-white" : "bg-gray-100 text-gray-900"}
+                ${
+                  isToday
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-900"
+                }
               `}
             >
               <div className="font-bold text-sm">
@@ -91,7 +67,7 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
                     w-full text-left p-4 rounded-xl border-l-4
                     transition-all hover:shadow-md active:scale-99
                     touch-manipulation
-                    ${getStatusColor(slot.status)}
+                    ${getStatusColorClasses(slot.status)}
                   `}
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -101,13 +77,21 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
                           {slot.startTime}
                         </span>
                         <span className="text-gray-400">—</span>
-                        <span className="text-sm text-gray-600">{slot.endTime}</span>
+                        <span className="text-sm text-gray-600">
+                          {slot.endTime}
+                        </span>
                       </div>
                       <h3 className="font-semibold text-lg text-gray-900 mb-1">
                         {slot.title}
                       </h3>
                     </div>
-                    {getStatusBadge(slot.status)}
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusBadgeClasses(
+                        slot.status
+                      )}`}
+                    >
+                      {formatStatusText(slot.status)}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-4 text-xs text-gray-600">
@@ -117,7 +101,7 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
                     </div>
                     <div className="flex items-center gap-1">
                       <span>🔒</span>
-                      <span>{getUserName(slot.verifierId)}</span>
+                      <span>{getUserName(slot.verifierId, users)}</span>
                     </div>
                   </div>
                 </button>
@@ -139,4 +123,3 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
     </div>
   );
 }
-

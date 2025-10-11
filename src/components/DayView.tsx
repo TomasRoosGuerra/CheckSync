@@ -14,6 +14,8 @@ import {
   canVerify,
   getUserWorkspaceRole,
 } from "../utils/permissions";
+import { getStatusBadgeClasses } from "../utils/slotUtils";
+import { getUserName } from "../utils/userUtils";
 import SlotModal from "./SlotModal";
 
 interface DayViewProps {
@@ -175,27 +177,6 @@ export default function DayView({ date, onClose }: DayViewProps) {
     }
   };
 
-  const getStatusBadge = (status: TimeSlot["status"]) => {
-    const styles = {
-      planned: "bg-gray-100 text-gray-700",
-      "checked-in": "bg-yellow-100 text-yellow-700",
-      confirmed: "bg-green-100 text-green-700",
-      missed: "bg-red-100 text-red-700",
-    };
-
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status]}`}
-      >
-        {status.charAt(0).toUpperCase() + status.slice(1).replace("-", " ")}
-      </span>
-    );
-  };
-
-  const getUserName = (userId: string) => {
-    return users.find((u) => u.id === userId)?.name || "Unknown";
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
       <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden">
@@ -255,7 +236,14 @@ export default function DayView({ date, onClose }: DayViewProps) {
                         Ends at {slot.endTime}
                       </div>
                     </div>
-                    {getStatusBadge(slot.status)}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClasses(
+                        slot.status
+                      )}`}
+                    >
+                      {slot.status.charAt(0).toUpperCase() +
+                        slot.status.slice(1).replace("-", " ")}
+                    </span>
                   </div>
 
                   {slot.notes && (
@@ -266,13 +254,15 @@ export default function DayView({ date, onClose }: DayViewProps) {
                     <div className="flex items-center gap-2">
                       <span className="text-gray-500">👤</span>
                       <span className="font-medium">
-                        {slot.participantIds.map(getUserName).join(", ")}
+                        {slot.participantIds
+                          .map((id) => getUserName(id, users))
+                          .join(", ")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-gray-500">🔒</span>
                       <span className="font-medium">
-                        {getUserName(slot.verifierId)}
+                        {getUserName(slot.verifierId, users)}
                       </span>
                     </div>
                   </div>

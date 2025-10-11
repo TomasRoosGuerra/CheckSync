@@ -3,7 +3,6 @@ import { useState } from "react";
 import { auth } from "../firebase";
 import { useStore } from "../store";
 import UserConnections from "./UserConnections";
-import UserManagement from "./UserManagement";
 import WorkspaceSettings from "./WorkspaceSettings";
 
 interface SettingsProps {
@@ -12,10 +11,7 @@ interface SettingsProps {
 
 export default function Settings({ onClose }: SettingsProps) {
   const { user, setUser, users, currentWorkspace } = useStore();
-  const [notifications, setNotifications] = useState(true);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [showConnections, setShowConnections] = useState(false);
-  const [showUserManagement, setShowUserManagement] = useState(false);
   const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
 
   const handleLogout = async () => {
@@ -141,60 +137,6 @@ export default function Settings({ onClose }: SettingsProps) {
               )}
             </div>
 
-            {/* Notifications */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Notifications
-              </h3>
-              <label className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                <div>
-                  <div className="font-medium text-gray-900">
-                    Enable Notifications
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Get reminders for check-ins and verifications
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={notifications}
-                  onChange={(e) => setNotifications(e.target.checked)}
-                  className="w-5 h-5 text-primary rounded focus:ring-primary"
-                />
-              </label>
-            </div>
-
-            {/* Theme */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Appearance
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setTheme("light")}
-                  className={`p-4 rounded-lg border-2 transition-colors ${
-                    theme === "light"
-                      ? "border-primary bg-primary/5"
-                      : "border-gray-200 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="text-2xl mb-1">☀️</div>
-                  <div className="font-medium">Light</div>
-                </button>
-                <button
-                  onClick={() => setTheme("dark")}
-                  className={`p-4 rounded-lg border-2 transition-colors ${
-                    theme === "dark"
-                      ? "border-primary bg-primary/5"
-                      : "border-gray-200 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="text-2xl mb-1">🌙</div>
-                  <div className="font-medium">Dark</div>
-                </button>
-              </div>
-            </div>
-
             {/* User Connections */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -241,10 +183,6 @@ export default function Settings({ onClose }: SettingsProps) {
         <UserConnections onClose={() => setShowConnections(false)} />
       )}
 
-      {/* User Management Modal (Admin Only) */}
-      {showUserManagement && (
-        <UserManagement onClose={() => setShowUserManagement(false)} />
-      )}
       {showWorkspaceSettings && (
         <WorkspaceSettings onClose={() => setShowWorkspaceSettings(false)} />
       )}

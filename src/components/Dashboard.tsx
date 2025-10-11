@@ -33,16 +33,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Mobile Optimized */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      {/* Header - Mobile Optimized with iPhone Safe Area */}
+      <header className="bg-white border-b border-gray-200 sticky-mobile top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                        </svg>
-                      </div>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
               <button
                 onClick={() => setShowWorkspaceSwitcher(true)}
                 className="text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
@@ -186,7 +190,9 @@ export default function Dashboard() {
       )}
       {showTeamPanel && <TeamPanel onClose={() => setShowTeamPanel(false)} />}
       {showWorkspaceSwitcher && (
-        <WorkspaceQuickSwitcher onClose={() => setShowWorkspaceSwitcher(false)} />
+        <WorkspaceQuickSwitcher
+          onClose={() => setShowWorkspaceSwitcher(false)}
+        />
       )}
     </div>
   );

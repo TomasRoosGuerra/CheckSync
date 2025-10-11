@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { useStore } from "../store";
 import { createWorkspace } from "../services/workspaceService";
+import { useStore } from "../store";
 import type { Workspace } from "../types";
 
 interface WorkspaceQuickSwitcherProps {
   onClose: () => void;
 }
 
-export default function WorkspaceQuickSwitcher({ onClose }: WorkspaceQuickSwitcherProps) {
-  const { user, workspaces, currentWorkspace, setCurrentWorkspace } = useStore();
+export default function WorkspaceQuickSwitcher({
+  onClose,
+}: WorkspaceQuickSwitcherProps) {
+  const { user, workspaces, currentWorkspace, setCurrentWorkspace } =
+    useStore();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
@@ -18,7 +21,7 @@ export default function WorkspaceQuickSwitcher({ onClose }: WorkspaceQuickSwitch
   const handleSwitch = (workspace: Workspace) => {
     setCurrentWorkspace(workspace);
     localStorage.setItem("lastWorkspaceId", workspace.id);
-    window.location.reload();
+    onClose();
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -47,7 +50,7 @@ export default function WorkspaceQuickSwitcher({ onClose }: WorkspaceQuickSwitch
       alert(`✅ Workspace "${newWorkspace.name}" created!`);
       setCurrentWorkspace(newWorkspace);
       localStorage.setItem("lastWorkspaceId", newWorkspace.id);
-      window.location.reload();
+      onClose();
     } catch (error) {
       alert("Failed to create workspace.");
     } finally {
@@ -66,7 +69,15 @@ export default function WorkspaceQuickSwitcher({ onClose }: WorkspaceQuickSwitch
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100"
             >
-              <svg className="w-6 h-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
@@ -91,14 +102,20 @@ export default function WorkspaceQuickSwitcher({ onClose }: WorkspaceQuickSwitch
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                      <svg
+                        className="w-5 h-5 text-yellow-400"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                       </svg>
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 flex items-center gap-2">
                         {workspace.name}
-                        {workspace.ownerId === user?.id && <span className="text-sm">👑</span>}
+                        {workspace.ownerId === user?.id && (
+                          <span className="text-sm">👑</span>
+                        )}
                       </h3>
                       {workspace.description && (
                         <p className="text-sm text-gray-600 line-clamp-1">
@@ -123,7 +140,9 @@ export default function WorkspaceQuickSwitcher({ onClose }: WorkspaceQuickSwitch
               onClick={() => setShowCreate(true)}
               className="w-full p-4 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-all text-center"
             >
-              <span className="text-primary font-semibold">➕ Create New Workspace</span>
+              <span className="text-primary font-semibold">
+                ➕ Create New Workspace
+              </span>
             </button>
           ) : (
             <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl p-4 border-2 border-primary/20">
@@ -177,4 +196,3 @@ export default function WorkspaceQuickSwitcher({ onClose }: WorkspaceQuickSwitch
     </div>
   );
 }
-

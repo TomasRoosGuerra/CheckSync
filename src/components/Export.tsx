@@ -1,5 +1,6 @@
 import { subDays } from "date-fns";
 import { useState } from "react";
+import { useToggleSelection } from "../hooks/useToggleSelection";
 import { useStore } from "../store";
 import type { ExportFilter } from "../types";
 import { formatDate } from "../utils/dateUtils";
@@ -16,9 +17,11 @@ export default function Export({ onClose }: ExportProps) {
     formatDate(subDays(new Date(), 30))
   );
   const [endDate, setEndDate] = useState(formatDate(new Date()));
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
-    []
-  );
+  const {
+    selected: selectedParticipants,
+    toggle: toggleParticipant,
+    isSelected,
+  } = useToggleSelection();
   const [confirmedOnly, setConfirmedOnly] = useState(false);
 
   const handleExport = () => {
@@ -32,16 +35,6 @@ export default function Export({ onClose }: ExportProps) {
 
     exportToCSV(timeSlots, users, filter);
     onClose();
-  };
-
-  const toggleParticipant = (userId: string) => {
-    if (selectedParticipants.includes(userId)) {
-      setSelectedParticipants(
-        selectedParticipants.filter((id) => id !== userId)
-      );
-    } else {
-      setSelectedParticipants([...selectedParticipants, userId]);
-    }
   };
 
   const getFilteredCount = () => {
@@ -109,7 +102,7 @@ export default function Export({ onClose }: ExportProps) {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedParticipants.includes(u.id)}
+                      checked={isSelected(u.id)}
                       onChange={() => toggleParticipant(u.id)}
                       className="w-4 h-4 text-primary rounded focus:ring-primary"
                     />

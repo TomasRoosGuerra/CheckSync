@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
-import { useStore } from "../store";
-import { getPublicWorkspaces } from "../services/requestService";
-import { createJoinRequest, createNotification } from "../services/requestService";
+import { useEffect, useState } from "react";
 import { getUserProfile } from "../services/firestoreService";
+import {
+  createJoinRequest,
+  createNotification,
+  getPublicWorkspaces,
+} from "../services/requestService";
+import { useStore } from "../store";
 
 interface PublicWorkspace {
   id: string;
@@ -24,7 +27,9 @@ export default function PublicWorkspaceDiscovery({
   onClose,
 }: PublicWorkspaceDiscoveryProps) {
   const { user, workspaces } = useStore();
-  const [publicWorkspaces, setPublicWorkspaces] = useState<PublicWorkspace[]>([]);
+  const [publicWorkspaces, setPublicWorkspaces] = useState<PublicWorkspace[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [requesting, setRequesting] = useState<string | null>(null);
@@ -36,7 +41,7 @@ export default function PublicWorkspaceDiscovery({
   const loadPublicWorkspaces = async () => {
     try {
       const workspaces = await getPublicWorkspaces();
-      
+
       // Load owner names
       const workspacesWithDetails = await Promise.all(
         workspaces.map(async (ws: any) => {
@@ -47,7 +52,7 @@ export default function PublicWorkspaceDiscovery({
           };
         })
       );
-      
+
       setPublicWorkspaces(workspacesWithDetails);
     } catch (error) {
       console.error("Error loading public workspaces:", error);
@@ -89,7 +94,7 @@ export default function PublicWorkspaceDiscovery({
   };
 
   const userWorkspaceIds = new Set(workspaces.map((w) => w.id));
-  
+
   const filteredWorkspaces = publicWorkspaces.filter((ws) => {
     const matchesSearch =
       ws.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -229,12 +234,11 @@ export default function PublicWorkspaceDiscovery({
         {/* Footer */}
         <div className="border-t border-gray-200 p-4 sm:p-6 bg-gray-50">
           <p className="text-sm text-gray-600 text-center">
-            💡 Tip: Public workspaces allow anyone to request to join. The owner will
-            review your request.
+            💡 Tip: Public workspaces allow anyone to request to join. The owner
+            will review your request.
           </p>
         </div>
       </div>
     </div>
   );
 }
-

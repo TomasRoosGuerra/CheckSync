@@ -47,7 +47,7 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
       });
 
       alert("✅ Workspace settings updated!");
-      window.location.reload();
+      onClose();
     } catch (error) {
       console.error("Error updating workspace:", error);
       alert("Failed to update workspace settings.");

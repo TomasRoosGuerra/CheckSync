@@ -14,6 +14,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import type { TimeSlot, User } from "../types";
+import {
+  convertFirestoreTimestamp,
+  convertOptionalFirestoreTimestamp,
+} from "../utils/firestoreUtils";
 
 // Collections
 const USERS_COLLECTION = "users";
@@ -80,6 +84,19 @@ export const addConnection = async (
     });
   } catch (error) {
     console.error("Error adding connection:", error);
+    throw error;
+  }
+};
+
+export const removeConnection = async (
+  userId: string,
+  connectedUserId: string
+) => {
+  try {
+    const connectionId = [userId, connectedUserId].sort().join("_");
+    await deleteDoc(doc(db, CONNECTIONS_COLLECTION, connectionId));
+  } catch (error) {
+    console.error("Error removing connection:", error);
     throw error;
   }
 };
@@ -222,22 +239,10 @@ export const subscribeToWorkspaceTimeSlots = (
         slots.push({
           id: doc.id,
           ...data,
-          createdAt:
-            typeof data.createdAt?.toMillis === "function"
-              ? data.createdAt.toMillis()
-              : data.createdAt || Date.now(),
-          updatedAt:
-            typeof data.updatedAt?.toMillis === "function"
-              ? data.updatedAt.toMillis()
-              : data.updatedAt || Date.now(),
-          checkedInAt:
-            typeof data.checkedInAt?.toMillis === "function"
-              ? data.checkedInAt.toMillis()
-              : data.checkedInAt,
-          confirmedAt:
-            typeof data.confirmedAt?.toMillis === "function"
-              ? data.confirmedAt.toMillis()
-              : data.confirmedAt,
+          createdAt: convertFirestoreTimestamp(data.createdAt),
+          updatedAt: convertFirestoreTimestamp(data.updatedAt),
+          checkedInAt: convertOptionalFirestoreTimestamp(data.checkedInAt),
+          confirmedAt: convertOptionalFirestoreTimestamp(data.confirmedAt),
         } as TimeSlot);
       });
 
@@ -286,22 +291,10 @@ export const subscribeToUserTimeSlots = (
         const slotData = {
           id: change.doc.id,
           ...data,
-          createdAt:
-            typeof data.createdAt?.toMillis === "function"
-              ? data.createdAt.toMillis()
-              : data.createdAt || Date.now(),
-          updatedAt:
-            typeof data.updatedAt?.toMillis === "function"
-              ? data.updatedAt.toMillis()
-              : data.updatedAt || Date.now(),
-          checkedInAt:
-            typeof data.checkedInAt?.toMillis === "function"
-              ? data.checkedInAt.toMillis()
-              : data.checkedInAt,
-          confirmedAt:
-            typeof data.confirmedAt?.toMillis === "function"
-              ? data.confirmedAt.toMillis()
-              : data.confirmedAt,
+          createdAt: convertFirestoreTimestamp(data.createdAt),
+          updatedAt: convertFirestoreTimestamp(data.updatedAt),
+          checkedInAt: convertOptionalFirestoreTimestamp(data.checkedInAt),
+          confirmedAt: convertOptionalFirestoreTimestamp(data.confirmedAt),
         } as TimeSlot;
 
         if (change.type === "added" || change.type === "modified") {
@@ -339,22 +332,10 @@ export const subscribeToUserTimeSlots = (
         const slotData = {
           id: change.doc.id,
           ...data,
-          createdAt:
-            typeof data.createdAt?.toMillis === "function"
-              ? data.createdAt.toMillis()
-              : data.createdAt || Date.now(),
-          updatedAt:
-            typeof data.updatedAt?.toMillis === "function"
-              ? data.updatedAt.toMillis()
-              : data.updatedAt || Date.now(),
-          checkedInAt:
-            typeof data.checkedInAt?.toMillis === "function"
-              ? data.checkedInAt.toMillis()
-              : data.checkedInAt,
-          confirmedAt:
-            typeof data.confirmedAt?.toMillis === "function"
-              ? data.confirmedAt.toMillis()
-              : data.confirmedAt,
+          createdAt: convertFirestoreTimestamp(data.createdAt),
+          updatedAt: convertFirestoreTimestamp(data.updatedAt),
+          checkedInAt: convertOptionalFirestoreTimestamp(data.checkedInAt),
+          confirmedAt: convertOptionalFirestoreTimestamp(data.confirmedAt),
         } as TimeSlot;
 
         if (change.type === "added" || change.type === "modified") {
