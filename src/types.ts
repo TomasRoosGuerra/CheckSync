@@ -12,12 +12,15 @@ export interface User {
   currentWorkspaceId?: string; // Active workspace
 }
 
+export type WorkspaceColor = "blue" | "purple" | "orange" | "green" | "red" | "yellow" | "pink" | "teal";
+
 export interface Workspace {
   id: string;
   name: string;
   description?: string;
   ownerId: string; // Creator/Admin of this workspace
   isPublic: boolean; // Public workspaces are discoverable
+  color?: WorkspaceColor; // Visual identifier for multi-workspace views
   createdAt: number;
   updatedAt: number;
 }
@@ -86,4 +89,16 @@ export interface ExportFilter {
   endDate: string;
   participantIds?: string[];
   confirmedOnly?: boolean;
+}
+
+export interface TimeConflict {
+  id: string;
+  slot1Id: string;
+  slot2Id: string;
+  workspace1Id: string;
+  workspace2Id: string;
+  date: string;
+  overlapStart: string;
+  overlapEnd: string;
+  overlapMinutes: number;
 }

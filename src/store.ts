@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import type { TimeSlot, User, UserRole, Workspace, WorkspaceMember, Notification } from "./types";
+import type { TimeSlot, User, UserRole, Workspace, WorkspaceMember, Notification, TimeConflict } from "./types";
+
+type ViewMode = "week" | "agenda" | "my-agenda";
 
 interface AppStore {
   user: User | null;
@@ -10,6 +12,10 @@ interface AppStore {
   users: User[];
   notifications: Notification[];
   selectedDate: Date;
+  // Unified agenda state
+  allUserTimeSlots: TimeSlot[];
+  viewMode: ViewMode;
+  detectedConflicts: TimeConflict[];
   setUser: (user: User | null) => void;
   setCurrentWorkspace: (workspace: Workspace | null) => void;
   setWorkspaces: (workspaces: Workspace[]) => void;
@@ -22,6 +28,10 @@ interface AppStore {
   setNotifications: (notifications: Notification[]) => void;
   setSelectedDate: (date: Date) => void;
   getUserRole: (userId: string) => UserRole;
+  // Unified agenda setters
+  setAllUserTimeSlots: (slots: TimeSlot[]) => void;
+  setViewMode: (mode: ViewMode) => void;
+  setDetectedConflicts: (conflicts: TimeConflict[]) => void;
 }
 
 export const useStore = create<AppStore>((set, get) => ({
@@ -33,6 +43,9 @@ export const useStore = create<AppStore>((set, get) => ({
   users: [],
   notifications: [],
   selectedDate: new Date(),
+  allUserTimeSlots: [],
+  viewMode: "week",
+  detectedConflicts: [],
   setUser: (user) => set({ user }),
   setCurrentWorkspace: (currentWorkspace) => set({ currentWorkspace }),
   setWorkspaces: (workspaces) => set({ workspaces }),
@@ -53,6 +66,9 @@ export const useStore = create<AppStore>((set, get) => ({
   setUsers: (users) => set({ users }),
   setNotifications: (notifications) => set({ notifications }),
   setSelectedDate: (selectedDate) => set({ selectedDate }),
+  setAllUserTimeSlots: (allUserTimeSlots) => set({ allUserTimeSlots }),
+  setViewMode: (viewMode) => set({ viewMode }),
+  setDetectedConflicts: (detectedConflicts) => set({ detectedConflicts }),
   getUserRole: (userId: string) => {
     const state = get();
     const member = state.workspaceMembers.find(

@@ -4,24 +4,31 @@ import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
+import MyAgendaView from "./MyAgendaView";
 import NotificationsPanel from "./NotificationsPanel";
 import Settings from "./Settings";
 import TeamPanel from "./TeamPanel";
+import TodayWidget from "./TodayWidget";
 import WeekCalendar from "./WeekCalendar";
 import WorkspaceQuickSwitcher from "./WorkspaceQuickSwitcher";
 
-type ViewMode = "week" | "agenda";
-
 export default function Dashboard() {
-  const { user, currentWorkspace, workspaceMembers, notifications } =
-    useStore();
+  const {
+    user,
+    currentWorkspace,
+    workspaceMembers,
+    notifications,
+    viewMode,
+    setViewMode,
+    detectedConflicts,
+    setCurrentWorkspace,
+  } = useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showTeamPanel, setShowTeamPanel] = useState(false);
   const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("week");
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -97,17 +104,46 @@ export default function Dashboard() {
               </button>
 
               {/* View Toggle - Mobile */}
-              <button
-                onClick={() =>
-                  setViewMode(viewMode === "week" ? "agenda" : "week")
-                }
-                className="sm:hidden btn-secondary py-2 px-3 text-xs font-medium touch-manipulation"
-                title={
-                  viewMode === "week" ? "Switch to Agenda" : "Switch to Week"
-                }
-              >
-                {viewMode === "week" ? "📋" : "📅"}
-              </button>
+              <div className="sm:hidden flex gap-1">
+                <button
+                  onClick={() => setViewMode("week")}
+                  className={`py-2 px-3 text-xs font-medium touch-manipulation rounded-full transition-colors ${
+                    viewMode === "week"
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                  title="Week View"
+                >
+                  📅
+                </button>
+                <button
+                  onClick={() => setViewMode("agenda")}
+                  className={`py-2 px-3 text-xs font-medium touch-manipulation rounded-full transition-colors ${
+                    viewMode === "agenda"
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                  title="Workspace Agenda"
+                >
+                  📋
+                </button>
+                <button
+                  onClick={() => setViewMode("my-agenda")}
+                  className={`py-2 px-3 text-xs font-medium touch-manipulation rounded-full transition-colors relative ${
+                    viewMode === "my-agenda"
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                  title="My Agenda"
+                >
+                  ✨
+                  {detectedConflicts.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                      {detectedConflicts.length}
+                    </span>
+                  )}
+                </button>
+              </div>
 
               {canExportData(user, userRole) && (
                 <button
@@ -161,21 +197,69 @@ export default function Dashboard() {
 
       {/* Main Content - Mobile Optimized */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 md:py-8">
+        {/* View Mode Toggles - Desktop */}
+        <div className="hidden sm:flex gap-2 mb-6 justify-center">
+          <button
+            onClick={() => setViewMode("week")}
+            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
+              viewMode === "week"
+                ? "bg-primary text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            📅 Week View
+          </button>
+          <button
+            onClick={() => setViewMode("agenda")}
+            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
+              viewMode === "agenda"
+                ? "bg-primary text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            📋 Workspace Agenda
+          </button>
+          <button
+            onClick={() => setViewMode("my-agenda")}
+            className={`px-6 py-2.5 rounded-full font-medium transition-all relative ${
+              viewMode === "my-agenda"
+                ? "bg-primary text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            <span className="text-xl mr-1">✨</span>
+            My Agenda
+            {detectedConflicts.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                {detectedConflicts.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Today Widget - Only show on week view */}
+        {viewMode === "week" && <TodayWidget />}
+
+        {/* Content based on view mode */}
         {viewMode === "week" ? (
           <WeekCalendar onDayClick={setSelectedDay} />
-        ) : (
+        ) : viewMode === "agenda" ? (
           <div className="card">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Agenda View</h2>
-              <button
-                onClick={() => setViewMode("week")}
-                className="text-primary text-sm font-medium hover:underline"
-              >
-                ← Back to Week
-              </button>
+              <h2 className="text-xl font-bold text-gray-900">
+                {currentWorkspace?.name} Agenda
+              </h2>
             </div>
             <AgendaView onSlotClick={setSelectedDay} />
           </div>
+        ) : (
+          <MyAgendaView
+            onSlotClick={(slot, workspace) => {
+              // Switch to workspace and open day view
+              setCurrentWorkspace(workspace);
+              setSelectedDay(new Date(slot.date + "T00:00:00"));
+            }}
+          />
         )}
       </main>
 

@@ -10,6 +10,10 @@ import {
   subscribeToWorkspaceTimeSlots,
 } from "./services/firestoreService";
 import { subscribeToWorkspaceMembers } from "./services/workspaceService";
+import {
+  subscribeToAllUserTimeSlots,
+  detectTimeConflicts,
+} from "./services/unifiedAgendaService";
 import { useStore } from "./store";
 import type { User } from "./types";
 
@@ -21,6 +25,9 @@ function App() {
     setTimeSlots,
     setWorkspaceMembers,
     setUsers,
+    workspaces,
+    setAllUserTimeSlots,
+    setDetectedConflicts,
   } = useStore();
   const [loading, setLoading] = useState(true);
 
@@ -102,6 +109,34 @@ function App() {
       unsubMembers();
     };
   }, [currentWorkspace, user, setTimeSlots, setWorkspaceMembers, setUsers]);
+
+  // Load ALL user's time slots across all workspaces for unified agenda
+  useEffect(() => {
+    if (!user || workspaces.length === 0) {
+      setAllUserTimeSlots([]);
+      setDetectedConflicts([]);
+      return;
+    }
+
+    console.log("🌍 Loading unified agenda across", workspaces.length, "workspaces");
+
+    const workspaceIds = workspaces.map((w) => w.id);
+    const unsubscribe = subscribeToAllUserTimeSlots(
+      user.id,
+      workspaceIds,
+      (allSlots) => {
+        console.log("📦 All user slots updated:", allSlots.length);
+        setAllUserTimeSlots(allSlots);
+
+        // Detect conflicts
+        const conflicts = detectTimeConflicts(allSlots);
+        console.log("⚠️ Conflicts detected:", conflicts.length);
+        setDetectedConflicts(conflicts);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user, workspaces, setAllUserTimeSlots, setDetectedConflicts]);
 
   if (loading) {
     return (
