@@ -7,6 +7,7 @@ import Export from "./Export";
 import MyAgendaView from "./MyAgendaView";
 import NotificationsPanel from "./NotificationsPanel";
 import Settings from "./Settings";
+import TeamDashboard from "./TeamDashboard";
 import TeamPanel from "./TeamPanel";
 import TodayWidget from "./TodayWidget";
 import WeekCalendar from "./WeekCalendar";
@@ -22,6 +23,7 @@ export default function Dashboard() {
     setViewMode,
     detectedConflicts,
     setCurrentWorkspace,
+    workspaces,
   } = useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
@@ -37,6 +39,12 @@ export default function Dashboard() {
     user && currentWorkspace
       ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
       : "participant";
+
+  // Check if user is manager/admin in any workspace
+  const isManagerOrAdmin = workspaces.some((ws) => {
+    const role = getUserWorkspaceRole(user?.id || "", ws.id, workspaceMembers);
+    return role === "manager" || role === "admin";
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,6 +130,22 @@ export default function Dashboard() {
                     </span>
                   )}
                 </button>
+
+                {/* Team Dashboard - Manager/Admin Only */}
+                {isManagerOrAdmin && (
+                  <button
+                    onClick={() => setViewMode("team-dashboard")}
+                    className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
+                      viewMode === "team-dashboard"
+                        ? "bg-primary shadow-md"
+                        : "bg-gray-100 hover:bg-gray-200"
+                    }`}
+                    title="Team Dashboard"
+                  >
+                    <span className="sm:hidden">📊</span>
+                    <span className="hidden sm:inline">📊 Team</span>
+                  </button>
+                )}
               </div>
 
               {/* Notifications Button */}
@@ -215,8 +239,16 @@ export default function Dashboard() {
             </div>
             <AgendaView onSlotClick={setSelectedDay} />
           </div>
-        ) : (
+        ) : viewMode === "my-agenda" ? (
           <MyAgendaView
+            onSlotClick={(slot, workspace) => {
+              // Switch to workspace and open day view
+              setCurrentWorkspace(workspace);
+              setSelectedDay(new Date(slot.date + "T00:00:00"));
+            }}
+          />
+        ) : (
+          <TeamDashboard
             onSlotClick={(slot, workspace) => {
               // Switch to workspace and open day view
               setCurrentWorkspace(workspace);

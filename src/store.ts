@@ -9,7 +9,7 @@ import type {
   WorkspaceMember,
 } from "./types";
 
-type ViewMode = "week" | "agenda" | "my-agenda";
+type ViewMode = "week" | "agenda" | "my-agenda" | "team-dashboard";
 
 interface AppStore {
   user: User | null;
