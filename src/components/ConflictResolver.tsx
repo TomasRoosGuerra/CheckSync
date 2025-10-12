@@ -1,5 +1,5 @@
-import type { TimeConflict } from "../types";
 import { useStore } from "../store";
+import type { TimeConflict } from "../types";
 
 interface ConflictResolverProps {
   conflict: TimeConflict;
@@ -10,7 +10,8 @@ export default function ConflictResolver({
   conflict,
   onClose,
 }: ConflictResolverProps) {
-  const { allUserTimeSlots, workspaces, setCurrentWorkspace, setViewMode } = useStore();
+  const { allUserTimeSlots, workspaces, setCurrentWorkspace, setViewMode } =
+    useStore();
 
   const slot1 = allUserTimeSlots.find((s) => s.id === conflict.slot1Id);
   const slot2 = allUserTimeSlots.find((s) => s.id === conflict.slot2Id);
@@ -103,4 +104,3 @@ export default function ConflictResolver({
     </div>
   );
 }
-

@@ -9,11 +9,11 @@ import {
   getUserProfile,
   subscribeToWorkspaceTimeSlots,
 } from "./services/firestoreService";
-import { subscribeToWorkspaceMembers } from "./services/workspaceService";
 import {
-  subscribeToAllUserTimeSlots,
   detectTimeConflicts,
+  subscribeToAllUserTimeSlots,
 } from "./services/unifiedAgendaService";
+import { subscribeToWorkspaceMembers } from "./services/workspaceService";
 import { useStore } from "./store";
 import type { User } from "./types";
 
@@ -118,7 +118,11 @@ function App() {
       return;
     }
 
-    console.log("🌍 Loading unified agenda across", workspaces.length, "workspaces");
+    console.log(
+      "🌍 Loading unified agenda across",
+      workspaces.length,
+      "workspaces"
+    );
 
     const workspaceIds = workspaces.map((w) => w.id);
     const unsubscribe = subscribeToAllUserTimeSlots(

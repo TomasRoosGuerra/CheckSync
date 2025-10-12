@@ -12,7 +12,15 @@ export interface User {
   currentWorkspaceId?: string; // Active workspace
 }
 
-export type WorkspaceColor = "blue" | "purple" | "orange" | "green" | "red" | "yellow" | "pink" | "teal";
+export type WorkspaceColor =
+  | "blue"
+  | "purple"
+  | "orange"
+  | "green"
+  | "red"
+  | "yellow"
+  | "pink"
+  | "teal";
 
 export interface Workspace {
   id: string;
@@ -39,7 +47,11 @@ export interface JoinRequest {
 export interface Notification {
   id: string;
   userId: string;
-  type: "join_request" | "request_approved" | "request_rejected" | "workspace_invite";
+  type:
+    | "join_request"
+    | "request_approved"
+    | "request_rejected"
+    | "workspace_invite";
   title: string;
   message: string;
   workspaceId?: string;

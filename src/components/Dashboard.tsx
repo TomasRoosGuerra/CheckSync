@@ -79,6 +79,51 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
+              {/* View Toggle - All Screens */}
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setViewMode("week")}
+                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors ${
+                    viewMode === "week"
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                  title="Week View"
+                >
+                  <span className="sm:hidden">📅</span>
+                  <span className="hidden sm:inline">📅 Week</span>
+                </button>
+                <button
+                  onClick={() => setViewMode("agenda")}
+                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors ${
+                    viewMode === "agenda"
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                  title="Workspace Agenda"
+                >
+                  <span className="sm:hidden">📋</span>
+                  <span className="hidden sm:inline">📋 Agenda</span>
+                </button>
+                <button
+                  onClick={() => setViewMode("my-agenda")}
+                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors relative ${
+                    viewMode === "my-agenda"
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                  title="My Agenda"
+                >
+                  <span className="sm:hidden">✨</span>
+                  <span className="hidden sm:inline">✨ My Agenda</span>
+                  {detectedConflicts.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold">
+                      {detectedConflicts.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+
               {/* Notifications Button */}
               <button
                 onClick={() => setShowNotifications(true)}
@@ -102,48 +147,6 @@ export default function Dashboard() {
                 <span className="hidden sm:inline">👥 Team</span>
                 <span className="sm:hidden">👥</span>
               </button>
-
-              {/* View Toggle - Mobile */}
-              <div className="sm:hidden flex gap-1">
-                <button
-                  onClick={() => setViewMode("week")}
-                  className={`py-2 px-3 text-xs font-medium touch-manipulation rounded-full transition-colors ${
-                    viewMode === "week"
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                  title="Week View"
-                >
-                  📅
-                </button>
-                <button
-                  onClick={() => setViewMode("agenda")}
-                  className={`py-2 px-3 text-xs font-medium touch-manipulation rounded-full transition-colors ${
-                    viewMode === "agenda"
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                  title="Workspace Agenda"
-                >
-                  📋
-                </button>
-                <button
-                  onClick={() => setViewMode("my-agenda")}
-                  className={`py-2 px-3 text-xs font-medium touch-manipulation rounded-full transition-colors relative ${
-                    viewMode === "my-agenda"
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                  title="My Agenda"
-                >
-                  ✨
-                  {detectedConflicts.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                      {detectedConflicts.length}
-                    </span>
-                  )}
-                </button>
-              </div>
 
               {canExportData(user, userRole) && (
                 <button
@@ -197,46 +200,6 @@ export default function Dashboard() {
 
       {/* Main Content - Mobile Optimized */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 md:py-8">
-        {/* View Mode Toggles - Desktop */}
-        <div className="hidden sm:flex gap-2 mb-6 justify-center">
-          <button
-            onClick={() => setViewMode("week")}
-            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
-              viewMode === "week"
-                ? "bg-primary text-white shadow-lg"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            📅 Week View
-          </button>
-          <button
-            onClick={() => setViewMode("agenda")}
-            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
-              viewMode === "agenda"
-                ? "bg-primary text-white shadow-lg"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            📋 Workspace Agenda
-          </button>
-          <button
-            onClick={() => setViewMode("my-agenda")}
-            className={`px-6 py-2.5 rounded-full font-medium transition-all relative ${
-              viewMode === "my-agenda"
-                ? "bg-primary text-white shadow-lg"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <span className="text-xl mr-1">✨</span>
-            My Agenda
-            {detectedConflicts.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                {detectedConflicts.length}
-              </span>
-            )}
-          </button>
-        </div>
-
         {/* Today Widget - Only show on week view */}
         {viewMode === "week" && <TodayWidget />}
 

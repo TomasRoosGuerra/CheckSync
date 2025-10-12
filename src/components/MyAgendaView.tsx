@@ -1,19 +1,17 @@
 import { format } from "date-fns";
 import { useState } from "react";
+import { updateTimeSlot as updateSlotFirestore } from "../services/firestoreService";
 import { useStore } from "../store";
 import type { TimeSlot, Workspace } from "../types";
 import { isSameDayAs } from "../utils/dateUtils";
-import { getStatusBadgeClasses, formatStatusText } from "../utils/slotUtils";
-import { getUserName } from "../utils/userUtils";
-import { getWorkspaceColorClasses } from "../utils/workspaceUtils";
 import {
   canCheckIn,
   canVerify,
   getUserWorkspaceRole,
 } from "../utils/permissions";
-import {
-  updateTimeSlot as updateSlotFirestore,
-} from "../services/firestoreService";
+import { formatStatusText, getStatusBadgeClasses } from "../utils/slotUtils";
+import { getUserName } from "../utils/userUtils";
+import { getWorkspaceColorClasses } from "../utils/workspaceUtils";
 
 interface MyAgendaViewProps {
   onSlotClick: (slot: TimeSlot, workspace: Workspace) => void;
@@ -101,7 +99,7 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
 
   const handleQuickCheckIn = async (slot: TimeSlot, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!canCheckIn(user, slot)) {
       alert("You don't have permission to check in to this slot.");
       return;
@@ -121,11 +119,12 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
 
   const handleQuickVerify = async (slot: TimeSlot, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     const workspace = getWorkspace(slot.workspaceId);
-    const userRole = workspace && user
-      ? getUserWorkspaceRole(user.id, workspace.id, workspaceMembers)
-      : "participant";
+    const userRole =
+      workspace && user
+        ? getUserWorkspaceRole(user.id, workspace.id, workspaceMembers)
+        : "participant";
 
     if (!canVerify(user, slot, userRole)) {
       alert("You don't have permission to verify this slot.");
@@ -317,14 +316,15 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
 
                       {/* Quick Actions */}
                       <div className="flex gap-2 flex-wrap">
-                        {canCheckIn(user, slot) && slot.status === "planned" && (
-                          <button
-                            onClick={(e) => handleQuickCheckIn(slot, e)}
-                            className="btn-accent text-xs py-2 px-4 touch-manipulation"
-                          >
-                            ✅ Check In
-                          </button>
-                        )}
+                        {canCheckIn(user, slot) &&
+                          slot.status === "planned" && (
+                            <button
+                              onClick={(e) => handleQuickCheckIn(slot, e)}
+                              className="btn-accent text-xs py-2 px-4 touch-manipulation"
+                            >
+                              ✅ Check In
+                            </button>
+                          )}
 
                         {canVerify(user, slot) &&
                           slot.status === "checked-in" && (
@@ -379,4 +379,3 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
     </div>
   );
 }
-

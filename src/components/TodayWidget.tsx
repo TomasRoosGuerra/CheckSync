@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useStore } from "../store";
 import { isSameDayAs } from "../utils/dateUtils";
-import { getStatusBadgeClasses, formatStatusText } from "../utils/slotUtils";
+import { formatStatusText, getStatusBadgeClasses } from "../utils/slotUtils";
 
 export default function TodayWidget() {
   const { user, allUserTimeSlots, workspaces, detectedConflicts, setViewMode } =
@@ -48,9 +48,7 @@ export default function TodayWidget() {
           </div>
         </div>
 
-        <span className="text-gray-400 text-xl">
-          {isExpanded ? "↑" : "↓"}
-        </span>
+        <span className="text-gray-400 text-xl">{isExpanded ? "↑" : "↓"}</span>
       </button>
 
       {/* Content */}
@@ -89,11 +87,16 @@ export default function TodayWidget() {
             );
           })}
 
-          {todaySlots.length === 5 && allUserTimeSlots.filter((s) => isSameDayAs(new Date(), s.date)).length > 5 && (
-            <p className="text-xs text-center text-gray-500 pt-2">
-              +{allUserTimeSlots.filter((s) => isSameDayAs(new Date(), s.date)).length - 5} more events today
-            </p>
-          )}
+          {todaySlots.length === 5 &&
+            allUserTimeSlots.filter((s) => isSameDayAs(new Date(), s.date))
+              .length > 5 && (
+              <p className="text-xs text-center text-gray-500 pt-2">
+                +
+                {allUserTimeSlots.filter((s) => isSameDayAs(new Date(), s.date))
+                  .length - 5}{" "}
+                more events today
+              </p>
+            )}
 
           <button
             onClick={() => setViewMode("my-agenda")}
@@ -106,4 +109,3 @@ export default function TodayWidget() {
     </div>
   );
 }
-

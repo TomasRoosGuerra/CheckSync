@@ -1,6 +1,6 @@
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../firebase";
-import type { TimeSlot, TimeConflict } from "../types";
+import type { TimeConflict, TimeSlot } from "../types";
 import {
   convertFirestoreTimestamp,
   convertOptionalFirestoreTimestamp,
@@ -148,4 +148,3 @@ export const detectTimeConflicts = (slots: TimeSlot[]): TimeConflict[] => {
 
   return conflicts;
 };
-

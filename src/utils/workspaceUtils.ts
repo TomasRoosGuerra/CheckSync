@@ -93,7 +93,15 @@ export const getWorkspaceColorDot = (color?: WorkspaceColor): string => {
  * Auto-assign colors to workspaces based on index
  */
 export const autoAssignWorkspaceColor = (index: number): WorkspaceColor => {
-  const colors: WorkspaceColor[] = ["blue", "purple", "orange", "green", "red", "yellow", "pink", "teal"];
+  const colors: WorkspaceColor[] = [
+    "blue",
+    "purple",
+    "orange",
+    "green",
+    "red",
+    "yellow",
+    "pink",
+    "teal",
+  ];
   return colors[index % colors.length];
 };
-

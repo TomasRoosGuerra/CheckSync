@@ -1,5 +1,13 @@
 import { create } from "zustand";
-import type { TimeSlot, User, UserRole, Workspace, WorkspaceMember, Notification, TimeConflict } from "./types";
+import type {
+  Notification,
+  TimeConflict,
+  TimeSlot,
+  User,
+  UserRole,
+  Workspace,
+  WorkspaceMember,
+} from "./types";
 
 type ViewMode = "week" | "agenda" | "my-agenda";
 
