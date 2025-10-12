@@ -83,10 +83,10 @@ export default function Dashboard() {
               <div className="flex gap-1">
                 <button
                   onClick={() => setViewMode("week")}
-                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors ${
+                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
                     viewMode === "week"
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700"
+                      ? "bg-primary shadow-md"
+                      : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   title="Week View"
                 >
@@ -95,10 +95,10 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={() => setViewMode("agenda")}
-                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors ${
+                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
                     viewMode === "agenda"
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700"
+                      ? "bg-primary shadow-md"
+                      : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   title="Workspace Agenda"
                 >
@@ -107,10 +107,10 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={() => setViewMode("my-agenda")}
-                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors relative ${
+                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors relative text-gray-900 ${
                     viewMode === "my-agenda"
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700"
+                      ? "bg-primary shadow-md"
+                      : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   title="My Agenda"
                 >
