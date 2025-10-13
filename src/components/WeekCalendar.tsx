@@ -174,14 +174,17 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                   </button>
                 )}
                 {daySlots.length === 0 && (
-                  <div className="text-center text-gray-400 py-4 sm:py-3">
+                  <button
+                    onClick={() => onDayClick(day)}
+                    className="w-full text-center text-gray-400 py-4 sm:py-3 hover:text-primary active:text-primary-dark transition-colors touch-manipulation"
+                  >
                     <div className="text-2xl sm:text-xl mb-1 opacity-40">
                       ➕
                     </div>
                     <div className="text-[10px] sm:text-[9px] font-medium opacity-60">
                       Tap to add
                     </div>
-                  </div>
+                  </button>
                 )}
               </div>
             </div>
