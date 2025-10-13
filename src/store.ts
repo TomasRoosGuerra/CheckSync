@@ -46,6 +46,7 @@ interface AppStore {
   setAllUserTimeSlots: (slots: TimeSlot[]) => void;
   setViewMode: (mode: ViewMode) => void;
   setDetectedConflicts: (conflicts: TimeConflict[]) => void;
+  resetStore: () => void;
 }
 
 export const useStore = create<AppStore>((set, get) => ({
@@ -96,6 +97,20 @@ export const useStore = create<AppStore>((set, get) => ({
   setAllUserTimeSlots: (allUserTimeSlots) => set({ allUserTimeSlots }),
   setViewMode: (viewMode) => set({ viewMode }),
   setDetectedConflicts: (detectedConflicts) => set({ detectedConflicts }),
+  resetStore: () => set({
+    user: null,
+    currentWorkspace: null,
+    workspaces: [],
+    workspaceMembers: [],
+    timeSlots: [],
+    users: [],
+    labels: [],
+    notifications: [],
+    selectedDate: new Date(),
+    allUserTimeSlots: [],
+    viewMode: "week",
+    detectedConflicts: [],
+  }),
   getUserRole: (userId: string) => {
     const state = get();
     const member = state.workspaceMembers.find(

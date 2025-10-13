@@ -28,6 +28,7 @@ function App() {
     workspaces,
     setAllUserTimeSlots,
     setDetectedConflicts,
+    resetStore,
   } = useStore();
   const [loading, setLoading] = useState(true);
 
@@ -59,7 +60,8 @@ function App() {
           alert("Error loading data. Check console and Firestore setup.");
         }
       } else {
-        setUser(null);
+        // User logged out - reset all store state to prevent data leakage
+        resetStore();
       }
       setLoading(false);
     });

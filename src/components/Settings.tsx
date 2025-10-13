@@ -11,7 +11,7 @@ interface SettingsProps {
 }
 
 export default function Settings({ onClose }: SettingsProps) {
-  const { user, setUser, users, currentWorkspace, labels } = useStore();
+  const { user, setUser, users, currentWorkspace, labels, resetStore } = useStore();
   const [showTeamPanel, setShowTeamPanel] = useState(false);
   const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
   const [showLabelManagement, setShowLabelManagement] = useState(false);
@@ -19,7 +19,8 @@ export default function Settings({ onClose }: SettingsProps) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setUser(null);
+      // Reset all store state to prevent data leakage between users
+      resetStore();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -202,7 +203,8 @@ export default function Settings({ onClose }: SettingsProps) {
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  💡 Add team members directly to your workspace - no separate connections needed
+                  💡 Add team members directly to your workspace - no separate
+                  connections needed
                 </p>
               </div>
             </div>
@@ -221,9 +223,7 @@ export default function Settings({ onClose }: SettingsProps) {
       </div>
 
       {/* Team Panel Modal */}
-      {showTeamPanel && (
-        <TeamPanel onClose={() => setShowTeamPanel(false)} />
-      )}
+      {showTeamPanel && <TeamPanel onClose={() => setShowTeamPanel(false)} />}
 
       {showWorkspaceSettings && (
         <WorkspaceSettings onClose={() => setShowWorkspaceSettings(false)} />

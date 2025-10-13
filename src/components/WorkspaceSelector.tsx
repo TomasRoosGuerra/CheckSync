@@ -26,7 +26,12 @@ export default function WorkspaceSelector({
   const [joinCode, setJoinCode] = useState("");
 
   useEffect(() => {
-    loadWorkspaces();
+    if (user) {
+      loadWorkspaces();
+    } else {
+      // Clear workspaces when user logs out
+      setWorkspaces([]);
+    }
   }, [user]);
 
   const loadWorkspaces = async () => {
