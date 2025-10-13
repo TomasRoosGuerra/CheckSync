@@ -59,17 +59,20 @@ export default function WorkspaceSelector({
 
     setCreating(true);
     try {
+      // Ensure description is optional - convert empty string to undefined
+      const description = newWorkspaceDesc.trim() || undefined;
+      
       const workspaceId = await createWorkspace(
         user.id,
         newWorkspaceName.trim(),
-        newWorkspaceDesc.trim() || undefined,
+        description,
         newWorkspacePublic
       );
 
       const newWorkspace: Workspace = {
         id: workspaceId,
         name: newWorkspaceName.trim(),
-        description: newWorkspaceDesc.trim() || undefined,
+        description: description,
         ownerId: user.id,
         isPublic: newWorkspacePublic,
         createdAt: Date.now(),
@@ -190,15 +193,18 @@ export default function WorkspaceSelector({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description (Optional)
+                    Description <span className="text-gray-500 font-normal">(Optional)</span>
                   </label>
                   <textarea
                     value={newWorkspaceDesc}
                     onChange={(e) => setNewWorkspaceDesc(e.target.value)}
                     className="input-field resize-none"
                     rows={2}
-                    placeholder="e.g., Weekly training sessions for tennis coaches"
+                    placeholder="e.g., Weekly training sessions for tennis coaches (leave blank if not needed)"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    You can add a description later in workspace settings
+                  </p>
                 </div>
                 <div>
                   <label className="flex items-center gap-2 cursor-pointer">

@@ -30,17 +30,20 @@ export default function WorkspaceQuickSwitcher({
 
     setCreating(true);
     try {
+      // Ensure description is optional - convert empty string to undefined
+      const description = newDesc.trim() || undefined;
+      
       const workspaceId = await createWorkspace(
         user.id,
         newName.trim(),
-        newDesc.trim() || undefined,
+        description,
         newPublic
       );
 
       const newWorkspace: Workspace = {
         id: workspaceId,
         name: newName.trim(),
-        description: newDesc.trim() || undefined,
+        description: description,
         ownerId: user.id,
         isPublic: newPublic,
         createdAt: Date.now(),
@@ -159,7 +162,7 @@ export default function WorkspaceQuickSwitcher({
                 <textarea
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  placeholder="Description (optional)"
+                  placeholder="Description (optional - leave blank if not needed)"
                   className="input-field resize-none"
                   rows={2}
                 />
