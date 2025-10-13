@@ -174,6 +174,7 @@ export const markNotificationAsRead = async (notificationId: string) => {
   try {
     const notifRef = doc(db, NOTIFICATIONS_COLLECTION, notificationId);
     await updateDoc(notifRef, { read: true });
+    console.log("✅ Notification marked as read:", notificationId);
   } catch (error) {
     console.error("Error marking notification as read:", error);
     throw error;

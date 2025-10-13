@@ -59,8 +59,13 @@ export default function NotificationsPanel({
         notification.workspaceId
       );
 
-      // Mark as read
-      await markNotificationAsRead(notification.id);
+      // Mark as read (non-critical - don't fail if this errors)
+      try {
+        await markNotificationAsRead(notification.id);
+      } catch (markError) {
+        console.warn("Failed to mark notification as read:", markError);
+        // Don't throw - this is not critical to the approval process
+      }
 
       alert("✅ Request approved! User has been added to the workspace.");
     } catch (error) {
@@ -74,7 +79,14 @@ export default function NotificationsPanel({
 
     try {
       await rejectJoinRequest(notification.requestId, user!.id);
-      await markNotificationAsRead(notification.id);
+      
+      // Mark as read (non-critical - don't fail if this errors)
+      try {
+        await markNotificationAsRead(notification.id);
+      } catch (markError) {
+        console.warn("Failed to mark notification as read:", markError);
+        // Don't throw - this is not critical to the rejection process
+      }
 
       alert("Request rejected.");
     } catch (error) {
