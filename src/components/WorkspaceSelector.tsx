@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
 import {
   createWorkspace,
   getUserWorkspaces,
@@ -14,7 +16,7 @@ interface WorkspaceSelectorProps {
 export default function WorkspaceSelector({
   onWorkspaceSelected,
 }: WorkspaceSelectorProps) {
-  const { user, setCurrentWorkspace, workspaces, setWorkspaces } = useStore();
+  const { user, setCurrentWorkspace, workspaces, setWorkspaces, resetStore } = useStore();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -61,7 +63,7 @@ export default function WorkspaceSelector({
     try {
       // Ensure description is optional - convert empty string to undefined
       const description = newWorkspaceDesc.trim() || undefined;
-      
+
       const workspaceId = await createWorkspace(
         user.id,
         newWorkspaceName.trim(),
@@ -101,9 +103,42 @@ export default function WorkspaceSelector({
     onWorkspaceSelected();
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Reset all store state to prevent data leakage between users
+      resetStore();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+        {/* Logout Button */}
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={handleLogout}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            title="Sign Out"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+          </button>
+        </div>
+
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl">✓</span>
@@ -114,6 +149,11 @@ export default function WorkspaceSelector({
           <p className="text-sm text-gray-600">
             Choose a team or create a new one
           </p>
+          {user && (
+            <p className="text-xs text-gray-500 mt-2">
+              Signed in as {user.name} ({user.email})
+            </p>
+          )}
         </div>
 
         {loading ? (
@@ -193,7 +233,10 @@ export default function WorkspaceSelector({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description <span className="text-gray-500 font-normal">(Optional)</span>
+                    Description{" "}
+                    <span className="text-gray-500 font-normal">
+                      (Optional)
+                    </span>
                   </label>
                   <textarea
                     value={newWorkspaceDesc}
