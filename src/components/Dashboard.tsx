@@ -8,7 +8,6 @@ import MobileMenu from "./MobileMenu";
 import MyAgendaView from "./MyAgendaView";
 import NotificationsPanel from "./NotificationsPanel";
 import Settings from "./Settings";
-import TeamDashboard from "./TeamDashboard";
 import TeamPanel from "./TeamPanel";
 import TodayWidget from "./TodayWidget";
 import WeekCalendar from "./WeekCalendar";
@@ -42,11 +41,6 @@ export default function Dashboard() {
       ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
       : "participant";
 
-  // Check if user is manager/admin in any workspace
-  const isManagerOrAdmin = workspaces.some((ws) => {
-    const role = getUserWorkspaceRole(user?.id || "", ws.id, workspaceMembers);
-    return role === "manager" || role === "admin";
-  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -131,20 +125,6 @@ export default function Dashboard() {
                   )}
                 </button>
 
-                {/* Team Dashboard - Manager/Admin Only */}
-                {isManagerOrAdmin && (
-                  <button
-                    onClick={() => setViewMode("team-dashboard")}
-                    className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
-                      viewMode === "team-dashboard"
-                        ? "bg-primary shadow-md"
-                        : "bg-gray-100 hover:bg-gray-200"
-                    }`}
-                    title="Team Dashboard"
-                  >
-                    📊 Team
-                  </button>
-                )}
               </div>
 
               {/* Action Buttons */}
@@ -225,7 +205,6 @@ export default function Dashboard() {
                   {viewMode === "week" && "📅 Week"}
                   {viewMode === "agenda" && "📋 Agenda"}
                   {viewMode === "my-agenda" && "✨ My Agenda"}
-                  {viewMode === "team-dashboard" && "📊 Team"}
                 </span>
               </div>
 
@@ -285,16 +264,8 @@ export default function Dashboard() {
             </div>
             <AgendaView onSlotClick={setSelectedDay} />
           </div>
-        ) : viewMode === "my-agenda" ? (
-          <MyAgendaView
-            onSlotClick={(slot, workspace) => {
-              // Switch to workspace and open day view
-              setCurrentWorkspace(workspace);
-              setSelectedDay(new Date(slot.date + "T00:00:00"));
-            }}
-          />
         ) : (
-          <TeamDashboard
+          <MyAgendaView
             onSlotClick={(slot, workspace) => {
               // Switch to workspace and open day view
               setCurrentWorkspace(workspace);

@@ -10,7 +10,7 @@ import type {
   WorkspaceMember,
 } from "./types";
 
-type ViewMode = "week" | "agenda" | "my-agenda" | "team-dashboard";
+type ViewMode = "week" | "agenda" | "my-agenda";
 
 interface AppStore {
   user: User | null;
@@ -97,20 +97,21 @@ export const useStore = create<AppStore>((set, get) => ({
   setAllUserTimeSlots: (allUserTimeSlots) => set({ allUserTimeSlots }),
   setViewMode: (viewMode) => set({ viewMode }),
   setDetectedConflicts: (detectedConflicts) => set({ detectedConflicts }),
-  resetStore: () => set({
-    user: null,
-    currentWorkspace: null,
-    workspaces: [],
-    workspaceMembers: [],
-    timeSlots: [],
-    users: [],
-    labels: [],
-    notifications: [],
-    selectedDate: new Date(),
-    allUserTimeSlots: [],
-    viewMode: "week",
-    detectedConflicts: [],
-  }),
+  resetStore: () =>
+    set({
+      user: null,
+      currentWorkspace: null,
+      workspaces: [],
+      workspaceMembers: [],
+      timeSlots: [],
+      users: [],
+      labels: [],
+      notifications: [],
+      selectedDate: new Date(),
+      allUserTimeSlots: [],
+      viewMode: "week",
+      detectedConflicts: [],
+    }),
   getUserRole: (userId: string) => {
     const state = get();
     const member = state.workspaceMembers.find(

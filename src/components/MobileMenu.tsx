@@ -3,9 +3,7 @@ import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 
 interface MobileMenuProps {
   onClose: () => void;
-  onViewModeChange: (
-    mode: "week" | "agenda" | "my-agenda" | "team-dashboard"
-  ) => void;
+  onViewModeChange: (mode: "week" | "agenda" | "my-agenda") => void;
   onNotificationsClick: () => void;
   onTeamPanelClick: () => void;
   onExportClick: () => void;
@@ -37,11 +35,6 @@ export default function MobileMenu({
       ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
       : "participant";
 
-  // Check if user is manager/admin in any workspace
-  const isManagerOrAdmin = workspaces.some((ws) => {
-    const role = getUserWorkspaceRole(user?.id || "", ws.id, workspaceMembers);
-    return role === "manager" || role === "admin";
-  });
 
   const menuItems = [
     {
@@ -64,16 +57,6 @@ export default function MobileMenu({
       badge:
         detectedConflicts.length > 0 ? detectedConflicts.length : undefined,
     },
-    ...(isManagerOrAdmin
-      ? [
-          {
-            id: "team-dashboard",
-            icon: "📊",
-            label: "Team Dashboard",
-            action: () => onViewModeChange("team-dashboard"),
-          },
-        ]
-      : []),
     {
       id: "notifications",
       icon: "🔔",
