@@ -85,6 +85,7 @@ export interface TimeSlot {
   updatedAt: number;
   recurringGroupId?: string; // ID linking recurring slots together
   isRecurring?: boolean; // Flag for recurring slots
+  labelId?: string; // Optional label for categorization
 }
 
 export interface AttendanceRecord {
@@ -113,4 +114,13 @@ export interface TimeConflict {
   overlapStart: string;
   overlapEnd: string;
   overlapMinutes: number;
+}
+
+export interface Label {
+  id: string;
+  workspaceId: string;
+  name: string;
+  color: string;
+  createdBy: string;
+  createdAt: number;
 }

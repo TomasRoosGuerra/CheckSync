@@ -15,7 +15,7 @@ interface SlotModalProps {
 }
 
 export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
-  const { user, users, currentWorkspace } = useStore();
+  const { user, users, currentWorkspace, labels } = useStore();
 
   const [title, setTitle] = useState(slot?.title || "");
   const [startTime, setStartTime] = useState(slot?.startTime || "09:00");
@@ -28,6 +28,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
   } = useToggleSelection(slot?.participantIds || []);
   const [verifierId, setVerifierId] = useState(slot?.verifierId || "");
   const [notes, setNotes] = useState(slot?.notes || "");
+  const [labelId, setLabelId] = useState(slot?.labelId || "");
   const [recurring, setRecurring] = useState(false);
   const [weeksAhead, setWeeksAhead] = useState(1);
 
@@ -39,6 +40,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
       setParticipantIds(slot.participantIds);
       setVerifierId(slot.verifierId);
       setNotes(slot.notes || "");
+      setLabelId(slot.labelId || "");
     }
   }, [slot]);
 
@@ -60,7 +62,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
       if (slot) {
         console.log("📝 Updating existing slot:", slot.id);
-        const updatePromise = updateSlotFirestore(slot.id, {
+        const updateData: any = {
           title,
           date: customDate,
           startTime,
@@ -68,7 +70,13 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           participantIds,
           verifierId,
           notes,
-        });
+        };
+
+        if (labelId) {
+          updateData.labelId = labelId;
+        }
+
+        const updatePromise = updateSlotFirestore(slot.id, updateData);
 
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => {
@@ -93,7 +101,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
         // Generate recurring group ID if creating multiple slots
         const recurringGroupId =
-          recurring && weeksAhead > 1 ? `recurring-${Date.now()}` : undefined;
+          recurring && weeksAhead > 1 ? `recurring-${Date.now()}` : null;
 
         const baseSlot: Omit<
           TimeSlot,
@@ -108,8 +116,9 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           status: "planned",
           notes,
           createdBy: user?.id || "",
-          recurringGroupId,
           isRecurring: recurring && weeksAhead > 1,
+          ...(recurringGroupId && { recurringGroupId }),
+          ...(labelId && { labelId }),
         };
 
         // Create recurring slots if requested
@@ -348,6 +357,38 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                   <p className="text-xs text-yellow-700 mt-1">
                     Set your role to Verifier/Manager/Admin in Settings, or add
                     connections who can verify.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Label (optional)
+              </label>
+              <select
+                value={labelId}
+                onChange={(e) => setLabelId(e.target.value)}
+                className="input-field text-base"
+              >
+                <option value="">No label</option>
+                {labels
+                  .filter((label) => label.workspaceId === currentWorkspace?.id)
+                  .map((label) => (
+                    <option key={label.id} value={label.id}>
+                      🏷️ {label.name}
+                    </option>
+                  ))}
+              </select>
+              {labels.filter(
+                (label) => label.workspaceId === currentWorkspace?.id
+              ).length === 0 && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>No labels available.</strong>
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Create labels in Settings to organize your time slots.
                   </p>
                 </div>
               )}

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type {
+  Label,
   Notification,
   TimeConflict,
   TimeSlot,
@@ -18,6 +19,7 @@ interface AppStore {
   workspaceMembers: WorkspaceMember[];
   timeSlots: TimeSlot[];
   users: User[];
+  labels: Label[];
   notifications: Notification[];
   selectedDate: Date;
   // Unified agenda state
@@ -33,6 +35,10 @@ interface AppStore {
   updateTimeSlot: (id: string, updates: Partial<TimeSlot>) => void;
   deleteTimeSlot: (id: string) => void;
   setUsers: (users: User[]) => void;
+  setLabels: (labels: Label[]) => void;
+  addLabel: (label: Label) => void;
+  updateLabel: (id: string, updates: Partial<Label>) => void;
+  deleteLabel: (id: string) => void;
   setNotifications: (notifications: Notification[]) => void;
   setSelectedDate: (date: Date) => void;
   getUserRole: (userId: string) => UserRole;
@@ -49,6 +55,7 @@ export const useStore = create<AppStore>((set, get) => ({
   workspaceMembers: [],
   timeSlots: [],
   users: [],
+  labels: [],
   notifications: [],
   selectedDate: new Date(),
   allUserTimeSlots: [],
@@ -72,6 +79,18 @@ export const useStore = create<AppStore>((set, get) => ({
       timeSlots: state.timeSlots.filter((slot) => slot.id !== id),
     })),
   setUsers: (users) => set({ users }),
+  setLabels: (labels) => set({ labels }),
+  addLabel: (label) => set((state) => ({ labels: [...state.labels, label] })),
+  updateLabel: (id, updates) =>
+    set((state) => ({
+      labels: state.labels.map((label) =>
+        label.id === id ? { ...label, ...updates } : label
+      ),
+    })),
+  deleteLabel: (id) =>
+    set((state) => ({
+      labels: state.labels.filter((label) => label.id !== id),
+    })),
   setNotifications: (notifications) => set({ notifications }),
   setSelectedDate: (selectedDate) => set({ selectedDate }),
   setAllUserTimeSlots: (allUserTimeSlots) => set({ allUserTimeSlots }),

@@ -2,6 +2,7 @@ import { signOut } from "firebase/auth";
 import { useState } from "react";
 import { auth } from "../firebase";
 import { useStore } from "../store";
+import LabelManagement from "./LabelManagement";
 import UserConnections from "./UserConnections";
 import WorkspaceSettings from "./WorkspaceSettings";
 
@@ -10,9 +11,10 @@ interface SettingsProps {
 }
 
 export default function Settings({ onClose }: SettingsProps) {
-  const { user, setUser, users, currentWorkspace } = useStore();
+  const { user, setUser, users, currentWorkspace, labels } = useStore();
   const [showConnections, setShowConnections] = useState(false);
   const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
+  const [showLabelManagement, setShowLabelManagement] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -137,6 +139,42 @@ export default function Settings({ onClose }: SettingsProps) {
               )}
             </div>
 
+            {/* Label Management */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span>🏷️</span>
+                Labels
+              </h3>
+              <div className="card">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      Workspace Labels
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {
+                        labels.filter(
+                          (l) => l.workspaceId === currentWorkspace?.id
+                        ).length
+                      }{" "}
+                      label
+                      {labels.filter(
+                        (l) => l.workspaceId === currentWorkspace?.id
+                      ).length !== 1
+                        ? "s"
+                        : ""}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowLabelManagement(true)}
+                    className="btn-primary text-sm py-2"
+                  >
+                    Manage
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* User Connections */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -185,6 +223,10 @@ export default function Settings({ onClose }: SettingsProps) {
 
       {showWorkspaceSettings && (
         <WorkspaceSettings onClose={() => setShowWorkspaceSettings(false)} />
+      )}
+
+      {showLabelManagement && (
+        <LabelManagement onClose={() => setShowLabelManagement(false)} />
       )}
     </div>
   );

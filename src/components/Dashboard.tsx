@@ -4,6 +4,7 @@ import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
+import MobileMenu from "./MobileMenu";
 import MyAgendaView from "./MyAgendaView";
 import NotificationsPanel from "./NotificationsPanel";
 import Settings from "./Settings";
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showTeamPanel, setShowTeamPanel] = useState(false);
   const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -86,46 +88,44 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2">
-              {/* View Toggle - All Screens */}
+            {/* Desktop Navigation */}
+            <div className="hidden sm:flex items-center gap-2">
+              {/* View Toggle */}
               <div className="flex gap-1">
                 <button
                   onClick={() => setViewMode("week")}
-                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
+                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
                     viewMode === "week"
                       ? "bg-primary shadow-md"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   title="Week View"
                 >
-                  <span className="sm:hidden">📅</span>
-                  <span className="hidden sm:inline">📅 Week</span>
+                  📅 Week
                 </button>
                 <button
                   onClick={() => setViewMode("agenda")}
-                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
+                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
                     viewMode === "agenda"
                       ? "bg-primary shadow-md"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   title="Workspace Agenda"
                 >
-                  <span className="sm:hidden">📋</span>
-                  <span className="hidden sm:inline">📋 Agenda</span>
+                  📋 Agenda
                 </button>
                 <button
                   onClick={() => setViewMode("my-agenda")}
-                  className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors relative text-gray-900 ${
+                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full relative text-gray-900 ${
                     viewMode === "my-agenda"
                       ? "bg-primary shadow-md"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   title="My Agenda"
                 >
-                  <span className="sm:hidden">✨</span>
-                  <span className="hidden sm:inline">✨ My Agenda</span>
+                  ✨ My Agenda
                   {detectedConflicts.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                       {detectedConflicts.length}
                     </span>
                   )}
@@ -135,23 +135,22 @@ export default function Dashboard() {
                 {isManagerOrAdmin && (
                   <button
                     onClick={() => setViewMode("team-dashboard")}
-                    className={`py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
+                    className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
                       viewMode === "team-dashboard"
                         ? "bg-primary shadow-md"
                         : "bg-gray-100 hover:bg-gray-200"
                     }`}
                     title="Team Dashboard"
                   >
-                    <span className="sm:hidden">📊</span>
-                    <span className="hidden sm:inline">📊 Team</span>
+                    📊 Team
                   </button>
                 )}
               </div>
 
-              {/* Notifications Button */}
+              {/* Action Buttons */}
               <button
                 onClick={() => setShowNotifications(true)}
-                className="btn-secondary py-2 px-2 sm:px-3 text-xs sm:text-sm touch-manipulation relative"
+                className="btn-secondary py-2 px-3 text-sm touch-manipulation relative"
                 title="Notifications"
               >
                 <span className="text-base">🔔</span>
@@ -162,23 +161,21 @@ export default function Dashboard() {
                 )}
               </button>
 
-              {/* Team Panel Button - Consolidated */}
               <button
                 onClick={() => setShowTeamPanel(true)}
-                className="btn-secondary py-2 px-2 sm:px-3 text-xs sm:text-sm touch-manipulation"
+                className="btn-secondary py-2 px-3 text-sm touch-manipulation"
                 title="Team & Workspaces"
               >
-                <span className="hidden sm:inline">👥 Team</span>
-                <span className="sm:hidden">👥</span>
+                👥 Team
               </button>
 
               {canExportData(user, userRole) && (
                 <button
                   onClick={() => setShowExport(true)}
-                  className="btn-secondary flex items-center gap-1 sm:gap-2 py-2 px-3 sm:px-4 text-sm sm:text-base"
+                  className="btn-secondary flex items-center gap-2 py-2 px-4 text-base"
                 >
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -190,9 +187,10 @@ export default function Dashboard() {
                       d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">Export</span>
+                  Export
                 </button>
               )}
+
               <button
                 onClick={() => setShowSettings(true)}
                 className="btn-secondary py-2 px-3 min-w-[44px]"
@@ -216,6 +214,54 @@ export default function Dashboard() {
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
+              </button>
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="flex sm:hidden items-center gap-2">
+              {/* Current View Indicator */}
+              <div className="flex-1 text-center">
+                <span className="text-sm font-medium text-gray-700">
+                  {viewMode === "week" && "📅 Week"}
+                  {viewMode === "agenda" && "📋 Agenda"}
+                  {viewMode === "my-agenda" && "✨ My Agenda"}
+                  {viewMode === "team-dashboard" && "📊 Team"}
+                </span>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setShowMobileMenu(true)}
+                className="btn-secondary py-2 px-3 min-w-[44px]"
+                title="Menu"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+
+              {/* Notifications Button (always visible) */}
+              <button
+                onClick={() => setShowNotifications(true)}
+                className="btn-secondary py-2 px-3 min-w-[44px] relative"
+                title="Notifications"
+              >
+                <span className="text-base">🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -271,6 +317,17 @@ export default function Dashboard() {
       {showWorkspaceSwitcher && (
         <WorkspaceQuickSwitcher
           onClose={() => setShowWorkspaceSwitcher(false)}
+        />
+      )}
+
+      {showMobileMenu && (
+        <MobileMenu
+          onClose={() => setShowMobileMenu(false)}
+          onViewModeChange={setViewMode}
+          onNotificationsClick={() => setShowNotifications(true)}
+          onTeamPanelClick={() => setShowTeamPanel(true)}
+          onExportClick={() => setShowExport(true)}
+          onSettingsClick={() => setShowSettings(true)}
         />
       )}
     </div>
