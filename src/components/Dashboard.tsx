@@ -164,7 +164,7 @@ export default function Dashboard() {
               <button
                 onClick={() => setShowTeamPanel(true)}
                 className="btn-secondary py-2 px-3 text-sm touch-manipulation"
-                title="Team & Workspaces"
+                title="Manage Team & Workspaces"
               >
                 👥 Team
               </button>

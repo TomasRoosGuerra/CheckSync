@@ -84,7 +84,7 @@ export default function MobileMenu({
     {
       id: "team",
       icon: "👥",
-      label: "Team & Workspaces",
+      label: "Manage Team",
       action: onTeamPanelClick,
     },
     ...(canExportData(user, userRole)

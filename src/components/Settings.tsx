@@ -3,7 +3,6 @@ import { useState } from "react";
 import { auth } from "../firebase";
 import { useStore } from "../store";
 import LabelManagement from "./LabelManagement";
-import TeamPanel from "./TeamPanel";
 import WorkspaceSettings from "./WorkspaceSettings";
 
 interface SettingsProps {
@@ -11,8 +10,8 @@ interface SettingsProps {
 }
 
 export default function Settings({ onClose }: SettingsProps) {
-  const { user, setUser, users, currentWorkspace, labels, resetStore } = useStore();
-  const [showTeamPanel, setShowTeamPanel] = useState(false);
+  const { user, setUser, users, currentWorkspace, labels, resetStore } =
+    useStore();
   const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
   const [showLabelManagement, setShowLabelManagement] = useState(false);
 
@@ -176,38 +175,6 @@ export default function Settings({ onClose }: SettingsProps) {
               </div>
             </div>
 
-            {/* Team Members */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <span>👥</span>
-                Team Members
-              </h3>
-              <div className="card">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      Current Workspace Team
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {users.filter((u) => u.id !== user?.id).length} member
-                      {users.filter((u) => u.id !== user?.id).length !== 1
-                        ? "s"
-                        : ""}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowTeamPanel(true)}
-                    className="btn-primary text-sm py-2"
-                  >
-                    Manage Team
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  💡 Add team members directly to your workspace - no separate
-                  connections needed
-                </p>
-              </div>
-            </div>
 
             {/* Logout */}
             <div className="pt-4 border-t border-gray-200">
@@ -222,8 +189,6 @@ export default function Settings({ onClose }: SettingsProps) {
         </div>
       </div>
 
-      {/* Team Panel Modal */}
-      {showTeamPanel && <TeamPanel onClose={() => setShowTeamPanel(false)} />}
 
       {showWorkspaceSettings && (
         <WorkspaceSettings onClose={() => setShowWorkspaceSettings(false)} />
