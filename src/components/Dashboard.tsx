@@ -23,7 +23,6 @@ export default function Dashboard() {
     setViewMode,
     detectedConflicts,
     setCurrentWorkspace,
-    workspaces,
   } = useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
