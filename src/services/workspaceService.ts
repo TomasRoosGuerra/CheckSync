@@ -11,7 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import type { Workspace, WorkspaceMember } from "../types";
+import type { User, Workspace, WorkspaceMember } from "../types";
 
 const WORKSPACES_COLLECTION = "workspaces";
 const WORKSPACE_MEMBERS_COLLECTION = "workspaceMembers";
@@ -234,6 +234,79 @@ export const createWorkspaceFromTemplate = async (
   } catch (error) {
     console.error("Error creating workspace from template:", error);
     throw error;
+  }
+};
+
+// Get all users that the current user has collaborated with across all workspaces
+export const getCollaboratedUsers = async (userId: string): Promise<User[]> => {
+  try {
+    // Get all workspaces where user is a member
+    const memberQuery = query(
+      collection(db, WORKSPACE_MEMBERS_COLLECTION),
+      where("userId", "==", userId)
+    );
+    const memberSnapshot = await getDocs(memberQuery);
+
+    const workspaceIds = memberSnapshot.docs.map(
+      (doc) => doc.data().workspaceId
+    );
+
+    if (workspaceIds.length === 0) return [];
+
+    // Get all members from these workspaces
+    const allMembersQuery = query(
+      collection(db, WORKSPACE_MEMBERS_COLLECTION),
+      where("workspaceId", "in", workspaceIds)
+    );
+    const allMembersSnapshot = await getDocs(allMembersQuery);
+
+    // Get unique user IDs (excluding current user)
+    const collaboratedUserIds = new Set(
+      allMembersSnapshot.docs
+        .map((doc) => doc.data().userId)
+        .filter((id) => id !== userId)
+    );
+
+    // Fetch user profiles for collaborated users
+    const userProfiles: User[] = [];
+    for (const uid of collaboratedUserIds) {
+      try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (userDoc.exists()) {
+          userProfiles.push({
+            id: userDoc.id,
+            ...userDoc.data(),
+          } as User);
+        }
+      } catch (error) {
+        console.warn(`Failed to fetch user profile for ${uid}:`, error);
+      }
+    }
+
+    return userProfiles;
+  } catch (error) {
+    console.error("Error getting collaborated users:", error);
+    return [];
+  }
+};
+
+// Search users globally by email (across all users in the system)
+export const searchUsersGlobally = async (email: string): Promise<User[]> => {
+  try {
+    const usersQuery = query(
+      collection(db, "users"),
+      where("email", ">=", email.toLowerCase()),
+      where("email", "<=", email.toLowerCase() + "\uf8ff")
+    );
+    const snapshot = await getDocs(usersQuery);
+
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as User[];
+  } catch (error) {
+    console.error("Error searching users globally:", error);
+    return [];
   }
 };
 

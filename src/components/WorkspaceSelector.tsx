@@ -245,6 +245,7 @@ export default function WorkspaceSelector({
                     className="input-field resize-none"
                     rows={2}
                     placeholder="e.g., Weekly training sessions for tennis coaches (leave blank if not needed)"
+                    style={{ minHeight: "60px" }}
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     You can add a description later in workspace settings

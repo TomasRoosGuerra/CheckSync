@@ -11,6 +11,7 @@ import {
   getUserWorkspaceRole,
   isWorkspaceOwner,
 } from "../utils/permissions";
+import EnhancedMemberAdder from "./EnhancedMemberAdder";
 
 interface TeamPanelProps {
   onClose: () => void;
@@ -25,6 +26,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
   const [processing, setProcessing] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
   const [memberSearch, setMemberSearch] = useState("");
+  const [showEnhancedAdder, setShowEnhancedAdder] = useState(false);
 
   // Get current workspace data
   const currentMembers = workspaceMembers.filter(
@@ -185,14 +187,10 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
             </button>
             {canManage && (
               <button
-                onClick={() => setActiveTab("add")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                  activeTab === "add"
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                onClick={() => setShowEnhancedAdder(true)}
+                className="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap bg-primary text-white hover:bg-primary-dark"
               >
-                ➕ Add Member
+                ➕ Add Members
               </button>
             )}
           </div>
@@ -332,99 +330,6 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               )}
             </div>
           )}
-
-          {/* Add Member Tab */}
-          {activeTab === "add" && isOwner && (
-            <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl p-6 border-2 border-primary/20">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Search User by Email
-              </h3>
-
-              <form onSubmit={handleSearchUser} className="space-y-4">
-                <input
-                  type="email"
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
-                  placeholder="teammate@example.com"
-                  className="input-field"
-                  required
-                />
-
-                {!searchResult ? (
-                  <button
-                    type="submit"
-                    disabled={processing}
-                    className="btn-primary w-full"
-                  >
-                    {processing ? "Searching..." : "🔍 Search User"}
-                  </button>
-                ) : (
-                  <div className="bg-white rounded-lg p-4 border-2 border-green-200">
-                    <p className="text-sm font-medium text-green-700 mb-3">
-                      ✅ User Found!
-                    </p>
-                    <div className="flex items-center gap-3 mb-4">
-                      {searchResult.photoURL ? (
-                        <img
-                          src={searchResult.photoURL}
-                          alt={searchResult.name}
-                          className="w-12 h-12 rounded-full"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-                          <span className="text-white font-bold">
-                            {searchResult.name.charAt(0)}
-                          </span>
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-semibold text-gray-900">
-                          {searchResult.name}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {searchResult.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    <select
-                      value={selectedRole}
-                      onChange={(e) =>
-                        setSelectedRole(e.target.value as UserRole)
-                      }
-                      className="input-field mb-4"
-                    >
-                      <option value="participant">👤 Participant</option>
-                      <option value="verifier">🔒 Verifier</option>
-                      <option value="manager">📊 Manager</option>
-                      <option value="admin">👑 Admin</option>
-                    </select>
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleAddMember}
-                        disabled={processing}
-                        className="btn-primary flex-1"
-                      >
-                        {processing ? "Adding..." : "✅ Add to Workspace"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSearchResult(null);
-                          setSearchEmail("");
-                        }}
-                        className="btn-secondary"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </form>
-            </div>
-          )}
         </div>
 
         {/* Leave Workspace Button - Only show for users who can leave */}
@@ -439,6 +344,18 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
           </div>
         )}
       </div>
+
+      {/* Enhanced Member Adder Modal */}
+      {showEnhancedAdder && currentWorkspace && (
+        <EnhancedMemberAdder
+          workspaceId={currentWorkspace.id}
+          onClose={() => setShowEnhancedAdder(false)}
+          onMembersAdded={() => {
+            // Members will be updated via subscription in App.tsx
+            setShowEnhancedAdder(false);
+          }}
+        />
+      )}
     </div>
   );
 }
