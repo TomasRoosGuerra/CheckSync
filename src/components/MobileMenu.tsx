@@ -22,7 +22,6 @@ export default function MobileMenu({
     user,
     currentWorkspace,
     workspaceMembers,
-    workspaces,
     notifications,
     detectedConflicts,
   } = useStore();

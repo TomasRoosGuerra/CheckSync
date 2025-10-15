@@ -10,8 +10,7 @@ interface SettingsProps {
 }
 
 export default function Settings({ onClose }: SettingsProps) {
-  const { user, setUser, users, currentWorkspace, labels, resetStore } =
-    useStore();
+  const { user, currentWorkspace, labels, resetStore } = useStore();
   const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
   const [showLabelManagement, setShowLabelManagement] = useState(false);
 

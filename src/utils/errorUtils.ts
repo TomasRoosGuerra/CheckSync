@@ -25,5 +25,6 @@ export const handleAsyncOperation = async <T>(
     return await operation();
   } catch (error) {
     handleServiceError(error, operationName, context);
+    throw error; // Re-throw the error after handling
   }
 };

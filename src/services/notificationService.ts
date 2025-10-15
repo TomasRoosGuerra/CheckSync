@@ -39,11 +39,10 @@ export const getNotificationTemplate = (
   context: {
     slot?: TimeSlot;
     workspace?: Workspace;
-    user?: User;
     member?: User;
   }
 ): { subject: string; body: string } => {
-  const { slot, workspace, user, member } = context;
+  const { slot, workspace, member } = context;
 
   switch (trigger) {
     case "slot_created":

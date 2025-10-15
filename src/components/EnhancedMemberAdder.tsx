@@ -19,7 +19,7 @@ export default function EnhancedMemberAdder({
   onClose,
   onMembersAdded,
 }: EnhancedMemberAdderProps) {
-  const { user, users, workspaces, workspaceMembers } = useStore();
+  const { user, workspaceMembers } = useStore();
   const [activeTab, setActiveTab] = useState<
     "collaborated" | "search" | "bulk"
   >("collaborated");
@@ -31,7 +31,7 @@ export default function EnhancedMemberAdder({
   );
   const [processing, setProcessing] = useState(false);
   const [searching, setSearching] = useState(false);
-  const [bulkEmails, setBulkEmails] = useState("");
+  // const [bulkEmails] = useState(""); // TODO: Implement bulk email functionality
   const [bulkRole, setBulkRole] = useState<UserRole>("participant");
 
   // Get current workspace members to avoid duplicates
