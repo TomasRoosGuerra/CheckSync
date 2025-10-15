@@ -110,21 +110,40 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
   };
 
   const handleLeaveWorkspace = async () => {
-    if (!currentWorkspace || !user) return;
+    console.log("🔍 handleLeaveWorkspace called:", {
+      user: user ? { id: user.id, name: user.name } : null,
+      currentWorkspace: currentWorkspace
+        ? {
+            id: currentWorkspace.id,
+            name: currentWorkspace.name,
+            ownerId: currentWorkspace.ownerId,
+          }
+        : null,
+    });
+
+    if (!currentWorkspace || !user) {
+      console.log("❌ Cannot leave: missing workspace or user");
+      return;
+    }
 
     const confirmLeave = confirm(
       `Are you sure you want to leave "${currentWorkspace.name}"?\n\nThis action cannot be undone. You'll need to be re-invited to rejoin.`
     );
 
-    if (!confirmLeave) return;
+    if (!confirmLeave) {
+      console.log("❌ User cancelled leave operation");
+      return;
+    }
 
+    console.log("🚪 Starting leave workspace process...");
     try {
       await removeWorkspaceMember(currentWorkspace.id, user.id);
+      console.log("✅ Successfully left workspace");
       alert("✅ You have left the workspace.");
       onClose(); // Close the team panel
       // The workspace will be removed from the user's list via subscription
     } catch (error) {
-      console.error("Error leaving workspace:", error);
+      console.error("❌ Error leaving workspace:", error);
       alert("Failed to leave workspace. Please try again.");
     }
   };
@@ -333,13 +352,51 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
         </div>
 
         {/* Leave Workspace Button - Only show for users who can leave */}
-        {canLeaveWorkspace(user, currentWorkspace) && (
+        {(() => {
+          const canLeave = canLeaveWorkspace(user, currentWorkspace);
+          console.log("🔍 TeamPanel render - Leave button visibility:", {
+            user: user ? { id: user.id, name: user.name } : null,
+            currentWorkspace: currentWorkspace
+              ? {
+                  id: currentWorkspace.id,
+                  name: currentWorkspace.name,
+                  ownerId: currentWorkspace.ownerId,
+                }
+              : null,
+            canLeave,
+          });
+          return canLeave;
+        })() && (
           <div className="border-t border-gray-200 p-4 sm:p-6">
             <button
               onClick={handleLeaveWorkspace}
               className="w-full bg-red-50 hover:bg-red-100 text-red-700 font-medium py-3 px-6 rounded-lg transition-colors border border-red-200"
             >
               🚪 Leave Workspace
+            </button>
+          </div>
+        )}
+
+        {/* DEBUG: Always show leave button for testing */}
+        {user && currentWorkspace && (
+          <div className="border-t border-gray-200 p-4 sm:p-6 bg-yellow-50">
+            <div className="text-xs text-gray-600 mb-2">DEBUG INFO:</div>
+            <div className="text-xs text-gray-600 mb-2">
+              User: {user.name} ({user.id})
+            </div>
+            <div className="text-xs text-gray-600 mb-2">
+              Workspace: {currentWorkspace.name} (Owner:{" "}
+              {currentWorkspace.ownerId})
+            </div>
+            <div className="text-xs text-gray-600 mb-2">
+              Can Leave:{" "}
+              {canLeaveWorkspace(user, currentWorkspace) ? "YES" : "NO"}
+            </div>
+            <button
+              onClick={handleLeaveWorkspace}
+              className="w-full bg-orange-50 hover:bg-orange-100 text-orange-700 font-medium py-2 px-4 rounded-lg transition-colors border border-orange-200 text-sm"
+            >
+              🚪 DEBUG: Force Leave Workspace
             </button>
           </div>
         )}

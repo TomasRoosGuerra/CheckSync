@@ -114,9 +114,28 @@ export const canLeaveWorkspace = (
   user: User | null,
   workspace: Workspace | null
 ): boolean => {
-  if (!user || !workspace) return false;
+  console.log("🔍 canLeaveWorkspace check:", {
+    user: user ? { id: user.id, name: user.name } : null,
+    workspace: workspace
+      ? { id: workspace.id, name: workspace.name, ownerId: workspace.ownerId }
+      : null,
+    isOwner: workspace?.ownerId === user?.id,
+  });
+
+  if (!user || !workspace) {
+    console.log("❌ Cannot leave: missing user or workspace");
+    return false;
+  }
+
+  const canLeave = workspace.ownerId !== user.id;
+  console.log(
+    `${canLeave ? "✅" : "❌"} User ${
+      canLeave ? "can" : "cannot"
+    } leave workspace`
+  );
+
   // Users can leave workspace unless they are the owner
-  return workspace.ownerId !== user.id;
+  return canLeave;
 };
 
 export const canViewSlot = (user: User | null, slot: TimeSlot): boolean => {
