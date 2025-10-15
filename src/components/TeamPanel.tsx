@@ -1,11 +1,16 @@
 import { useState } from "react";
 import {
   addWorkspaceMember,
+  removeWorkspaceMember,
   updateMemberRole,
 } from "../services/workspaceService";
 import { useStore } from "../store";
 import type { UserRole } from "../types";
-import { getUserWorkspaceRole, isWorkspaceOwner } from "../utils/permissions";
+import {
+  canLeaveWorkspace,
+  getUserWorkspaceRole,
+  isWorkspaceOwner,
+} from "../utils/permissions";
 
 interface TeamPanelProps {
   onClose: () => void;
@@ -34,6 +39,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
       : "participant";
 
   const isOwner = isWorkspaceOwner(user, currentWorkspace);
+  const canManage = isOwner || userRole === "manager" || userRole === "admin";
 
   const handleSearchUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +107,26 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
     }
   };
 
+  const handleLeaveWorkspace = async () => {
+    if (!currentWorkspace || !user) return;
+
+    const confirmLeave = confirm(
+      `Are you sure you want to leave "${currentWorkspace.name}"?\n\nThis action cannot be undone. You'll need to be re-invited to rejoin.`
+    );
+
+    if (!confirmLeave) return;
+
+    try {
+      await removeWorkspaceMember(currentWorkspace.id, user.id);
+      alert("✅ You have left the workspace.");
+      onClose(); // Close the team panel
+      // The workspace will be removed from the user's list via subscription
+    } catch (error) {
+      console.error("Error leaving workspace:", error);
+      alert("Failed to leave workspace. Please try again.");
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col animate-in slide-in-from-bottom duration-300">
@@ -157,7 +183,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
             >
               👥 Members ({currentWorkspaceUsers.length})
             </button>
-            {isOwner && (
+            {canManage && (
               <button
                 onClick={() => setActiveTab("add")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
@@ -274,7 +300,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                           </div>
 
                           <div className="w-full sm:w-auto flex-shrink-0">
-                            {isOwner && !isCurrentUser ? (
+                            {canManage && !isCurrentUser ? (
                               <select
                                 value={memberData?.role || "participant"}
                                 onChange={(e) =>
@@ -400,6 +426,18 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
             </div>
           )}
         </div>
+
+        {/* Leave Workspace Button - Only show for users who can leave */}
+        {canLeaveWorkspace(user, currentWorkspace) && (
+          <div className="border-t border-gray-200 p-4 sm:p-6">
+            <button
+              onClick={handleLeaveWorkspace}
+              className="w-full bg-red-50 hover:bg-red-100 text-red-700 font-medium py-3 px-6 rounded-lg transition-colors border border-red-200"
+            >
+              🚪 Leave Workspace
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

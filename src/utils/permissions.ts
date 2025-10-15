@@ -1,4 +1,10 @@
-import type { TimeSlot, User, UserRole, WorkspaceMember, Workspace } from "../types";
+import type {
+  TimeSlot,
+  User,
+  UserRole,
+  Workspace,
+  WorkspaceMember,
+} from "../types";
 
 // Role hierarchy and permissions
 
@@ -94,11 +100,23 @@ export const canVerify = (
 
 export const canManageUsers = (
   user: User | null,
+  workspace: Workspace | null,
+  workspaceRole?: UserRole
+): boolean => {
+  if (!user || !workspace) return false;
+  // Workspace owner can always manage users
+  if (workspace.ownerId === user.id) return true;
+  // Managers and admins can also manage users
+  return workspaceRole === "manager" || workspaceRole === "admin";
+};
+
+export const canLeaveWorkspace = (
+  user: User | null,
   workspace: Workspace | null
 ): boolean => {
   if (!user || !workspace) return false;
-  // Only workspace owner can manage roles
-  return workspace.ownerId === user.id;
+  // Users can leave workspace unless they are the owner
+  return workspace.ownerId !== user.id;
 };
 
 export const canViewSlot = (user: User | null, slot: TimeSlot): boolean => {

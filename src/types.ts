@@ -31,6 +31,12 @@ export interface Workspace {
   color?: WorkspaceColor; // Visual identifier for multi-workspace views
   createdAt: number;
   updatedAt: number;
+  timezone?: string; // Default timezone for the workspace
+  settings?: {
+    allowSelfCheckIn?: boolean;
+    requireVerification?: boolean;
+    autoConfirmAfterHours?: number; // Auto-confirm after X hours if not verified
+  };
 }
 
 export interface JoinRequest {
@@ -86,6 +92,8 @@ export interface TimeSlot {
   recurringGroupId?: string; // ID linking recurring slots together
   isRecurring?: boolean; // Flag for recurring slots
   labelId?: string; // Optional label for categorization
+  timezone?: string; // IANA timezone (e.g., "America/New_York")
+  allDay?: boolean; // For all-day events
 }
 
 export interface AttendanceRecord {

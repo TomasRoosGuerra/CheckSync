@@ -175,7 +175,6 @@ export default function Settings({ onClose }: SettingsProps) {
               </div>
             </div>
 
-
             {/* Logout */}
             <div className="pt-4 border-t border-gray-200">
               <button
@@ -188,7 +187,6 @@ export default function Settings({ onClose }: SettingsProps) {
           </div>
         </div>
       </div>
-
 
       {showWorkspaceSettings && (
         <WorkspaceSettings onClose={() => setShowWorkspaceSettings(false)} />

@@ -20,9 +20,7 @@ export default function ModalHeader({
           {icon && <span className="mr-2">{icon}</span>}
           {title}
         </h2>
-        {subtitle && (
-          <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-sm text-gray-600 mt-1">{subtitle}</p>}
       </div>
       <CloseButton onClose={onClose} />
     </div>

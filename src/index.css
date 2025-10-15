@@ -132,7 +132,6 @@
     display: inline-block;
   }
 
-
   /* Better sticky positioning on iOS */
   .sticky-mobile {
     position: -webkit-sticky;

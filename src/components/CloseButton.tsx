@@ -3,7 +3,10 @@ interface CloseButtonProps {
   className?: string;
 }
 
-export default function CloseButton({ onClose, className = "" }: CloseButtonProps) {
+export default function CloseButton({
+  onClose,
+  className = "",
+}: CloseButtonProps) {
   return (
     <button
       onClick={onClose}

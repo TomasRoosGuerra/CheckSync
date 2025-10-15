@@ -41,7 +41,6 @@ export default function Dashboard() {
       ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
       : "participant";
 
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header - Mobile Optimized with iPhone Safe Area */}
@@ -124,7 +123,6 @@ export default function Dashboard() {
                     </span>
                   )}
                 </button>
-
               </div>
 
               {/* Action Buttons */}

@@ -8,10 +8,10 @@ export const handleServiceError = (
   context?: string
 ): never => {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  const logMessage = context 
+  const logMessage = context
     ? `❌ Error ${operation} (${context}): ${errorMessage}`
     : `❌ Error ${operation}: ${errorMessage}`;
-  
+
   console.error(logMessage);
   throw error;
 };

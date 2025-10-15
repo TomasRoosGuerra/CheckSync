@@ -79,7 +79,7 @@ export default function NotificationsPanel({
 
     try {
       await rejectJoinRequest(notification.requestId, user!.id);
-      
+
       // Mark as read (non-critical - don't fail if this errors)
       try {
         await markNotificationAsRead(notification.id);

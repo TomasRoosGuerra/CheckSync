@@ -1,13 +1,13 @@
 import {
   collection,
   doc,
-  setDoc,
   getDocs,
-  query,
-  where,
-  serverTimestamp,
   onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import type { JoinRequest, Notification } from "../types";
@@ -31,7 +31,7 @@ export const createJoinRequest = async (
       message,
       createdAt: serverTimestamp(),
     });
-    
+
     console.log("✅ Join request created:", requestRef.id);
     return requestRef.id;
   } catch (error) {
@@ -50,33 +50,41 @@ export const getPendingRequests = async (
       where("status", "==", "pending")
     );
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toMillis() || Date.now(),
-      resolvedAt: doc.data().resolvedAt?.toMillis(),
-    } as JoinRequest));
+
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toMillis() || Date.now(),
+          resolvedAt: doc.data().resolvedAt?.toMillis(),
+        } as JoinRequest)
+    );
   } catch (error) {
     console.error("Error getting pending requests:", error);
     return [];
   }
 };
 
-export const getUserRequests = async (userId: string): Promise<JoinRequest[]> => {
+export const getUserRequests = async (
+  userId: string
+): Promise<JoinRequest[]> => {
   try {
     const q = query(
       collection(db, REQUESTS_COLLECTION),
       where("userId", "==", userId)
     );
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toMillis() || Date.now(),
-      resolvedAt: doc.data().resolvedAt?.toMillis(),
-    } as JoinRequest));
+
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toMillis() || Date.now(),
+          resolvedAt: doc.data().resolvedAt?.toMillis(),
+        } as JoinRequest)
+    );
   } catch (error) {
     console.error("Error getting user requests:", error);
     return [];
@@ -141,7 +149,7 @@ export const createNotification = async (
       read: false,
       createdAt: serverTimestamp(),
     });
-    
+
     return notifRef.id;
   } catch (error) {
     console.error("Error creating notification:", error);
@@ -158,12 +166,15 @@ export const getUserNotifications = async (
       where("userId", "==", userId)
     );
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toMillis() || Date.now(),
-    } as Notification));
+
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toMillis() || Date.now(),
+        } as Notification)
+    );
   } catch (error) {
     console.error("Error getting notifications:", error);
     return [];
@@ -189,14 +200,17 @@ export const subscribeToNotifications = (
     collection(db, NOTIFICATIONS_COLLECTION),
     where("userId", "==", userId)
   );
-  
+
   return onSnapshot(q, (snapshot) => {
-    const notifications = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toMillis() || Date.now(),
-    } as Notification));
-    
+    const notifications = snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toMillis() || Date.now(),
+        } as Notification)
+    );
+
     callback(notifications);
   });
 };
@@ -210,7 +224,7 @@ export const getPublicWorkspaces = async () => {
       where("isPublic", "==", true)
     );
     const snapshot = await getDocs(q);
-    
+
     return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -222,4 +236,3 @@ export const getPublicWorkspaces = async () => {
     return [];
   }
 };
-

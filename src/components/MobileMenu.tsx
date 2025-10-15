@@ -35,7 +35,6 @@ export default function MobileMenu({
       ? getUserWorkspaceRole(user.id, currentWorkspace.id, workspaceMembers)
       : "participant";
 
-
   const menuItems = [
     {
       id: "week",

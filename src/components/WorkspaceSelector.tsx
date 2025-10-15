@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import {
   createWorkspace,
@@ -16,7 +16,8 @@ interface WorkspaceSelectorProps {
 export default function WorkspaceSelector({
   onWorkspaceSelected,
 }: WorkspaceSelectorProps) {
-  const { user, setCurrentWorkspace, workspaces, setWorkspaces, resetStore } = useStore();
+  const { user, setCurrentWorkspace, workspaces, setWorkspaces, resetStore } =
+    useStore();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);

@@ -21,7 +21,7 @@ export default function Modal({
 
   const sizeClasses = {
     sm: "max-w-md",
-    md: "max-w-lg", 
+    md: "max-w-lg",
     lg: "max-w-2xl",
     xl: "max-w-4xl",
   };
@@ -40,13 +40,15 @@ export default function Modal({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex ${variantClasses[variant]} ${
-        variant !== "fullscreen" ? "p-4" : ""
-      }`}
+      className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex ${
+        variantClasses[variant]
+      } ${variant !== "fullscreen" ? "p-4" : ""}`}
       onClick={onClose}
     >
       <div
-        className={`bg-white ${modalClasses[variant]} shadow-2xl ${sizeClasses[size]} w-full ${
+        className={`bg-white ${modalClasses[variant]} shadow-2xl ${
+          sizeClasses[size]
+        } w-full ${
           variant === "fullscreen" ? "h-full" : "max-h-[90vh] sm:max-h-[90vh]"
         } overflow-hidden ${className}`}
         onClick={(e) => e.stopPropagation()}

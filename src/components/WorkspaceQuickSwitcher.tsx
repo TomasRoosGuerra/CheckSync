@@ -32,7 +32,7 @@ export default function WorkspaceQuickSwitcher({
     try {
       // Ensure description is optional - convert empty string to undefined
       const description = newDesc.trim() || undefined;
-      
+
       const workspaceId = await createWorkspace(
         user.id,
         newName.trim(),

@@ -1,13 +1,14 @@
 import {
   collection,
+  deleteDoc,
   doc,
-  setDoc,
   getDoc,
   getDocs,
-  query,
-  where,
-  serverTimestamp,
   onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import type { Workspace, WorkspaceMember } from "../types";
@@ -33,9 +34,9 @@ export const createWorkspace = async (
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    
+
     await setDoc(workspaceRef, workspace);
-    
+
     // Add owner as admin member
     const memberRef = doc(collection(db, WORKSPACE_MEMBERS_COLLECTION));
     await setDoc(memberRef, {
@@ -44,7 +45,7 @@ export const createWorkspace = async (
       role: "admin",
       joinedAt: serverTimestamp(),
     });
-    
+
     console.log("✅ Workspace created:", workspaceRef.id);
     return workspaceRef.id;
   } catch (error) {
@@ -53,7 +54,9 @@ export const createWorkspace = async (
   }
 };
 
-export const getUserWorkspaces = async (userId: string): Promise<Workspace[]> => {
+export const getUserWorkspaces = async (
+  userId: string
+): Promise<Workspace[]> => {
   try {
     // Get workspaces where user is a member
     const q = query(
@@ -61,13 +64,17 @@ export const getUserWorkspaces = async (userId: string): Promise<Workspace[]> =>
       where("userId", "==", userId)
     );
     const memberSnapshot = await getDocs(q);
-    
-    const workspaceIds = memberSnapshot.docs.map((doc) => doc.data().workspaceId);
-    
+
+    const workspaceIds = memberSnapshot.docs.map(
+      (doc) => doc.data().workspaceId
+    );
+
     // Fetch workspace details
     const workspaces: Workspace[] = [];
     for (const workspaceId of workspaceIds) {
-      const workspaceDoc = await getDoc(doc(db, WORKSPACES_COLLECTION, workspaceId));
+      const workspaceDoc = await getDoc(
+        doc(db, WORKSPACES_COLLECTION, workspaceId)
+      );
       if (workspaceDoc.exists()) {
         workspaces.push({
           id: workspaceDoc.id,
@@ -77,7 +84,7 @@ export const getUserWorkspaces = async (userId: string): Promise<Workspace[]> =>
         } as Workspace);
       }
     }
-    
+
     return workspaces;
   } catch (error) {
     console.error("Error getting workspaces:", error);
@@ -94,11 +101,14 @@ export const getWorkspaceMembers = async (
       where("workspaceId", "==", workspaceId)
     );
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map((doc) => ({
-      ...doc.data(),
-      joinedAt: doc.data().joinedAt?.toMillis() || Date.now(),
-    } as WorkspaceMember));
+
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          joinedAt: doc.data().joinedAt?.toMillis() || Date.now(),
+        } as WorkspaceMember)
+    );
   } catch (error) {
     console.error("Error getting workspace members:", error);
     return [];
@@ -137,7 +147,7 @@ export const updateMemberRole = async (
       where("userId", "==", userId)
     );
     const snapshot = await getDocs(q);
-    
+
     if (!snapshot.empty) {
       const memberDoc = snapshot.docs[0];
       await setDoc(memberDoc.ref, { role }, { merge: true });
@@ -145,6 +155,84 @@ export const updateMemberRole = async (
     }
   } catch (error) {
     console.error("Error updating member role:", error);
+    throw error;
+  }
+};
+
+export const removeWorkspaceMember = async (
+  workspaceId: string,
+  userId: string
+) => {
+  try {
+    const q = query(
+      collection(db, WORKSPACE_MEMBERS_COLLECTION),
+      where("workspaceId", "==", workspaceId),
+      where("userId", "==", userId)
+    );
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      const memberDoc = snapshot.docs[0];
+      await deleteDoc(memberDoc.ref);
+      console.log("✅ Member removed from workspace");
+    }
+  } catch (error) {
+    console.error("Error removing workspace member:", error);
+    throw error;
+  }
+};
+
+export const bulkAddWorkspaceMembers = async (
+  workspaceId: string,
+  members: { userId: string; role: string }[]
+) => {
+  try {
+    const batch = [];
+    for (const member of members) {
+      const memberRef = doc(collection(db, WORKSPACE_MEMBERS_COLLECTION));
+      batch.push(
+        setDoc(memberRef, {
+          workspaceId,
+          userId: member.userId,
+          role: member.role,
+          joinedAt: serverTimestamp(),
+        })
+      );
+    }
+
+    await Promise.all(batch);
+    console.log(`✅ ${members.length} members added to workspace`);
+  } catch (error) {
+    console.error("Error bulk adding workspace members:", error);
+    throw error;
+  }
+};
+
+export const createWorkspaceFromTemplate = async (
+  ownerId: string,
+  name: string,
+  template: "tennis-club" | "gym" | "office" | "school" | "custom",
+  description?: string
+): Promise<string> => {
+  try {
+    // Create the workspace first
+    const workspaceId = await createWorkspace(
+      ownerId,
+      name,
+      description,
+      false
+    );
+
+    // Add template-specific time slots if needed
+    if (template !== "custom") {
+      // This would create initial time slots based on the template
+      // For now, we'll just return the workspace ID
+      console.log(`✅ Workspace created from ${template} template`);
+    }
+
+    return workspaceId;
+  } catch (error) {
+    console.error("Error creating workspace from template:", error);
     throw error;
   }
 };
@@ -157,14 +245,16 @@ export const subscribeToWorkspaceMembers = (
     collection(db, WORKSPACE_MEMBERS_COLLECTION),
     where("workspaceId", "==", workspaceId)
   );
-  
+
   return onSnapshot(q, (snapshot) => {
-    const members = snapshot.docs.map((doc) => ({
-      ...doc.data(),
-      joinedAt: doc.data().joinedAt?.toMillis() || Date.now(),
-    } as WorkspaceMember));
-    
+    const members = snapshot.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          joinedAt: doc.data().joinedAt?.toMillis() || Date.now(),
+        } as WorkspaceMember)
+    );
+
     callback(members);
   });
 };
-
