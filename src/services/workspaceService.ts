@@ -293,14 +293,29 @@ export const getCollaboratedUsers = async (userId: string): Promise<User[]> => {
 // Search users globally by email (across all users in the system)
 export const searchUsersGlobally = async (email: string): Promise<User[]> => {
   try {
-    const usersQuery = query(
+    // First try exact match
+    const exactQuery = query(
+      collection(db, "users"),
+      where("email", "==", email.toLowerCase())
+    );
+    const exactSnapshot = await getDocs(exactQuery);
+    
+    if (!exactSnapshot.empty) {
+      return exactSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as User[];
+    }
+    
+    // If no exact match, try prefix search for partial matches
+    const prefixQuery = query(
       collection(db, "users"),
       where("email", ">=", email.toLowerCase()),
       where("email", "<=", email.toLowerCase() + "\uf8ff")
     );
-    const snapshot = await getDocs(usersQuery);
+    const prefixSnapshot = await getDocs(prefixQuery);
 
-    return snapshot.docs.map((doc) => ({
+    return prefixSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as User[];

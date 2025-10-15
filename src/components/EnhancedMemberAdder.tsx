@@ -73,12 +73,17 @@ export default function EnhancedMemberAdder({
     setSearchResults([]);
 
     try {
+      console.log("🔍 Searching for email:", searchEmail.trim());
       const results = await searchUsersGlobally(searchEmail.trim());
+      console.log("📋 Search results:", results);
+      
       // Filter out users who are already members
       const availableResults = results.filter((u) => !memberUserIds.has(u.id));
+      console.log("✅ Available results (not members):", availableResults);
+      
       setSearchResults(availableResults);
     } catch (error) {
-      console.error("Error searching users:", error);
+      console.error("❌ Error searching users:", error);
       alert("Failed to search users. Please try again.");
     } finally {
       setSearching(false);
@@ -353,10 +358,16 @@ export default function EnhancedMemberAdder({
                 <div className="text-center py-8 text-gray-500">
                   <div className="text-4xl mb-3 opacity-60">🔍</div>
                   <p className="text-lg font-medium mb-1">No users found</p>
-                  <p className="text-sm">
+                  <p className="text-sm mb-3">
                     No users found with email "{searchEmail}" or they're already
                     members.
                   </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-left">
+                    <p className="text-sm text-blue-800">
+                      <strong>💡 Tip:</strong> Make sure the email is spelled correctly. 
+                      If the user exists but isn't found, they may need to sign up first.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
