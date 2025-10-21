@@ -116,6 +116,28 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
     }
   };
 
+  const handleRemoveMember = async (userId: string, memberName: string) => {
+    if (!currentWorkspace) return;
+
+    const confirmRemove = confirm(
+      `Are you sure you want to remove "${memberName}" from "${currentWorkspace.name}"?\n\nThis action cannot be undone. They will need to be re-invited to rejoin.`
+    );
+
+    if (!confirmRemove) return;
+
+    setUpdating(userId);
+    try {
+      await removeWorkspaceMember(currentWorkspace.id, userId);
+      alert(`✅ ${memberName} has been removed from the workspace.`);
+      // State will update via subscription in App.tsx
+    } catch (error) {
+      console.error("Error removing member:", error);
+      alert("Failed to remove member. Please try again.");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const handleLeaveWorkspace = async () => {
     console.log("🔍 handleLeaveWorkspace called:", {
       user: user ? { id: user.id, name: user.name } : null,
@@ -327,26 +349,35 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                             </div>
                           </div>
 
-                          <div className="w-full sm:w-auto flex-shrink-0">
+                          <div className="w-full sm:w-auto flex-shrink-0 flex flex-col sm:flex-row gap-2">
                             {canManage && !isCurrentUser ? (
-                              <select
-                                value={memberData?.role || "participant"}
-                                onChange={(e) =>
-                                  handleRoleChange(
-                                    member.id,
-                                    e.target.value as UserRole
-                                  )
-                                }
-                                disabled={updating === member.id}
-                                className="input-field py-2 px-3 text-sm w-full sm:w-auto"
-                              >
-                                <option value="participant">
-                                  👤 Participant
-                                </option>
-                                <option value="verifier">🔒 Verifier</option>
-                                <option value="manager">📊 Manager</option>
-                                <option value="admin">👑 Admin</option>
-                              </select>
+                              <>
+                                <select
+                                  value={memberData?.role || "participant"}
+                                  onChange={(e) =>
+                                    handleRoleChange(
+                                      member.id,
+                                      e.target.value as UserRole
+                                    )
+                                  }
+                                  disabled={updating === member.id}
+                                  className="input-field py-2 px-3 text-sm w-full sm:w-auto"
+                                >
+                                  <option value="participant">
+                                    👤 Participant
+                                  </option>
+                                  <option value="verifier">🔒 Verifier</option>
+                                  <option value="manager">📊 Manager</option>
+                                  <option value="admin">👑 Admin</option>
+                                </select>
+                                <button
+                                  onClick={() => handleRemoveMember(member.id, member.name)}
+                                  disabled={updating === member.id}
+                                  className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {updating === member.id ? "..." : "🗑️ Remove"}
+                                </button>
+                              </>
                             ) : (
                               <span className="block px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm capitalize text-center">
                                 {memberData?.role || userRole}
