@@ -247,8 +247,8 @@ export default function EnhancedMemberAdder({
               onClick={() => setActiveTab("collaborated")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "collaborated"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary !text-white"
+                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
               }`}
             >
               👥 Previous Collaborators
@@ -257,8 +257,8 @@ export default function EnhancedMemberAdder({
               onClick={() => setActiveTab("search")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "search"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary !text-white"
+                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
               }`}
             >
               🔍 Search by Email
@@ -267,8 +267,8 @@ export default function EnhancedMemberAdder({
               onClick={() => setActiveTab("bulk")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "bulk"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary !text-white"
+                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
               }`}
             >
               📝 Bulk Add

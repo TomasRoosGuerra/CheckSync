@@ -201,8 +201,8 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               onClick={() => setActiveTab("members")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "members"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary !text-white"
+                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
               }`}
             >
               👥 Members ({currentWorkspaceUsers.length})
@@ -210,7 +210,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
             {canManage && (
               <button
                 onClick={() => setShowEnhancedAdder(true)}
-                className="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap bg-primary text-white hover:bg-primary-dark"
+                className="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap bg-primary hover:bg-primary-dark !text-white"
               >
                 ➕ Add Members
               </button>

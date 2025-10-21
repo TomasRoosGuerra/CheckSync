@@ -13,7 +13,10 @@ import {
   detectTimeConflicts,
   subscribeToAllUserTimeSlots,
 } from "./services/unifiedAgendaService";
-import { subscribeToWorkspaceMembers, getUserWorkspaces } from "./services/workspaceService";
+import {
+  getUserWorkspaces,
+  subscribeToWorkspaceMembers,
+} from "./services/workspaceService";
 import { useStore } from "./store";
 import type { User } from "./types";
 
@@ -56,14 +59,16 @@ function App() {
           }
 
           setUser(userProfile);
-          
+
           // Check if user has a workspace selected from localStorage
           const lastWorkspaceId = localStorage.getItem("lastWorkspaceId");
           if (lastWorkspaceId) {
             // Validate that the workspace still exists and is not deleted
             try {
               const userWorkspaces = await getUserWorkspaces(firebaseUser.uid);
-              const validWorkspace = userWorkspaces.find(w => w.id === lastWorkspaceId && !w.deletedAt);
+              const validWorkspace = userWorkspaces.find(
+                (w) => w.id === lastWorkspaceId && !w.deletedAt
+              );
               if (validWorkspace) {
                 setCurrentWorkspace(validWorkspace);
               } else {
