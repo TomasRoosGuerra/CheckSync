@@ -176,6 +176,14 @@ export default function WorkspaceSelector({
               Signed in as {user.name} ({user.email})
             </p>
           )}
+          <button
+            onClick={loadWorkspaces}
+            disabled={loading}
+            className="mt-2 text-xs text-primary hover:text-primary-dark transition-colors disabled:opacity-50"
+            title="Refresh workspace list"
+          >
+            🔄 Refresh
+          </button>
         </div>
 
         {loading ? (

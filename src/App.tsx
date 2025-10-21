@@ -9,6 +9,8 @@ import {
   getUserProfile,
   subscribeToWorkspaceTimeSlots,
 } from "./services/firestoreService";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase";
 import {
   detectTimeConflicts,
   subscribeToAllUserTimeSlots,
@@ -18,7 +20,7 @@ import {
   subscribeToWorkspaceMembers,
 } from "./services/workspaceService";
 import { useStore } from "./store";
-import type { User } from "./types";
+import type { User, Workspace } from "./types";
 
 function App() {
   const {
@@ -188,43 +190,54 @@ function App() {
   useEffect(() => {
     if (!user) return;
 
-    // Temporarily disabled to debug blank canvas issue
-    // const unsubscribe = subscribeToUserWorkspaceMemberships(
-    //   user.id,
-    //   async (memberships) => {
-    //     try {
-    //       // Get workspace details for each membership
-    //       const workspaceIds = memberships.map(m => m.workspaceId);
-    //       const workspaces: Workspace[] = [];
+    console.log("🔗 Setting up workspace membership subscription for user:", user.id);
+    
+    const unsubscribe = subscribeToUserWorkspaceMemberships(
+      user.id,
+      async (memberships) => {
+        try {
+          console.log("📋 Workspace memberships updated:", memberships.length);
+          
+          // Get workspace details for each membership
+          const workspaceIds = memberships.map(m => m.workspaceId);
+          const workspaces: Workspace[] = [];
 
-    //       for (const workspaceId of workspaceIds) {
-    //         try {
-    //           const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
-    //           if (workspaceDoc.exists()) {
-    //             const workspaceData = workspaceDoc.data();
-    //             // Filter out deleted workspaces
-    //             if (!workspaceData.deletedAt) {
-    //               workspaces.push({
-    //                 id: workspaceDoc.id,
-    //                 ...workspaceData,
-    //                 createdAt: workspaceData.createdAt?.toMillis() || Date.now(),
-    //                 updatedAt: workspaceData.updatedAt?.toMillis() || Date.now(),
-    //               } as Workspace);
-    //             }
-    //           }
-    //         } catch (error) {
-    //           console.error("Error loading workspace:", error);
-    //         }
-    //       }
+          for (const workspaceId of workspaceIds) {
+            try {
+              const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
+              if (workspaceDoc.exists()) {
+                const workspaceData = workspaceDoc.data();
+                // Filter out deleted workspaces
+                if (!workspaceData.deletedAt) {
+                  workspaces.push({
+                    id: workspaceDoc.id,
+                    ...workspaceData,
+                    createdAt: workspaceData.createdAt?.toMillis() || Date.now(),
+                    updatedAt: workspaceData.updatedAt?.toMillis() || Date.now(),
+                  } as Workspace);
+                } else {
+                  console.log("🗑️ Skipping deleted workspace:", workspaceId);
+                }
+              } else {
+                console.log("⚠️ Workspace document not found:", workspaceId);
+              }
+            } catch (error) {
+              console.error("Error loading workspace:", workspaceId, error);
+            }
+          }
 
-    //       setWorkspaces(workspaces);
-    //     } catch (error) {
-    //       console.error("Error processing workspace memberships:", error);
-    //     }
-    //   }
-    // );
+          console.log("✅ Setting workspaces:", workspaces.length);
+          setWorkspaces(workspaces);
+        } catch (error) {
+          console.error("Error processing workspace memberships:", error);
+        }
+      }
+    );
 
-    // return () => unsubscribe();
+    return () => {
+      console.log("🔌 Cleaning up workspace membership subscription");
+      unsubscribe();
+    };
   }, [user, setWorkspaces]);
 
   if (loading) {
