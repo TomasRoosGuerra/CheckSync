@@ -14,7 +14,10 @@ import {
   canVerify,
   getUserWorkspaceRole,
 } from "../utils/permissions";
-import { getStatusBadgeClasses } from "../utils/slotUtils";
+import {
+  getStatusBadgeClasses,
+  groupOverlappingSlots,
+} from "../utils/slotUtils";
 import { getUserName } from "../utils/userUtils";
 import SlotModal from "./SlotModal";
 
@@ -28,6 +31,10 @@ export default function DayView({ date, onClose }: DayViewProps) {
     useStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<TimeSlot | null>(null);
+  const [bulkOperationMode, setBulkOperationMode] = useState<{
+    type: "edit" | "delete" | "status" | "participants";
+    recurringGroupId: string;
+  } | null>(null);
 
   // Get user's role in current workspace
   const userRole =
@@ -38,6 +45,94 @@ export default function DayView({ date, onClose }: DayViewProps) {
   const daySlots = timeSlots
     .filter((slot) => isSameDayAs(date, slot.date))
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  const daySlotGroups = groupOverlappingSlots(daySlots);
+
+  // Bulk operation functions
+  const getRecurringSlots = (recurringGroupId: string): TimeSlot[] => {
+    return timeSlots.filter(
+      (slot) => slot.recurringGroupId === recurringGroupId
+    );
+  };
+
+  const handleBulkStatusChange = async (
+    recurringGroupId: string,
+    newStatus: SlotStatus
+  ) => {
+    const recurringSlots = getRecurringSlots(recurringGroupId);
+
+    try {
+      for (const slot of recurringSlots) {
+        const updates: any = { status: newStatus };
+
+        if (newStatus === "checked-in") {
+          updates.checkedInAt = Date.now();
+        } else if (newStatus === "confirmed") {
+          updates.confirmedAt = Date.now();
+        } else if (newStatus === "planned") {
+          updates.checkedInAt = undefined;
+          updates.confirmedAt = undefined;
+        }
+
+        await updateSlotFirestore(slot.id, updates);
+      }
+
+      console.log(
+        `✅ Updated ${recurringSlots.length} recurring slots to ${newStatus}`
+      );
+    } catch (error) {
+      console.error("Error updating recurring slots:", error);
+      alert("Failed to update recurring slots. Please try again.");
+    }
+  };
+
+  const handleBulkParticipantUpdate = async (
+    recurringGroupId: string,
+    participantIds: string[]
+  ) => {
+    const recurringSlots = getRecurringSlots(recurringGroupId);
+
+    try {
+      for (const slot of recurringSlots) {
+        await updateSlotFirestore(slot.id, { participantIds });
+      }
+
+      console.log(
+        `✅ Updated participants for ${recurringSlots.length} recurring slots`
+      );
+    } catch (error) {
+      console.error("Error updating recurring slots:", error);
+      alert("Failed to update recurring slots. Please try again.");
+    }
+  };
+
+  const handleBulkEdit = (recurringGroupId: string) => {
+    const firstSlot = getRecurringSlots(recurringGroupId)[0];
+    if (firstSlot) {
+      setEditingSlot(firstSlot);
+      setBulkOperationMode({ type: "edit", recurringGroupId });
+    }
+  };
+
+  const handleBulkDelete = async (recurringGroupId: string) => {
+    const recurringSlots = getRecurringSlots(recurringGroupId);
+
+    if (
+      confirm(
+        `Delete all ${recurringSlots.length} slots in this recurring series?`
+      )
+    ) {
+      try {
+        for (const slot of recurringSlots) {
+          await deleteSlotFirestore(slot.id);
+        }
+        console.log(`✅ Deleted ${recurringSlots.length} recurring slots`);
+      } catch (error) {
+        console.error("Error deleting recurring slots:", error);
+        alert("Failed to delete recurring slots. Please try again.");
+      }
+    }
+  };
 
   const handleCheckIn = async (slot: TimeSlot) => {
     if (!canCheckIn(user, slot)) {
@@ -212,123 +307,203 @@ export default function DayView({ date, onClose }: DayViewProps) {
             </div>
           ) : (
             <div className="space-y-2 sm:space-y-3">
-              {daySlots.map((slot) => (
-                <div
-                  key={slot.id}
-                  className="card hover:shadow-md transition-shadow relative border-l-4 border-l-primary/30 p-3 sm:p-4"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
-                        <span className="text-xs sm:text-sm font-bold text-primary bg-primary/10 px-2 sm:px-3 py-1 rounded">
-                          {slot.startTime}
+              {daySlotGroups.map((slotGroup, groupIndex) => (
+                <div key={`group-${groupIndex}`} className="relative">
+                  {slotGroup.length > 1 && (
+                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="text-blue-600 text-sm font-medium">
+                          📋 {slotGroup.length} Scheduled Slots
                         </span>
-                        <h3 className="font-semibold text-base sm:text-lg text-gray-900">
-                          {slot.title}
-                        </h3>
-                        {slot.isRecurring && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                            🔁 Recurring
+                      </div>
+                    </div>
+                  )}
+                  {slotGroup.map((slot) => (
+                    <div
+                      key={slot.id}
+                      className="card hover:shadow-md transition-shadow relative border-l-4 border-l-primary/30 p-3 sm:p-4"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
+                            <span className="text-xs sm:text-sm font-bold text-primary bg-primary/10 px-2 sm:px-3 py-1 rounded">
+                              {slot.startTime}
+                            </span>
+                            <h3 className="font-semibold text-base sm:text-lg text-gray-900">
+                              {slot.title}
+                            </h3>
+                            {slot.isRecurring && (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                🔁 Recurring
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500 ml-0 sm:ml-[4.5rem]">
+                            Ends at {slot.endTime}
+                          </div>
+                        </div>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClasses(
+                            slot.status
+                          )}`}
+                        >
+                          {slot.status.charAt(0).toUpperCase() +
+                            slot.status.slice(1).replace("-", " ")}
+                        </span>
+                      </div>
+
+                      {slot.notes && (
+                        <p className="text-sm text-gray-600 mb-3">
+                          {slot.notes}
+                        </p>
+                      )}
+
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">👤</span>
+                          <span className="font-medium">
+                            {slot.participantIds
+                              .map((id) => getUserName(id, users))
+                              .join(", ")}
                           </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">🔒</span>
+                          <span className="font-medium">
+                            {getUserName(slot.verifierId, users)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bulk Operations for Recurring Slots */}
+                      {slot.isRecurring && slot.recurringGroupId && (
+                        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-blue-800">
+                              🔁 Recurring Series (
+                              {getRecurringSlots(slot.recurringGroupId).length}{" "}
+                              slots)
+                            </span>
+                          </div>
+                          <div className="flex gap-1 flex-wrap">
+                            {canEditSlot(user, slot, userRole) && (
+                              <button
+                                onClick={() =>
+                                  handleBulkEdit(slot.recurringGroupId!)
+                                }
+                                className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition-colors"
+                              >
+                                ✏️ Edit All
+                              </button>
+                            )}
+                            {canVerify(user, slot, userRole) && (
+                              <>
+                                <button
+                                  onClick={() =>
+                                    handleBulkStatusChange(
+                                      slot.recurringGroupId!,
+                                      "checked-in"
+                                    )
+                                  }
+                                  className="text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded transition-colors"
+                                >
+                                  ✅ Check In All
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleBulkStatusChange(
+                                      slot.recurringGroupId!,
+                                      "confirmed"
+                                    )
+                                  }
+                                  className="text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded transition-colors"
+                                >
+                                  🔒 Confirm All
+                                </button>
+                              </>
+                            )}
+                            {canDeleteSlot(user, slot, userRole) && (
+                              <button
+                                onClick={() =>
+                                  handleBulkDelete(slot.recurringGroupId!)
+                                }
+                                className="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded transition-colors"
+                              >
+                                🗑️ Delete All
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex gap-2 flex-wrap">
+                        {/* Check In Button - Mobile Optimized */}
+                        {canCheckIn(user, slot) &&
+                          slot.status === "planned" && (
+                            <button
+                              onClick={() => handleCheckIn(slot)}
+                              className="btn-accent text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
+                            >
+                              ✅ Check In
+                            </button>
+                          )}
+
+                        {/* Undo Check-In Button - Mobile Optimized */}
+                        {canCheckIn(user, slot) &&
+                          slot.status === "checked-in" && (
+                            <button
+                              onClick={() => handleUndoCheckIn(slot)}
+                              className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                            >
+                              ↩️ Undo Check-In
+                            </button>
+                          )}
+
+                        {/* Confirm Attendance - Mobile Optimized */}
+                        {canVerify(user, slot) &&
+                          slot.status === "checked-in" && (
+                            <button
+                              onClick={() => handleConfirm(slot)}
+                              className="btn-primary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
+                            >
+                              🔒 Confirm
+                            </button>
+                          )}
+
+                        {/* Undo Confirmation - Mobile Optimized */}
+                        {canVerify(user, slot) &&
+                          slot.status === "confirmed" && (
+                            <button
+                              onClick={() => handleUndoConfirmation(slot)}
+                              className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                            >
+                              ↩️ Undo
+                            </button>
+                          )}
+
+                        {/* Edit Button - Mobile Optimized */}
+                        {canEditSlot(user, slot, userRole) && (
+                          <button
+                            onClick={() => setEditingSlot(slot)}
+                            className="btn-secondary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 touch-manipulation min-h-[44px] sm:min-h-auto"
+                          >
+                            ✏️ Edit
+                          </button>
+                        )}
+
+                        {/* Delete Button - Mobile Optimized */}
+                        {canDeleteSlot(user, slot, userRole) && (
+                          <button
+                            onClick={() => handleDelete(slot)}
+                            className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                          >
+                            🗑️ {slot.isRecurring ? "Delete Series" : "Delete"}
+                          </button>
                         )}
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-500 ml-0 sm:ml-[4.5rem]">
-                        Ends at {slot.endTime}
-                      </div>
                     </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClasses(
-                        slot.status
-                      )}`}
-                    >
-                      {slot.status.charAt(0).toUpperCase() +
-                        slot.status.slice(1).replace("-", " ")}
-                    </span>
-                  </div>
-
-                  {slot.notes && (
-                    <p className="text-sm text-gray-600 mb-3">{slot.notes}</p>
-                  )}
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">👤</span>
-                      <span className="font-medium">
-                        {slot.participantIds
-                          .map((id) => getUserName(id, users))
-                          .join(", ")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">🔒</span>
-                      <span className="font-medium">
-                        {getUserName(slot.verifierId, users)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 flex-wrap">
-                    {/* Check In Button - Mobile Optimized */}
-                    {canCheckIn(user, slot) && slot.status === "planned" && (
-                      <button
-                        onClick={() => handleCheckIn(slot)}
-                        className="btn-accent text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
-                      >
-                        ✅ Check In
-                      </button>
-                    )}
-
-                    {/* Undo Check-In Button - Mobile Optimized */}
-                    {canCheckIn(user, slot) && slot.status === "checked-in" && (
-                      <button
-                        onClick={() => handleUndoCheckIn(slot)}
-                        className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
-                      >
-                        ↩️ Undo Check-In
-                      </button>
-                    )}
-
-                    {/* Confirm Attendance - Mobile Optimized */}
-                    {canVerify(user, slot) && slot.status === "checked-in" && (
-                      <button
-                        onClick={() => handleConfirm(slot)}
-                        className="btn-primary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
-                      >
-                        🔒 Confirm
-                      </button>
-                    )}
-
-                    {/* Undo Confirmation - Mobile Optimized */}
-                    {canVerify(user, slot) && slot.status === "confirmed" && (
-                      <button
-                        onClick={() => handleUndoConfirmation(slot)}
-                        className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
-                      >
-                        ↩️ Undo
-                      </button>
-                    )}
-
-                    {/* Edit Button - Mobile Optimized */}
-                    {canEditSlot(user, slot, userRole) && (
-                      <button
-                        onClick={() => setEditingSlot(slot)}
-                        className="btn-secondary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 touch-manipulation min-h-[44px] sm:min-h-auto"
-                      >
-                        ✏️ Edit
-                      </button>
-                    )}
-
-                    {/* Delete Button - Mobile Optimized */}
-                    {canDeleteSlot(user, slot, userRole) && (
-                      <button
-                        onClick={() => handleDelete(slot)}
-                        className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
-                      >
-                        🗑️ {slot.isRecurring ? "Delete Series" : "Delete"}
-                      </button>
-                    )}
-                  </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -366,7 +541,9 @@ export default function DayView({ date, onClose }: DayViewProps) {
           onClose={() => {
             setIsAddModalOpen(false);
             setEditingSlot(null);
+            setBulkOperationMode(null);
           }}
+          bulkEditMode={bulkOperationMode}
         />
       )}
     </div>

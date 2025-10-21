@@ -76,11 +76,11 @@ export default function EnhancedMemberAdder({
       console.log("🔍 Searching for email:", searchEmail.trim());
       const results = await searchUsersGlobally(searchEmail.trim());
       console.log("📋 Search results:", results);
-      
+
       // Filter out users who are already members
       const availableResults = results.filter((u) => !memberUserIds.has(u.id));
       console.log("✅ Available results (not members):", availableResults);
-      
+
       setSearchResults(availableResults);
     } catch (error) {
       console.error("❌ Error searching users:", error);
@@ -364,8 +364,9 @@ export default function EnhancedMemberAdder({
                   </p>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-left">
                     <p className="text-sm text-blue-800">
-                      <strong>💡 Tip:</strong> Make sure the email is spelled correctly. 
-                      If the user exists but isn't found, they may need to sign up first.
+                      <strong>💡 Tip:</strong> Make sure the email is spelled
+                      correctly. If the user exists but isn't found, they may
+                      need to sign up first.
                     </p>
                   </div>
                 </div>

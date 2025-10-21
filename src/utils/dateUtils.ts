@@ -16,6 +16,17 @@ export const getWeekDays = (date: Date) => {
   return eachDayOfInterval({ start, end });
 };
 
+export const getExtendedWeekDays = (date: Date) => {
+  const start = startOfWeek(date, { weekStartsOn: 1 }); // Monday
+  const end = endOfWeek(date, { weekStartsOn: 1 });
+
+  // Add half day before and after for mobile
+  const extendedStart = subDays(start, 1); // Add Sunday
+  const extendedEnd = addDays(end, 1); // Add next Monday
+
+  return eachDayOfInterval({ start: extendedStart, end: extendedEnd });
+};
+
 export const getWeekNumber = (date: Date) => {
   return getWeek(date, { weekStartsOn: 1 });
 };

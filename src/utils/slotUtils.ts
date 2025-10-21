@@ -1,6 +1,85 @@
 import type { TimeSlot } from "../types";
 
 /**
+ * Check if two time slots overlap
+ */
+export const slotsOverlap = (slot1: TimeSlot, slot2: TimeSlot): boolean => {
+  if (slot1.date !== slot2.date) return false;
+
+  const timeToMinutes = (time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const start1 = timeToMinutes(slot1.startTime);
+  const end1 = timeToMinutes(slot1.endTime);
+  const start2 = timeToMinutes(slot2.startTime);
+  const end2 = timeToMinutes(slot2.endTime);
+
+  return start1 < end2 && start2 < end1;
+};
+
+/**
+ * Group overlapping slots together
+ */
+export const groupOverlappingSlots = (slots: TimeSlot[]): TimeSlot[][] => {
+  if (slots.length === 0) return [];
+
+  const groups: TimeSlot[][] = [];
+  const processed = new Set<string>();
+
+  for (const slot of slots) {
+    if (processed.has(slot.id)) continue;
+
+    const group = [slot];
+    processed.add(slot.id);
+
+    // Find all slots that overlap with this one
+    for (const otherSlot of slots) {
+      if (processed.has(otherSlot.id)) continue;
+
+      if (slotsOverlap(slot, otherSlot)) {
+        group.push(otherSlot);
+        processed.add(otherSlot.id);
+      }
+    }
+
+    groups.push(group);
+  }
+
+  return groups;
+};
+
+/**
+ * Calculate overlap percentage for visual display
+ */
+export const getOverlapInfo = (
+  slot: TimeSlot,
+  overlappingSlots: TimeSlot[]
+): {
+  index: number;
+  total: number;
+  width: number;
+  offset: number;
+} => {
+  const sortedSlots = overlappingSlots.sort((a, b) =>
+    a.startTime.localeCompare(b.startTime)
+  );
+  const index = sortedSlots.findIndex((s) => s.id === slot.id);
+
+  // For better visual stacking, use full width with slight offsets
+  const width = 100;
+  const offset = index * 3; // Small offset for visual separation
+
+  return {
+    index,
+    total: overlappingSlots.length,
+    width,
+    offset,
+  };
+};
+
+/**
  * Get status badge configuration for a time slot
  */
 export const getStatusBadgeClasses = (status: TimeSlot["status"]): string => {

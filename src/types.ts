@@ -37,6 +37,8 @@ export interface Workspace {
     requireVerification?: boolean;
     autoConfirmAfterHours?: number; // Auto-confirm after X hours if not verified
   };
+  deletedAt?: number; // Timestamp when workspace was deleted
+  deletedBy?: string; // User ID who deleted the workspace
 }
 
 export interface JoinRequest {
@@ -73,6 +75,13 @@ export interface WorkspaceMember {
   joinedAt: number;
 }
 
+export interface DeletedWorkspaceView {
+  workspaceId: string;
+  userId: string;
+  deletedAt: number;
+  viewsRemaining: number; // Number of times user will see this deleted workspace
+}
+
 export interface TimeSlot {
   id: string;
   workspaceId: string; // Belongs to a workspace
@@ -92,6 +101,7 @@ export interface TimeSlot {
   recurringGroupId?: string; // ID linking recurring slots together
   isRecurring?: boolean; // Flag for recurring slots
   labelId?: string; // Optional label for categorization
+  labelProperties?: Record<string, string | number>; // Values for label properties
   timezone?: string; // IANA timezone (e.g., "America/New_York")
   allDay?: boolean; // For all-day events
 }
@@ -131,4 +141,19 @@ export interface Label {
   color: string;
   createdBy: string;
   createdAt: number;
+  properties?: LabelProperty[];
+}
+
+export interface LabelProperty {
+  id: string;
+  type: "text" | "number" | "range";
+  name: string;
+  required?: boolean;
+  defaultValue?: string | number;
+  options?: {
+    min?: number;
+    max?: number;
+    step?: number;
+    placeholder?: string;
+  };
 }

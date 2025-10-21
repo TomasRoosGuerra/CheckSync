@@ -1,12 +1,10 @@
 import { formatDistanceToNow } from "date-fns";
-import { useEffect } from "react";
 import {
   approveJoinRequest,
   createNotification,
   getPendingRequests,
   markNotificationAsRead,
   rejectJoinRequest,
-  subscribeToNotifications,
 } from "../services/requestService";
 import { addWorkspaceMember } from "../services/workspaceService";
 import { useStore } from "../store";
@@ -18,14 +16,7 @@ interface NotificationsPanelProps {
 export default function NotificationsPanel({
   onClose,
 }: NotificationsPanelProps) {
-  const { user, notifications, setNotifications } = useStore();
-
-  useEffect(() => {
-    if (!user) return;
-
-    const unsubscribe = subscribeToNotifications(user.id, setNotifications);
-    return () => unsubscribe();
-  }, [user, setNotifications]);
+  const { user, notifications } = useStore();
 
   const handleApproveRequest = async (notification: any) => {
     if (!notification.requestId || !notification.workspaceId) return;

@@ -8,6 +8,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "../firebase";
@@ -182,6 +183,87 @@ export const removeWorkspaceMember = async (
   }
 };
 
+export const deleteWorkspace = async (
+  workspaceId: string,
+  deletedBy: string
+): Promise<void> => {
+  try {
+    // Get all workspace members to notify them
+    const membersQuery = query(
+      collection(db, WORKSPACE_MEMBERS_COLLECTION),
+      where("workspaceId", "==", workspaceId)
+    );
+    const membersSnapshot = await getDocs(membersQuery);
+
+    // Mark workspace as deleted instead of actually deleting it
+    const workspaceRef = doc(db, WORKSPACES_COLLECTION, workspaceId);
+    await updateDoc(workspaceRef, {
+      deletedAt: serverTimestamp(),
+      deletedBy: deletedBy,
+    });
+
+    // Delete all workspace members
+    const memberDeletions = membersSnapshot.docs.map((doc) =>
+      deleteDoc(doc.ref)
+    );
+    await Promise.all(memberDeletions);
+
+    // Create deleted workspace view records for all members
+    const deletedViewRecords = membersSnapshot.docs.map((memberDoc) => {
+      const memberData = memberDoc.data();
+      const deletedViewRef = doc(collection(db, "deletedWorkspaceViews"));
+      return setDoc(deletedViewRef, {
+        workspaceId: workspaceId,
+        userId: memberData.userId,
+        deletedAt: Date.now(),
+        viewsRemaining: 2, // Show for 2 more times
+      });
+    });
+
+    await Promise.all(deletedViewRecords);
+
+    console.log("✅ Workspace marked as deleted successfully:", workspaceId);
+  } catch (error) {
+    console.error("❌ Error deleting workspace:", error);
+    throw error;
+  }
+};
+
+export const getDeletedWorkspaceViews = async (userId: string) => {
+  try {
+    const q = query(
+      collection(db, "deletedWorkspaceViews"),
+      where("userId", "==", userId),
+      where("viewsRemaining", ">", 0)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error getting deleted workspace views:", error);
+    return [];
+  }
+};
+
+export const decrementDeletedWorkspaceView = async (viewId: string) => {
+  try {
+    const viewRef = doc(db, "deletedWorkspaceViews", viewId);
+    const viewDoc = await getDoc(viewRef);
+
+    if (viewDoc.exists()) {
+      const currentViews = viewDoc.data().viewsRemaining;
+      if (currentViews > 1) {
+        await updateDoc(viewRef, {
+          viewsRemaining: currentViews - 1,
+        });
+      } else {
+        await deleteDoc(viewRef);
+      }
+    }
+  } catch (error) {
+    console.error("Error decrementing deleted workspace view:", error);
+  }
+};
+
 export const bulkAddWorkspaceMembers = async (
   workspaceId: string,
   members: { userId: string; role: string }[]
@@ -299,14 +381,14 @@ export const searchUsersGlobally = async (email: string): Promise<User[]> => {
       where("email", "==", email.toLowerCase())
     );
     const exactSnapshot = await getDocs(exactQuery);
-    
+
     if (!exactSnapshot.empty) {
       return exactSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as User[];
     }
-    
+
     // If no exact match, try prefix search for partial matches
     const prefixQuery = query(
       collection(db, "users"),

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { subscribeToNotifications } from "../services/requestService";
 import { useStore } from "../store";
 import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
@@ -33,6 +34,14 @@ export default function Dashboard() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Subscribe to notifications for real-time updates
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = subscribeToNotifications(user.id, setNotifications);
+    return () => unsubscribe();
+  }, [user, setNotifications]);
 
   // Get user's role in current workspace
   const userRole =

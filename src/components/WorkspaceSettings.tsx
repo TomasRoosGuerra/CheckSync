@@ -1,6 +1,7 @@
 import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { db } from "../firebase";
+import { deleteWorkspace } from "../services/workspaceService";
 import { useStore } from "../store";
 import { isWorkspaceOwner } from "../utils/permissions";
 
@@ -23,12 +24,39 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
   ).length;
   const slotCount = timeSlots.length;
   const [showCopySuccess, setShowCopySuccess] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleCopyWorkspaceId = () => {
     if (currentWorkspace) {
       navigator.clipboard.writeText(currentWorkspace.id);
       setShowCopySuccess(true);
       setTimeout(() => setShowCopySuccess(false), 2000);
+    }
+  };
+
+  const handleDeleteWorkspace = async () => {
+    if (!currentWorkspace || !user) return;
+
+    const workspaceName = currentWorkspace.name;
+    const confirmMessage = `⚠️ Delete "${workspaceName}"?\n\nThis will:\n- Remove all time slots\n- Remove all members\n- Cannot be undone!\n\nType the workspace name to confirm.`;
+
+    const userInput = prompt(confirmMessage);
+    if (userInput !== workspaceName) {
+      alert("Workspace name doesn't match. Deletion cancelled.");
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await deleteWorkspace(currentWorkspace.id, user.id);
+      alert("✅ Workspace deleted successfully.");
+      onClose();
+      // The app will redirect to workspace selector automatically
+    } catch (error) {
+      console.error("Error deleting workspace:", error);
+      alert("Failed to delete workspace. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -228,20 +256,11 @@ export default function WorkspaceSettings({ onClose }: WorkspaceSettingsProps) {
                 associations. This action cannot be undone.
               </p>
               <button
-                onClick={() => {
-                  if (
-                    confirm(
-                      `⚠️ Delete "${currentWorkspace?.name}"?\n\nThis will:\n- Remove all time slots\n- Remove all members\n- Cannot be undone!\n\nType the workspace name to confirm.`
-                    )
-                  ) {
-                    alert(
-                      "Workspace deletion coming soon. Please export your data first."
-                    );
-                  }
-                }}
-                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                onClick={handleDeleteWorkspace}
+                disabled={deleting}
+                className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
-                🗑️ Delete Workspace
+                {deleting ? "🗑️ Deleting..." : "🗑️ Delete Workspace"}
               </button>
             </div>
           )}

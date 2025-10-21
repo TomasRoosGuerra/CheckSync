@@ -12,14 +12,67 @@ interface SlotModalProps {
   date: Date;
   slot?: TimeSlot;
   onClose: () => void;
+  bulkEditMode?: {
+    type: "edit" | "delete" | "status" | "participants";
+    recurringGroupId: string;
+  };
 }
 
-export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
+export default function SlotModal({
+  date,
+  slot,
+  onClose,
+  bulkEditMode,
+}: SlotModalProps) {
   const { user, users, currentWorkspace, labels } = useStore();
 
   const [title, setTitle] = useState(slot?.title || "");
   const [startTime, setStartTime] = useState(slot?.startTime || "09:00");
   const [endTime, setEndTime] = useState(slot?.endTime || "10:00");
+
+  // Auto-adjust time validation
+  const handleStartTimeChange = (newStartTime: string) => {
+    setStartTime(newStartTime);
+
+    // If start time is after end time, adjust end time to be 1 hour later
+    if (newStartTime >= endTime) {
+      const [hours, minutes] = newStartTime.split(":").map(Number);
+      const startMinutes = hours * 60 + minutes;
+      const endMinutes = startMinutes + 60; // Add 1 hour
+
+      // Handle day overflow
+      const endHours = Math.floor(endMinutes / 60) % 24;
+      const endMins = endMinutes % 60;
+
+      setEndTime(
+        `${endHours.toString().padStart(2, "0")}:${endMins
+          .toString()
+          .padStart(2, "0")}`
+      );
+    }
+  };
+
+  const handleEndTimeChange = (newEndTime: string) => {
+    setEndTime(newEndTime);
+
+    // If end time is before or equal to start time, adjust start time to be 1 hour earlier
+    if (newEndTime <= startTime) {
+      const [hours, minutes] = newEndTime.split(":").map(Number);
+      const endMinutes = hours * 60 + minutes;
+      const startMinutes = endMinutes - 60; // Subtract 1 hour
+
+      // Handle day underflow
+      const startHours = startMinutes < 0 ? 23 : Math.floor(startMinutes / 60);
+      const startMins =
+        startMinutes < 0 ? 60 + (startMinutes % 60) : startMinutes % 60;
+
+      setStartTime(
+        `${startHours.toString().padStart(2, "0")}:${startMins
+          .toString()
+          .padStart(2, "0")}`
+      );
+    }
+  };
   const {
     selected: participantIds,
     toggle: toggleParticipant,
@@ -29,6 +82,9 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
   const [verifierId, setVerifierId] = useState(slot?.verifierId || "");
   const [notes, setNotes] = useState(slot?.notes || "");
   const [labelId, setLabelId] = useState(slot?.labelId || "");
+  const [labelProperties, setLabelProperties] = useState<
+    Record<string, string | number>
+  >(slot?.labelProperties || {});
   const [recurring, setRecurring] = useState(false);
   const [weeksAhead, setWeeksAhead] = useState(1);
 
@@ -41,6 +97,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
       setVerifierId(slot.verifierId);
       setNotes(slot.notes || "");
       setLabelId(slot.labelId || "");
+      setLabelProperties(slot.labelProperties || {});
     }
   }, [slot]);
 
@@ -60,6 +117,40 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
       console.log("Participants:", participantIds);
       console.log("Verifier:", verifierId);
 
+      // Handle bulk edit mode
+      if (bulkEditMode && slot) {
+        console.log("📝 Bulk editing recurring slots...");
+        const { timeSlots } = useStore.getState();
+        const recurringSlots = timeSlots.filter(
+          (s) => s.recurringGroupId === bulkEditMode.recurringGroupId
+        );
+
+        const updateData: any = {
+          title,
+          startTime,
+          endTime,
+          participantIds,
+          verifierId,
+          notes,
+        };
+
+        if (labelId) {
+          updateData.labelId = labelId;
+          if (Object.keys(labelProperties).length > 0) {
+            updateData.labelProperties = labelProperties;
+          }
+        }
+
+        for (const recurringSlot of recurringSlots) {
+          await updateSlotFirestore(recurringSlot.id, updateData);
+        }
+
+        console.log(`✅ Updated ${recurringSlots.length} recurring slots`);
+        setSaving(false);
+        onClose();
+        return;
+      }
+
       if (slot) {
         console.log("📝 Updating existing slot:", slot.id);
         const updateData: any = {
@@ -74,6 +165,9 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
 
         if (labelId) {
           updateData.labelId = labelId;
+          if (Object.keys(labelProperties).length > 0) {
+            updateData.labelProperties = labelProperties;
+          }
         }
 
         const updatePromise = updateSlotFirestore(slot.id, updateData);
@@ -118,7 +212,10 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
           createdBy: user?.id || "",
           isRecurring: recurring && weeksAhead > 1,
           ...(recurringGroupId && { recurringGroupId }),
-          ...(labelId && { labelId }),
+          ...(labelId && {
+            labelId,
+            ...(Object.keys(labelProperties).length > 0 && { labelProperties }),
+          }),
         };
 
         // Create recurring slots if requested
@@ -191,7 +288,11 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
         <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              {slot ? "Edit Time Slot" : "Add Time Slot"}
+              {bulkEditMode
+                ? `Edit All Recurring Slots`
+                : slot
+                ? "Edit Time Slot"
+                : "Add Time Slot"}
             </h2>
             <button
               onClick={onClose}
@@ -277,7 +378,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                 <input
                   type="time"
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  onChange={(e) => handleStartTimeChange(e.target.value)}
                   className="input-field text-base"
                   required
                 />
@@ -289,7 +390,7 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
                 <input
                   type="time"
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
+                  onChange={(e) => handleEndTimeChange(e.target.value)}
                   className="input-field text-base"
                   required
                 />
@@ -394,6 +495,96 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
               )}
             </div>
 
+            {/* Label Properties */}
+            {labelId && labels.find((l) => l.id === labelId)?.properties && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Label Details
+                </label>
+                <div className="space-y-2">
+                  {labels
+                    .find((l) => l.id === labelId)
+                    ?.properties?.map((property) => (
+                      <div key={property.id}>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          {property.name}{" "}
+                          {property.required && (
+                            <span className="text-red-500">*</span>
+                          )}
+                        </label>
+                        {property.type === "text" && (
+                          <input
+                            type="text"
+                            value={
+                              (labelProperties[property.id] as string) || ""
+                            }
+                            onChange={(e) =>
+                              setLabelProperties({
+                                ...labelProperties,
+                                [property.id]: e.target.value,
+                              })
+                            }
+                            placeholder={
+                              property.options?.placeholder ||
+                              `Enter ${property.name.toLowerCase()}`
+                            }
+                            className="input-field text-sm"
+                            required={property.required}
+                          />
+                        )}
+                        {property.type === "number" && (
+                          <input
+                            type="number"
+                            value={
+                              (labelProperties[property.id] as number) || ""
+                            }
+                            onChange={(e) =>
+                              setLabelProperties({
+                                ...labelProperties,
+                                [property.id]: parseFloat(e.target.value) || 0,
+                              })
+                            }
+                            min={property.options?.min}
+                            max={property.options?.max}
+                            step={property.options?.step}
+                            className="input-field text-sm"
+                            required={property.required}
+                          />
+                        )}
+                        {property.type === "range" && (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={
+                                (labelProperties[property.id] as number) || ""
+                              }
+                              onChange={(e) =>
+                                setLabelProperties({
+                                  ...labelProperties,
+                                  [property.id]:
+                                    parseFloat(e.target.value) || 0,
+                                })
+                              }
+                              min={property.options?.min}
+                              max={property.options?.max}
+                              className="input-field text-sm flex-1"
+                              required={property.required}
+                            />
+                            {property.options?.min !== undefined &&
+                              property.options?.max !== undefined && (
+                                <span className="text-xs text-gray-500 whitespace-nowrap">
+                                  ({property.options.min}-{property.options.max}
+                                  )
+                                </span>
+                              )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Notes (optional)
@@ -415,6 +606,8 @@ export default function SlotModal({ date, slot, onClose }: SlotModalProps) {
               >
                 {saving
                   ? "Saving..."
+                  : bulkEditMode
+                  ? "✓ Update All Slots"
                   : slot
                   ? "✓ Update Slot"
                   : recurring && weeksAhead > 1

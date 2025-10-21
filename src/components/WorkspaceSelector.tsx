@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import {
   createWorkspace,
+  decrementDeletedWorkspaceView,
+  getDeletedWorkspaceViews,
   getUserWorkspaces,
 } from "../services/workspaceService";
 import { useStore } from "../store";
@@ -27,6 +29,7 @@ export default function WorkspaceSelector({
   const [newWorkspaceDesc, setNewWorkspaceDesc] = useState("");
   const [newWorkspacePublic, setNewWorkspacePublic] = useState(false);
   const [joinCode, setJoinCode] = useState("");
+  const [deletedWorkspaceViews, setDeletedWorkspaceViews] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -42,8 +45,13 @@ export default function WorkspaceSelector({
 
     setLoading(true);
     try {
-      const userWorkspaces = await getUserWorkspaces(user.id);
+      const [userWorkspaces, deletedViews] = await Promise.all([
+        getUserWorkspaces(user.id),
+        getDeletedWorkspaceViews(user.id),
+      ]);
+
       setWorkspaces(userWorkspaces);
+      setDeletedWorkspaceViews(deletedViews);
 
       // Auto-select if only one workspace
       if (userWorkspaces.length === 1) {
@@ -102,6 +110,19 @@ export default function WorkspaceSelector({
     setCurrentWorkspace(workspace);
     localStorage.setItem("lastWorkspaceId", workspace.id);
     onWorkspaceSelected();
+  };
+
+  const handleViewDeletedWorkspace = async (viewId: string) => {
+    await decrementDeletedWorkspaceView(viewId);
+    setDeletedWorkspaceViews((prev) =>
+      prev
+        .map((view) =>
+          view.id === viewId
+            ? { ...view, viewsRemaining: view.viewsRemaining - 1 }
+            : view
+        )
+        .filter((view) => view.viewsRemaining > 0)
+    );
   };
 
   const handleLogout = async () => {
@@ -188,6 +209,39 @@ export default function WorkspaceSelector({
                     )}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Deleted Workspaces */}
+            {deletedWorkspaceViews.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Recently Deleted
+                </h3>
+                <div className="space-y-2">
+                  {deletedWorkspaceViews.map((view) => (
+                    <button
+                      key={view.id}
+                      onClick={() => handleViewDeletedWorkspace(view.id)}
+                      className="w-full p-3 text-left bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-200 opacity-60 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-600">
+                            🗑️ Deleted Workspace
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Will disappear in {view.viewsRemaining} day
+                            {view.viewsRemaining !== 1 ? "s" : ""}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {view.viewsRemaining}/2
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useStore } from "../store";
-import type { Label } from "../types";
+import type { Label, LabelProperty } from "../types";
 
 interface LabelManagementProps {
   onClose: () => void;
@@ -26,10 +26,180 @@ export default function LabelManagement({ onClose }: LabelManagementProps) {
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
   const [newLabelName, setNewLabelName] = useState("");
   const [newLabelColor, setNewLabelColor] = useState(LABEL_COLORS[0].value);
+  const [labelProperties, setLabelProperties] = useState<LabelProperty[]>([]);
 
   const workspaceLabels = labels.filter(
     (label) => label.workspaceId === currentWorkspace?.id
   );
+
+  // Label property management functions
+  const addProperty = () => {
+    const newProperty: LabelProperty = {
+      id: `prop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: "text",
+      name: "",
+      required: false,
+      options: {},
+    };
+    setLabelProperties([...labelProperties, newProperty]);
+  };
+
+  const updateProperty = (index: number, updates: Partial<LabelProperty>) => {
+    const updated = [...labelProperties];
+    updated[index] = { ...updated[index], ...updates };
+    setLabelProperties(updated);
+  };
+
+  const removeProperty = (index: number) => {
+    setLabelProperties(labelProperties.filter((_, i) => i !== index));
+  };
+
+  const renderPropertyInput = (property: LabelProperty, index: number) => {
+    return (
+      <div
+        key={property.id}
+        className="bg-gray-50 p-3 rounded-lg border border-gray-200"
+      >
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <input
+            type="text"
+            value={property.name}
+            onChange={(e) => updateProperty(index, { name: e.target.value })}
+            placeholder="Property name (e.g., Priority, Room)"
+            className="input-field text-sm"
+          />
+          <select
+            value={property.type}
+            onChange={(e) =>
+              updateProperty(index, {
+                type: e.target.value as "text" | "number" | "range",
+              })
+            }
+            className="input-field text-sm"
+          >
+            <option value="text">Text Input</option>
+            <option value="number">Number Input</option>
+            <option value="range">Number Range</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2 mb-2">
+          <label className="flex items-center gap-1 text-xs">
+            <input
+              type="checkbox"
+              checked={property.required || false}
+              onChange={(e) =>
+                updateProperty(index, { required: e.target.checked })
+              }
+              className="w-3 h-3"
+            />
+            Required
+          </label>
+        </div>
+
+        {property.type === "text" && (
+          <input
+            type="text"
+            value={property.options?.placeholder || ""}
+            onChange={(e) =>
+              updateProperty(index, {
+                options: { ...property.options, placeholder: e.target.value },
+              })
+            }
+            placeholder="Placeholder text"
+            className="input-field text-sm"
+          />
+        )}
+
+        {property.type === "number" && (
+          <div className="grid grid-cols-3 gap-2">
+            <input
+              type="number"
+              value={property.options?.min || ""}
+              onChange={(e) =>
+                updateProperty(index, {
+                  options: {
+                    ...property.options,
+                    min: parseInt(e.target.value) || undefined,
+                  },
+                })
+              }
+              placeholder="Min"
+              className="input-field text-sm"
+            />
+            <input
+              type="number"
+              value={property.options?.max || ""}
+              onChange={(e) =>
+                updateProperty(index, {
+                  options: {
+                    ...property.options,
+                    max: parseInt(e.target.value) || undefined,
+                  },
+                })
+              }
+              placeholder="Max"
+              className="input-field text-sm"
+            />
+            <input
+              type="number"
+              value={property.options?.step || ""}
+              onChange={(e) =>
+                updateProperty(index, {
+                  options: {
+                    ...property.options,
+                    step: parseInt(e.target.value) || undefined,
+                  },
+                })
+              }
+              placeholder="Step"
+              className="input-field text-sm"
+            />
+          </div>
+        )}
+
+        {property.type === "range" && (
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="number"
+              value={property.options?.min || ""}
+              onChange={(e) =>
+                updateProperty(index, {
+                  options: {
+                    ...property.options,
+                    min: parseInt(e.target.value) || undefined,
+                  },
+                })
+              }
+              placeholder="Min value"
+              className="input-field text-sm"
+            />
+            <input
+              type="number"
+              value={property.options?.max || ""}
+              onChange={(e) =>
+                updateProperty(index, {
+                  options: {
+                    ...property.options,
+                    max: parseInt(e.target.value) || undefined,
+                  },
+                })
+              }
+              placeholder="Max value"
+              className="input-field text-sm"
+            />
+          </div>
+        )}
+
+        <button
+          onClick={() => removeProperty(index)}
+          className="mt-2 text-red-500 hover:text-red-700 text-xs"
+        >
+          🗑️ Remove Property
+        </button>
+      </div>
+    );
+  };
 
   const handleCreateLabel = async () => {
     if (!newLabelName.trim() || !currentWorkspace || !user) return;
@@ -41,11 +211,13 @@ export default function LabelManagement({ onClose }: LabelManagementProps) {
       color: newLabelColor,
       createdBy: user.id,
       createdAt: Date.now(),
+      properties: labelProperties.filter((prop) => prop.name.trim() !== ""),
     };
 
     addLabel(newLabel);
     setNewLabelName("");
     setNewLabelColor(LABEL_COLORS[0].value);
+    setLabelProperties([]);
     setShowCreateForm(false);
   };
 
@@ -55,11 +227,13 @@ export default function LabelManagement({ onClose }: LabelManagementProps) {
     updateLabel(editingLabel.id, {
       name: newLabelName.trim(),
       color: newLabelColor,
+      properties: labelProperties.filter((prop) => prop.name.trim() !== ""),
     });
 
     setEditingLabel(null);
     setNewLabelName("");
     setNewLabelColor(LABEL_COLORS[0].value);
+    setLabelProperties([]);
   };
 
   const handleDeleteLabel = (labelId: string) => {
@@ -72,6 +246,7 @@ export default function LabelManagement({ onClose }: LabelManagementProps) {
     setEditingLabel(label);
     setNewLabelName(label.name);
     setNewLabelColor(label.color);
+    setLabelProperties(label.properties || []);
     setShowCreateForm(true);
   };
 
@@ -79,6 +254,7 @@ export default function LabelManagement({ onClose }: LabelManagementProps) {
     setEditingLabel(null);
     setNewLabelName("");
     setNewLabelColor(LABEL_COLORS[0].value);
+    setLabelProperties([]);
     setShowCreateForm(false);
   };
 
@@ -138,6 +314,38 @@ export default function LabelManagement({ onClose }: LabelManagementProps) {
                         />
                       ))}
                     </div>
+                  </div>
+
+                  {/* Label Properties Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Properties (optional)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={addProperty}
+                        className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded"
+                      >
+                        + Add Property
+                      </button>
+                    </div>
+
+                    {labelProperties.length > 0 && (
+                      <div className="space-y-2 mb-3">
+                        {labelProperties.map((property, index) =>
+                          renderPropertyInput(property, index)
+                        )}
+                      </div>
+                    )}
+
+                    {labelProperties.length === 0 && (
+                      <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded border border-gray-200">
+                        Add custom properties like priority levels, room
+                        numbers, or any other data you want to track with this
+                        label.
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-3 pt-2">
