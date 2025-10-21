@@ -18,6 +18,7 @@ import {
 import {
   getUserWorkspaces,
   subscribeToWorkspaceMembers,
+  subscribeToUserWorkspaceMemberships,
 } from "./services/workspaceService";
 import { useStore } from "./store";
 import type { User, Workspace } from "./types";
@@ -192,9 +193,13 @@ function App() {
 
     console.log("🔗 Setting up workspace membership subscription for user:", user.id);
     
+    let isActive = true; // Flag to prevent state updates after component unmounts
+    
     const unsubscribe = subscribeToUserWorkspaceMemberships(
       user.id,
       async (memberships) => {
+        if (!isActive) return; // Don't update state if component has unmounted
+        
         try {
           console.log("📋 Workspace memberships updated:", memberships.length);
           
@@ -203,6 +208,8 @@ function App() {
           const workspaces: Workspace[] = [];
 
           for (const workspaceId of workspaceIds) {
+            if (!isActive) break; // Stop processing if component unmounted
+            
             try {
               const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
               if (workspaceDoc.exists()) {
@@ -226,8 +233,10 @@ function App() {
             }
           }
 
-          console.log("✅ Setting workspaces:", workspaces.length);
-          setWorkspaces(workspaces);
+          if (isActive) {
+            console.log("✅ Setting workspaces:", workspaces.length);
+            setWorkspaces(workspaces);
+          }
         } catch (error) {
           console.error("Error processing workspace memberships:", error);
         }
@@ -236,6 +245,7 @@ function App() {
 
     return () => {
       console.log("🔌 Cleaning up workspace membership subscription");
+      isActive = false;
       unsubscribe();
     };
   }, [user, setWorkspaces]);
