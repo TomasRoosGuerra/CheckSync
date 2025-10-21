@@ -1,10 +1,9 @@
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import WorkspaceSelector from "./components/WorkspaceSelector";
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
 import {
   createUserProfile,
   getUserProfile,
@@ -17,10 +16,9 @@ import {
 import {
   getUserWorkspaces,
   subscribeToWorkspaceMembers,
-  subscribeToUserWorkspaceMemberships,
 } from "./services/workspaceService";
 import { useStore } from "./store";
-import type { User, Workspace } from "./types";
+import type { User } from "./types";
 
 function App() {
   const {
@@ -32,6 +30,7 @@ function App() {
     setWorkspaceMembers,
     setUsers,
     workspaces,
+    setWorkspaces,
     setAllUserTimeSlots,
     setDetectedConflicts,
     resetStore,
@@ -144,7 +143,14 @@ function App() {
       unsubSlots();
       unsubMembers();
     };
-  }, [currentWorkspace, user, setTimeSlots, setWorkspaceMembers, setUsers, setCurrentWorkspace]);
+  }, [
+    currentWorkspace,
+    user,
+    setTimeSlots,
+    setWorkspaceMembers,
+    setUsers,
+    setCurrentWorkspace,
+  ]);
 
   // Load ALL user's time slots across all workspaces for unified agenda
   useEffect(() => {
@@ -190,7 +196,7 @@ function App() {
     //       // Get workspace details for each membership
     //       const workspaceIds = memberships.map(m => m.workspaceId);
     //       const workspaces: Workspace[] = [];
-          
+
     //       for (const workspaceId of workspaceIds) {
     //         try {
     //           const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
@@ -210,7 +216,7 @@ function App() {
     //           console.error("Error loading workspace:", error);
     //         }
     //       }
-          
+
     //       setWorkspaces(workspaces);
     //     } catch (error) {
     //       console.error("Error processing workspace memberships:", error);
