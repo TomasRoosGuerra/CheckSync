@@ -6,7 +6,7 @@ import {
   updateMemberRole,
 } from "../services/workspaceService";
 import { useStore } from "../store";
-import type { UserRole } from "../types";
+import type { User, UserRole } from "../types";
 import {
   canLeaveWorkspace,
   getUserWorkspaceRole,
@@ -90,8 +90,8 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
       setSearchResult(null);
       setActiveTab("members");
       // State will update via subscription in App.tsx
-    } catch (error: any) {
-      if (error.message.includes("already a member")) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes("already a member")) {
         alert("⚠️ This user is already a member of this workspace.");
       } else {
         alert("Failed to add member.");
@@ -205,16 +205,20 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               onClick={() => setActiveTab("members")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "members"
-                  ? "bg-primary !text-white"
-                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
+                  ? "bg-primary"
+                  : "bg-gray-100 hover:bg-gray-200"
               }`}
+              style={{
+                color: activeTab === "members" ? "white" : "#374151"
+              }}
             >
               👥 Members ({currentWorkspaceUsers.length})
             </button>
             {canManage && (
               <button
                 onClick={() => setShowEnhancedAdder(true)}
-                className="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap bg-primary hover:bg-primary-dark !text-white"
+                className="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap bg-primary hover:bg-primary-dark"
+                style={{ color: "white" }}
               >
                 ➕ Add Members
               </button>

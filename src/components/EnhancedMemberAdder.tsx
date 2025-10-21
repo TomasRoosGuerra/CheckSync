@@ -251,9 +251,12 @@ export default function EnhancedMemberAdder({
               onClick={() => setActiveTab("collaborated")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "collaborated"
-                  ? "bg-primary !text-white"
-                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
+                  ? "bg-primary"
+                  : "bg-gray-100 hover:bg-gray-200"
               }`}
+              style={{
+                color: activeTab === "collaborated" ? "white" : "#374151"
+              }}
             >
               👥 Previous Collaborators
             </button>
@@ -261,9 +264,12 @@ export default function EnhancedMemberAdder({
               onClick={() => setActiveTab("search")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "search"
-                  ? "bg-primary !text-white"
-                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
+                  ? "bg-primary"
+                  : "bg-gray-100 hover:bg-gray-200"
               }`}
+              style={{
+                color: activeTab === "search" ? "white" : "#374151"
+              }}
             >
               🔍 Search by Email
             </button>
@@ -271,9 +277,12 @@ export default function EnhancedMemberAdder({
               onClick={() => setActiveTab("bulk")}
               className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === "bulk"
-                  ? "bg-primary !text-white"
-                  : "bg-gray-100 hover:bg-gray-200 !text-gray-700"
+                  ? "bg-primary"
+                  : "bg-gray-100 hover:bg-gray-200"
               }`}
+              style={{
+                color: activeTab === "bulk" ? "white" : "#374151"
+              }}
             >
               📝 Bulk Add
             </button>

@@ -96,33 +96,42 @@ export default function Dashboard() {
               <div className="flex gap-1">
                 <button
                   onClick={() => setViewMode("week")}
-                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
+                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors ${
                     viewMode === "week"
                       ? "bg-primary shadow-md"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
+                  style={{
+                    color: viewMode === "week" ? "white" : "#111827"
+                  }}
                   title="Week View"
                 >
                   📅 Week
                 </button>
                 <button
                   onClick={() => setViewMode("agenda")}
-                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors text-gray-900 ${
+                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full transition-colors ${
                     viewMode === "agenda"
                       ? "bg-primary shadow-md"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
+                  style={{
+                    color: viewMode === "agenda" ? "white" : "#111827"
+                  }}
                   title="Workspace Agenda"
                 >
                   📋 Agenda
                 </button>
                 <button
                   onClick={() => setViewMode("my-agenda")}
-                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full relative text-gray-900 ${
+                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full relative ${
                     viewMode === "my-agenda"
                       ? "bg-primary shadow-md"
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
+                  style={{
+                    color: viewMode === "my-agenda" ? "white" : "#111827"
+                  }}
                   title="My Agenda"
                 >
                   ✨ My Agenda
