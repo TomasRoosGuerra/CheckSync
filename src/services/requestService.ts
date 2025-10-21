@@ -23,6 +23,33 @@ export const createJoinRequest = async (
   message?: string
 ): Promise<string> => {
   try {
+    // Check if user already has a pending request for this workspace
+    const existingRequestQuery = query(
+      collection(db, REQUESTS_COLLECTION),
+      where("workspaceId", "==", workspaceId),
+      where("userId", "==", userId),
+      where("status", "==", "pending")
+    );
+    const existingRequestSnapshot = await getDocs(existingRequestQuery);
+    
+    if (!existingRequestSnapshot.empty) {
+      console.log("⚠️ User already has a pending request for this workspace");
+      throw new Error("You already have a pending request for this workspace");
+    }
+
+    // Check if user is already a member
+    const memberQuery = query(
+      collection(db, "workspaceMembers"),
+      where("workspaceId", "==", workspaceId),
+      where("userId", "==", userId)
+    );
+    const memberSnapshot = await getDocs(memberQuery);
+    
+    if (!memberSnapshot.empty) {
+      console.log("⚠️ User is already a member of this workspace");
+      throw new Error("You are already a member of this workspace");
+    }
+
     const requestRef = doc(collection(db, REQUESTS_COLLECTION));
     await setDoc(requestRef, {
       workspaceId,

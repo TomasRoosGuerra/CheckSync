@@ -85,9 +85,15 @@ export default function PublicWorkspaceDiscovery({
 
       alert("✅ Request sent! The workspace owner will review your request.");
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending request:", error);
-      alert("Failed to send request. Please try again.");
+      if (error.message.includes("already have a pending request")) {
+        alert("⚠️ You already have a pending request for this workspace.");
+      } else if (error.message.includes("already a member")) {
+        alert("✅ You are already a member of this workspace!");
+      } else {
+        alert("Failed to send request. Please try again.");
+      }
     } finally {
       setRequesting(null);
     }

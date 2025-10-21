@@ -22,7 +22,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
   const { user, users, currentWorkspace, workspaceMembers } = useStore();
   const [activeTab, setActiveTab] = useState<"members" | "add">("members");
   const [searchEmail, setSearchEmail] = useState("");
-  const [searchResult, setSearchResult] = useState<any>(null);
+  const [searchResult, setSearchResult] = useState<User | null>(null);
   const [selectedRole] = useState<UserRole>("participant");
   const [, setProcessing] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
   const isOwner = isWorkspaceOwner(user, currentWorkspace);
   const canManage = isOwner || userRole === "manager" || userRole === "admin";
 
-  // @ts-ignore - Function is used in UI but not detected by TypeScript
+  // @ts-expect-error - Function is used in UI but not detected by TypeScript
   const handleSearchUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchEmail.trim()) return;
@@ -74,7 +74,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
     }
   };
 
-  // @ts-ignore - Function is used in UI but not detected by TypeScript
+  // @ts-expect-error - Function is used in UI but not detected by TypeScript
   const handleAddMember = async () => {
     if (!currentWorkspace || !searchResult) return;
 
@@ -90,8 +90,12 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
       setSearchResult(null);
       setActiveTab("members");
       // State will update via subscription in App.tsx
-    } catch (error) {
-      alert("Failed to add member.");
+    } catch (error: any) {
+      if (error.message.includes("already a member")) {
+        alert("⚠️ This user is already a member of this workspace.");
+      } else {
+        alert("Failed to add member.");
+      }
     } finally {
       setProcessing(false);
     }

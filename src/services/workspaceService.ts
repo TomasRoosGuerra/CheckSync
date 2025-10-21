@@ -126,6 +126,19 @@ export const addWorkspaceMember = async (
   role: string
 ) => {
   try {
+    // Check if user is already a member
+    const existingMemberQuery = query(
+      collection(db, WORKSPACE_MEMBERS_COLLECTION),
+      where("workspaceId", "==", workspaceId),
+      where("userId", "==", userId)
+    );
+    const existingMemberSnapshot = await getDocs(existingMemberQuery);
+    
+    if (!existingMemberSnapshot.empty) {
+      console.log("⚠️ User is already a member of this workspace");
+      throw new Error("User is already a member of this workspace");
+    }
+
     const memberRef = doc(collection(db, WORKSPACE_MEMBERS_COLLECTION));
     await setDoc(memberRef, {
       workspaceId,
@@ -266,6 +279,28 @@ export const decrementDeletedWorkspaceView = async (viewId: string) => {
   } catch (error) {
     console.error("Error decrementing deleted workspace view:", error);
   }
+};
+
+export const subscribeToUserWorkspaceMemberships = (
+  userId: string,
+  callback: (memberships: WorkspaceMember[]) => void
+) => {
+  const q = query(
+    collection(db, WORKSPACE_MEMBERS_COLLECTION),
+    where("userId", "==", userId)
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const memberships = snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+          joinedAt: doc.data().joinedAt?.toMillis() || Date.now(),
+        } as WorkspaceMember)
+    );
+    callback(memberships);
+  });
 };
 
 export const bulkAddWorkspaceMembers = async (

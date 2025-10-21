@@ -149,9 +149,13 @@ export default function EnhancedMemberAdder({
       alert(`✅ ${userToAdd.name} added as ${role}!`);
       onMembersAdded();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding member:", error);
-      alert("Failed to add member. Please try again.");
+      if (error.message.includes("already a member")) {
+        alert(`⚠️ ${userToAdd.name} is already a member of this workspace.`);
+      } else {
+        alert("Failed to add member. Please try again.");
+      }
     } finally {
       setProcessing(false);
     }

@@ -35,11 +35,20 @@ export default function NotificationsPanel({
       await approveJoinRequest(notification.requestId, user!.id);
 
       // Add user to workspace
-      await addWorkspaceMember(
-        notification.workspaceId,
-        request.userId,
-        "participant"
-      );
+      try {
+        await addWorkspaceMember(
+          notification.workspaceId,
+          request.userId,
+          "participant"
+        );
+      } catch (memberError: any) {
+        if (memberError.message.includes("already a member")) {
+          console.log("⚠️ User is already a member, skipping addition");
+          // Still proceed to mark the request as approved
+        } else {
+          throw memberError;
+        }
+      }
 
       // Notify requester
       await createNotification(

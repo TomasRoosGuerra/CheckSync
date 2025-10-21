@@ -1,9 +1,10 @@
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import WorkspaceSelector from "./components/WorkspaceSelector";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
 import {
   createUserProfile,
   getUserProfile,
@@ -16,6 +17,7 @@ import {
 import {
   getUserWorkspaces,
   subscribeToWorkspaceMembers,
+  subscribeToUserWorkspaceMemberships,
 } from "./services/workspaceService";
 import { useStore } from "./store";
 import type { User } from "./types";
@@ -175,6 +177,44 @@ function App() {
 
     return () => unsubscribe();
   }, [user, workspaces, setAllUserTimeSlots, setDetectedConflicts]);
+
+  // Subscribe to user workspace memberships to automatically update workspace list
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = subscribeToUserWorkspaceMemberships(
+      user.id,
+      async (memberships) => {
+        // Get workspace details for each membership
+        const workspaceIds = memberships.map(m => m.workspaceId);
+        const workspaces: Workspace[] = [];
+        
+        for (const workspaceId of workspaceIds) {
+          try {
+            const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
+            if (workspaceDoc.exists()) {
+              const workspaceData = workspaceDoc.data();
+              // Filter out deleted workspaces
+              if (!workspaceData.deletedAt) {
+                workspaces.push({
+                  id: workspaceDoc.id,
+                  ...workspaceData,
+                  createdAt: workspaceData.createdAt?.toMillis() || Date.now(),
+                  updatedAt: workspaceData.updatedAt?.toMillis() || Date.now(),
+                } as Workspace);
+              }
+            }
+          } catch (error) {
+            console.error("Error loading workspace:", error);
+          }
+        }
+        
+        setWorkspaces(workspaces);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user, setWorkspaces]);
 
   if (loading) {
     return (
