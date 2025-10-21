@@ -20,7 +20,7 @@ import {
   subscribeToUserWorkspaceMemberships,
 } from "./services/workspaceService";
 import { useStore } from "./store";
-import type { User } from "./types";
+import type { User, Workspace } from "./types";
 
 function App() {
   const {
@@ -144,7 +144,7 @@ function App() {
       unsubSlots();
       unsubMembers();
     };
-  }, [currentWorkspace, user, setTimeSlots, setWorkspaceMembers, setUsers]);
+  }, [currentWorkspace, user, setTimeSlots, setWorkspaceMembers, setUsers, setCurrentWorkspace]);
 
   // Load ALL user's time slots across all workspaces for unified agenda
   useEffect(() => {
@@ -182,38 +182,43 @@ function App() {
   useEffect(() => {
     if (!user) return;
 
-    const unsubscribe = subscribeToUserWorkspaceMemberships(
-      user.id,
-      async (memberships) => {
-        // Get workspace details for each membership
-        const workspaceIds = memberships.map(m => m.workspaceId);
-        const workspaces: Workspace[] = [];
-        
-        for (const workspaceId of workspaceIds) {
-          try {
-            const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
-            if (workspaceDoc.exists()) {
-              const workspaceData = workspaceDoc.data();
-              // Filter out deleted workspaces
-              if (!workspaceData.deletedAt) {
-                workspaces.push({
-                  id: workspaceDoc.id,
-                  ...workspaceData,
-                  createdAt: workspaceData.createdAt?.toMillis() || Date.now(),
-                  updatedAt: workspaceData.updatedAt?.toMillis() || Date.now(),
-                } as Workspace);
-              }
-            }
-          } catch (error) {
-            console.error("Error loading workspace:", error);
-          }
-        }
-        
-        setWorkspaces(workspaces);
-      }
-    );
+    // Temporarily disabled to debug blank canvas issue
+    // const unsubscribe = subscribeToUserWorkspaceMemberships(
+    //   user.id,
+    //   async (memberships) => {
+    //     try {
+    //       // Get workspace details for each membership
+    //       const workspaceIds = memberships.map(m => m.workspaceId);
+    //       const workspaces: Workspace[] = [];
+          
+    //       for (const workspaceId of workspaceIds) {
+    //         try {
+    //           const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
+    //           if (workspaceDoc.exists()) {
+    //             const workspaceData = workspaceDoc.data();
+    //             // Filter out deleted workspaces
+    //             if (!workspaceData.deletedAt) {
+    //               workspaces.push({
+    //                 id: workspaceDoc.id,
+    //                 ...workspaceData,
+    //                 createdAt: workspaceData.createdAt?.toMillis() || Date.now(),
+    //                 updatedAt: workspaceData.updatedAt?.toMillis() || Date.now(),
+    //               } as Workspace);
+    //             }
+    //           }
+    //         } catch (error) {
+    //           console.error("Error loading workspace:", error);
+    //         }
+    //       }
+          
+    //       setWorkspaces(workspaces);
+    //     } catch (error) {
+    //       console.error("Error processing workspace memberships:", error);
+    //     }
+    //   }
+    // );
 
-    return () => unsubscribe();
+    // return () => unsubscribe();
   }, [user, setWorkspaces]);
 
   if (loading) {
