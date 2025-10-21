@@ -13,7 +13,7 @@ import {
   detectTimeConflicts,
   subscribeToAllUserTimeSlots,
 } from "./services/unifiedAgendaService";
-import { subscribeToWorkspaceMembers } from "./services/workspaceService";
+import { subscribeToWorkspaceMembers, getUserWorkspaces } from "./services/workspaceService";
 import { useStore } from "./store";
 import type { User } from "./types";
 
@@ -22,6 +22,7 @@ function App() {
     user,
     setUser,
     currentWorkspace,
+    setCurrentWorkspace,
     setTimeSlots,
     setWorkspaceMembers,
     setUsers,
@@ -55,6 +56,25 @@ function App() {
           }
 
           setUser(userProfile);
+          
+          // Check if user has a workspace selected from localStorage
+          const lastWorkspaceId = localStorage.getItem("lastWorkspaceId");
+          if (lastWorkspaceId) {
+            // Validate that the workspace still exists and is not deleted
+            try {
+              const userWorkspaces = await getUserWorkspaces(firebaseUser.uid);
+              const validWorkspace = userWorkspaces.find(w => w.id === lastWorkspaceId && !w.deletedAt);
+              if (validWorkspace) {
+                setCurrentWorkspace(validWorkspace);
+              } else {
+                // Clear invalid workspace from localStorage
+                localStorage.removeItem("lastWorkspaceId");
+              }
+            } catch (error) {
+              console.error("Error validating workspace:", error);
+              localStorage.removeItem("lastWorkspaceId");
+            }
+          }
         } catch (error) {
           console.error("❌ Error loading user data:", error);
           alert("Error loading data. Check console and Firestore setup.");
@@ -67,11 +87,18 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [setUser]);
+  }, [setUser, setCurrentWorkspace]);
 
   // Load workspace data when workspace is selected
   useEffect(() => {
     if (!currentWorkspace || !user) return;
+
+    // Check if workspace is deleted
+    if (currentWorkspace.deletedAt) {
+      console.log("🗑️ Workspace is deleted, redirecting to workspace selector");
+      setCurrentWorkspace(null);
+      return;
+    }
 
     console.log("🏢 Loading workspace data:", currentWorkspace.id);
 

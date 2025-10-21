@@ -77,12 +77,16 @@ export const getUserWorkspaces = async (
         doc(db, WORKSPACES_COLLECTION, workspaceId)
       );
       if (workspaceDoc.exists()) {
-        workspaces.push({
-          id: workspaceDoc.id,
-          ...workspaceDoc.data(),
-          createdAt: workspaceDoc.data().createdAt?.toMillis() || Date.now(),
-          updatedAt: workspaceDoc.data().updatedAt?.toMillis() || Date.now(),
-        } as Workspace);
+        const workspaceData = workspaceDoc.data();
+        // Filter out deleted workspaces
+        if (!workspaceData.deletedAt) {
+          workspaces.push({
+            id: workspaceDoc.id,
+            ...workspaceData,
+            createdAt: workspaceData.createdAt?.toMillis() || Date.now(),
+            updatedAt: workspaceData.updatedAt?.toMillis() || Date.now(),
+          } as Workspace);
+        }
       }
     }
 
