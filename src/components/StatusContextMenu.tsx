@@ -49,6 +49,7 @@ export default function StatusContextMenu({
           // Status selection
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900 mb-3">Mark Status</h3>
+            <p className="text-xs text-gray-600 mb-3">Right-click on any slot to mark as sick/away</p>
             
             <button
               onClick={() => setSelectedStatus("sick")}

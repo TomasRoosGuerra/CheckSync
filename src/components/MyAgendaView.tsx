@@ -12,6 +12,7 @@ import {
 import { formatStatusText, getStatusBadgeClasses } from "../utils/slotUtils";
 import { getUserName } from "../utils/userUtils";
 import { getWorkspaceColorClasses } from "../utils/workspaceUtils";
+import StatusContextMenu from "./StatusContextMenu";
 
 interface MyAgendaViewProps {
   onSlotClick: (slot: TimeSlot, workspace: Workspace) => void;
@@ -26,6 +27,17 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
     detectedConflicts,
     workspaceMembers,
   } = useStore();
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    position: { x: number; y: number };
+    slot: TimeSlot | null;
+  }>({
+    isOpen: false,
+    position: { x: 0, y: 0 },
+    slot: null,
+  });
 
   const [dateFilter, setDateFilter] = useState<"today" | "week" | "all">(
     "week"
@@ -143,6 +155,46 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
     }
   };
 
+  // Context menu handlers
+  const handleSlotLongPress = (e: React.MouseEvent, slot: TimeSlot) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!canCheckIn(user, slot)) return;
+    
+    setContextMenu({
+      isOpen: true,
+      position: { x: e.clientX, y: e.clientY },
+      slot,
+    });
+  };
+
+  const handleStatusChange = async (status: "sick" | "away", reason: string, duration: string) => {
+    if (!contextMenu.slot) return;
+
+    try {
+      const updates = {
+        status: status,
+        sickAwayReason: reason,
+        sickAwayDuration: duration,
+        sickAwayAt: Date.now(),
+      };
+      await updateSlotFirestore(contextMenu.slot.id, updates);
+      console.log(`✅ Marked slot as ${status}: ${reason}`);
+    } catch (error) {
+      console.error("Error updating slot status:", error);
+      alert("Failed to update status. Please try again.");
+    }
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu({
+      isOpen: false,
+      position: { x: 0, y: 0 },
+      slot: null,
+    });
+  };
+
   return (
     <div className="card">
       {/* Header */}
@@ -251,6 +303,7 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
                         hover:shadow-md cursor-pointer
                       `}
                       onClick={() => workspace && onSlotClick(slot, workspace)}
+                      onContextMenu={(e) => handleSlotLongPress(e, slot)}
                     >
                       {/* Workspace Badge & Role */}
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -326,6 +379,24 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
                             </button>
                           )}
 
+                        {/* Mark Sick/Away Button */}
+                        {canCheckIn(user, slot) &&
+                          (slot.status === "planned" || slot.status === "checked-in") && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setContextMenu({
+                                  isOpen: true,
+                                  position: { x: e.clientX, y: e.clientY },
+                                  slot,
+                                });
+                              }}
+                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium text-xs py-2 px-4 rounded-full transition-colors touch-manipulation"
+                            >
+                              🏥 Mark Sick/Away
+                            </button>
+                          )}
+
                         {canVerify(user, slot) &&
                           slot.status === "checked-in" && (
                             <button
@@ -376,6 +447,17 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
           </div>
         )}
       </div>
+
+      {/* Status Context Menu */}
+      {contextMenu.isOpen && contextMenu.slot && (
+        <StatusContextMenu
+          slot={contextMenu.slot}
+          isOpen={contextMenu.isOpen}
+          position={contextMenu.position}
+          onClose={closeContextMenu}
+          onStatusChange={handleStatusChange}
+        />
+      )}
     </div>
   );
 }

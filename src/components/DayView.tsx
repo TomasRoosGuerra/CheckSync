@@ -15,6 +15,7 @@ import {
   canVerify,
   getUserWorkspaceRole,
 } from "../utils/permissions";
+import StatusContextMenu from "./StatusContextMenu";
 import {
   getStatusBadgeClasses,
   groupOverlappingSlots,
@@ -36,6 +37,17 @@ export default function DayView({ date, onClose }: DayViewProps) {
     type: "edit" | "delete" | "status" | "participants";
     recurringGroupId: string;
   } | null>(null);
+  
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    position: { x: number; y: number };
+    slot: TimeSlot | null;
+  }>({
+    isOpen: false,
+    position: { x: 0, y: 0 },
+    slot: null,
+  });
 
   // Get user's role in current workspace
   const userRole =
@@ -281,6 +293,46 @@ export default function DayView({ date, onClose }: DayViewProps) {
     }
   };
 
+  // Context menu handlers
+  const handleSlotLongPress = (e: React.MouseEvent, slot: TimeSlot) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!canCheckIn(user, slot)) return;
+    
+    setContextMenu({
+      isOpen: true,
+      position: { x: e.clientX, y: e.clientY },
+      slot,
+    });
+  };
+
+  const handleStatusChange = async (status: "sick" | "away", reason: string, duration: string) => {
+    if (!contextMenu.slot) return;
+
+    try {
+      const updates = {
+        status: status,
+        sickAwayReason: reason,
+        sickAwayDuration: duration,
+        sickAwayAt: Date.now(),
+      };
+      await updateSlotFirestore(contextMenu.slot.id, updates);
+      console.log(`✅ Marked slot as ${status}: ${reason}`);
+    } catch (error) {
+      console.error("Error updating slot status:", error);
+      alert("Failed to update status. Please try again.");
+    }
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu({
+      isOpen: false,
+      position: { x: 0, y: 0 },
+      slot: null,
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
       <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden">
@@ -331,6 +383,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                     <div
                       key={slot.id}
                       className="card hover:shadow-md transition-shadow relative border-l-4 border-l-primary/30 p-3 sm:p-4"
+                      onContextMenu={(e) => handleSlotLongPress(e, slot)}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
                         <div className="flex-1">
@@ -469,6 +522,24 @@ export default function DayView({ date, onClose }: DayViewProps) {
                             </button>
                           )}
 
+                        {/* Mark Sick/Away Button - Mobile Optimized */}
+                        {canCheckIn(user, slot) &&
+                          (slot.status === "planned" || slot.status === "checked-in") && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setContextMenu({
+                                  isOpen: true,
+                                  position: { x: e.clientX, y: e.clientY },
+                                  slot,
+                                });
+                              }}
+                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                            >
+                              🏥 Mark Sick/Away
+                            </button>
+                          )}
+
                         {/* Confirm Attendance - Mobile Optimized */}
                         {canVerify(user, slot) &&
                           slot.status === "checked-in" && (
@@ -553,6 +624,17 @@ export default function DayView({ date, onClose }: DayViewProps) {
             setBulkOperationMode(null);
           }}
           bulkEditMode={bulkOperationMode}
+        />
+      )}
+
+      {/* Status Context Menu */}
+      {contextMenu.isOpen && contextMenu.slot && (
+        <StatusContextMenu
+          slot={contextMenu.slot}
+          isOpen={contextMenu.isOpen}
+          position={contextMenu.position}
+          onClose={closeContextMenu}
+          onStatusChange={handleStatusChange}
         />
       )}
     </div>
