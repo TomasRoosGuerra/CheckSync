@@ -88,6 +88,8 @@ export const getStatusBadgeClasses = (status: TimeSlot["status"]): string => {
     "checked-in": "bg-yellow-100 text-yellow-700",
     confirmed: "bg-green-100 text-green-700",
     missed: "bg-red-100 text-red-700",
+    sick: "bg-orange-100 text-orange-700",
+    away: "bg-orange-100 text-orange-700",
   };
   return styles[status];
 };
@@ -105,6 +107,10 @@ export const getStatusColorClasses = (status: TimeSlot["status"]): string => {
       return "border-l-green-500 bg-green-50";
     case "missed":
       return "border-l-red-400 bg-red-50";
+    case "sick":
+      return "border-l-orange-400 bg-orange-50";
+    case "away":
+      return "border-l-orange-400 bg-orange-50";
     default:
       return "border-l-gray-300 bg-gray-50";
   }
@@ -115,5 +121,7 @@ export const getStatusColorClasses = (status: TimeSlot["status"]): string => {
  */
 export const formatStatusText = (status: TimeSlot["status"]): string => {
   if (status === "checked-in") return "Pending";
+  if (status === "sick") return "Sick";
+  if (status === "away") return "Away";
   return status.charAt(0).toUpperCase() + status.slice(1);
 };

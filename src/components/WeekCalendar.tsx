@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useStore } from "../store";
 import type { TimeSlot } from "../types";
 import {
@@ -12,17 +13,71 @@ import {
   prevWeek,
 } from "../utils/dateUtils";
 import { getOverlapInfo, groupOverlappingSlots } from "../utils/slotUtils";
+import { canCheckIn } from "../utils/permissions";
+import { updateTimeSlot as updateSlotFirestore } from "../services/firestoreService";
+import StatusContextMenu from "./StatusContextMenu";
 
 interface WeekCalendarProps {
   onDayClick: (date: Date) => void;
 }
 
 export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
-  const { selectedDate, setSelectedDate, timeSlots } = useStore();
+  const { selectedDate, setSelectedDate, timeSlots, user } = useStore();
+  
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    position: { x: number; y: number };
+    slot: TimeSlot | null;
+  }>({
+    isOpen: false,
+    position: { x: 0, y: 0 },
+    slot: null,
+  });
 
   const weekDays = getWeekDays(selectedDate);
   const extendedWeekDays = getExtendedWeekDays(selectedDate);
   const weekNumber = getWeekNumber(selectedDate);
+
+  // Context menu handlers
+  const handleSlotLongPress = (e: React.MouseEvent, slot: TimeSlot) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!canCheckIn(user, slot)) return;
+    
+    setContextMenu({
+      isOpen: true,
+      position: { x: e.clientX, y: e.clientY },
+      slot,
+    });
+  };
+
+  const handleStatusChange = async (status: "sick" | "away", reason: string, duration: string) => {
+    if (!contextMenu.slot) return;
+
+    try {
+      const updates = {
+        status: status,
+        sickAwayReason: reason,
+        sickAwayDuration: duration,
+        sickAwayAt: Date.now(),
+      };
+      await updateSlotFirestore(contextMenu.slot.id, updates);
+      console.log(`✅ Marked slot as ${status}: ${reason}`);
+    } catch (error) {
+      console.error("Error updating slot status:", error);
+      alert("Failed to update status. Please try again.");
+    }
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu({
+      isOpen: false,
+      position: { x: 0, y: 0 },
+      slot: null,
+    });
+  };
 
   const getDaySlots = (date: Date): TimeSlot[][] => {
     const daySlots = timeSlots
@@ -159,6 +214,7 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                                 <button
                                   key={slot.id}
                                   onClick={() => onDayClick(day)}
+                                  onContextMenu={(e) => handleSlotLongPress(e, slot)}
                                   className={`
                                   w-full text-left px-3 py-2.5 
                                   rounded-lg text-sm
@@ -189,6 +245,16 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                                   ${
                                     slot.status === "missed"
                                       ? "bg-red-100 border-red-400 text-red-800 active:bg-red-200"
+                                      : ""
+                                  }
+                                  ${
+                                    slot.status === "sick"
+                                      ? "bg-orange-100 border-orange-400 text-orange-800 active:bg-orange-200"
+                                      : ""
+                                  }
+                                  ${
+                                    slot.status === "away"
+                                      ? "bg-orange-100 border-orange-400 text-orange-800 active:bg-orange-200"
                                       : ""
                                   }
                                 `}
@@ -468,11 +534,26 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
             <span className="text-gray-700">Confirmed</span>
           </div>
           <div className="flex items-center gap-2">
+            <span className="status-dot bg-orange-400" />
+            <span className="text-gray-700">Sick/Away</span>
+          </div>
+          <div className="flex items-center gap-2">
             <span className="status-dot bg-red-400" />
             <span className="text-gray-700">Missed</span>
           </div>
         </div>
       </div>
+
+      {/* Status Context Menu */}
+      {contextMenu.isOpen && contextMenu.slot && (
+        <StatusContextMenu
+          slot={contextMenu.slot}
+          isOpen={contextMenu.isOpen}
+          position={contextMenu.position}
+          onClose={closeContextMenu}
+          onStatusChange={handleStatusChange}
+        />
+      )}
     </div>
   );
 }

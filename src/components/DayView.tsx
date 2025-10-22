@@ -62,7 +62,9 @@ export default function DayView({ date, onClose }: DayViewProps) {
   ) => {
     // Check permissions before performing bulk operations
     if (!canPerformBulkOperations(user, userRole)) {
-      alert("You don't have permission to perform bulk operations. Only admins and managers can use this feature.");
+      alert(
+        "You don't have permission to perform bulk operations. Only admins and managers can use this feature."
+      );
       return;
     }
 

@@ -1,6 +1,6 @@
 export type UserRole = "participant" | "verifier" | "manager" | "admin";
 
-export type SlotStatus = "planned" | "checked-in" | "confirmed" | "missed";
+export type SlotStatus = "planned" | "checked-in" | "confirmed" | "missed" | "sick" | "away";
 
 export interface User {
   id: string;
@@ -95,6 +95,9 @@ export interface TimeSlot {
   notes?: string;
   checkedInAt?: number; // timestamp
   confirmedAt?: number; // timestamp
+  sickAwayReason?: string; // Reason for sick/away status
+  sickAwayDuration?: string; // Duration of sick/away status
+  sickAwayAt?: number; // timestamp when marked as sick/away
   createdBy: string;
   createdAt: number;
   updatedAt: number;
