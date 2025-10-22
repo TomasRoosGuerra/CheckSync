@@ -176,6 +176,9 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
   };
 
   const handleQuickUndoCheckIn = async (slot: TimeSlot) => {
+    console.log("handleQuickUndoCheckIn called for slot:", slot.id, "status:", slot.status);
+    console.log("User can check in:", canCheckIn(user, slot));
+    
     if (!canCheckIn(user, slot)) {
       alert("You don't have permission to undo check-in for this slot.");
       return;
@@ -186,7 +189,9 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
         status: "planned" as const,
         checkedInAt: undefined,
       };
+      console.log("Updating slot with:", updates);
       await updateSlotFirestore(slot.id, updates);
+      console.log("Successfully updated slot");
     } catch (error) {
       console.error("Error undoing check-in:", error);
       alert("Failed to undo check-in. Please try again.");
