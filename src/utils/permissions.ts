@@ -161,6 +161,16 @@ export const canManageConnections = (user: User | null): boolean => {
   return true;
 };
 
+export const canPerformBulkOperations = (
+  user: User | null,
+  workspaceRole?: UserRole
+): boolean => {
+  if (!user) return false;
+  const role = workspaceRole || user.role;
+  // Only admins and managers can perform bulk operations
+  return ["admin", "manager"].includes(role);
+};
+
 export const getRoleColor = (role: UserRole): string => {
   switch (role) {
     case "admin":

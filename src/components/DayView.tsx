@@ -11,6 +11,7 @@ import {
   canCreateSlot,
   canDeleteSlot,
   canEditSlot,
+  canPerformBulkOperations,
   canVerify,
   getUserWorkspaceRole,
 } from "../utils/permissions";
@@ -59,6 +60,12 @@ export default function DayView({ date, onClose }: DayViewProps) {
     recurringGroupId: string,
     newStatus: SlotStatus
   ) => {
+    // Check permissions before performing bulk operations
+    if (!canPerformBulkOperations(user, userRole)) {
+      alert("You don't have permission to perform bulk operations. Only admins and managers can use this feature.");
+      return;
+    }
+
     const recurringSlots = getRecurringSlots(recurringGroupId);
 
     try {
@@ -396,7 +403,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                                 ✏️ Edit All
                               </button>
                             )}
-                            {canVerify(user, slot, userRole) && (
+                            {canPerformBulkOperations(user, userRole) && (
                               <>
                                 <button
                                   onClick={() =>
