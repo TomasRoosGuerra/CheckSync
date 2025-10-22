@@ -6,7 +6,11 @@ interface StatusContextMenuProps {
   isOpen: boolean;
   position: { x: number; y: number };
   onClose: () => void;
-  onStatusChange: (status: "sick" | "away", reason: string, duration: string) => void;
+  onStatusChange: (
+    status: "sick" | "away",
+    reason: string,
+    duration: string
+  ) => void;
 }
 
 export default function StatusContextMenu({
@@ -16,7 +20,9 @@ export default function StatusContextMenu({
   onClose,
   onStatusChange,
 }: StatusContextMenuProps) {
-  const [selectedStatus, setSelectedStatus] = useState<"sick" | "away" | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<"sick" | "away" | null>(
+    null
+  );
   const [reason, setReason] = useState("");
   const [duration, setDuration] = useState("today");
 
@@ -49,8 +55,10 @@ export default function StatusContextMenu({
           // Status selection
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900 mb-3">Mark Status</h3>
-            <p className="text-xs text-gray-600 mb-3">Right-click on any slot to mark as sick/away</p>
-            
+            <p className="text-xs text-gray-600 mb-3">
+              Right-click on any slot to mark as sick/away
+            </p>
+
             <button
               onClick={() => setSelectedStatus("sick")}
               className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-orange-50 hover:border-orange-300 transition-colors"
@@ -59,7 +67,9 @@ export default function StatusContextMenu({
                 <span className="text-2xl">🏥</span>
                 <div>
                   <div className="font-medium text-gray-900">Mark as Sick</div>
-                  <div className="text-sm text-gray-600">I'm feeling unwell</div>
+                  <div className="text-sm text-gray-600">
+                    I'm feeling unwell
+                  </div>
                 </div>
               </div>
             </button>
@@ -72,7 +82,9 @@ export default function StatusContextMenu({
                 <span className="text-2xl">🚫</span>
                 <div>
                   <div className="font-medium text-gray-900">Mark as Away</div>
-                  <div className="text-sm text-gray-600">Personal reasons, unavailable</div>
+                  <div className="text-sm text-gray-600">
+                    Personal reasons, unavailable
+                  </div>
                 </div>
               </div>
             </button>
@@ -95,7 +107,9 @@ export default function StatusContextMenu({
                 ← Back
               </button>
               <h3 className="font-semibold text-gray-900">
-                {selectedStatus === "sick" ? "🏥 Mark as Sick" : "🚫 Mark as Away"}
+                {selectedStatus === "sick"
+                  ? "🏥 Mark as Sick"
+                  : "🚫 Mark as Away"}
               </h3>
             </div>
 
@@ -106,7 +120,11 @@ export default function StatusContextMenu({
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder={selectedStatus === "sick" ? "e.g., Flu symptoms, headache..." : "e.g., Personal appointment, family emergency..."}
+                placeholder={
+                  selectedStatus === "sick"
+                    ? "e.g., Flu symptoms, headache..."
+                    : "e.g., Personal appointment, family emergency..."
+                }
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
                 rows={2}
                 autoFocus
@@ -125,7 +143,9 @@ export default function StatusContextMenu({
                 <option value="today">Today only</option>
                 <option value="this-week">This week</option>
                 <option value="next-week">Next week</option>
-                <option value="until-further-notice">Until further notice</option>
+                <option value="until-further-notice">
+                  Until further notice
+                </option>
               </select>
             </div>
 

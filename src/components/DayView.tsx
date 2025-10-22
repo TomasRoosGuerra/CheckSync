@@ -15,13 +15,13 @@ import {
   canVerify,
   getUserWorkspaceRole,
 } from "../utils/permissions";
-import StatusContextMenu from "./StatusContextMenu";
 import {
   getStatusBadgeClasses,
   groupOverlappingSlots,
 } from "../utils/slotUtils";
 import { getUserName } from "../utils/userUtils";
 import SlotModal from "./SlotModal";
+import StatusContextMenu from "./StatusContextMenu";
 
 interface DayViewProps {
   date: Date;
@@ -37,7 +37,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
     type: "edit" | "delete" | "status" | "participants";
     recurringGroupId: string;
   } | null>(null);
-  
+
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean;
@@ -174,19 +174,22 @@ export default function DayView({ date, onClose }: DayViewProps) {
   };
 
   const handleUndoCheckIn = async (slot: TimeSlot) => {
-    if (slot.participantIds.includes(user?.id || "")) {
-      if (confirm("Undo check-in and return to planned status?")) {
-        try {
-          const updates = {
-            status: "planned" as const,
-            checkedInAt: undefined,
-          };
-          await updateSlotFirestore(slot.id, updates);
-          // Real-time listener will update local state automatically
-        } catch (error) {
-          console.error("Error undoing check-in:", error);
-          alert("Failed to undo check-in. Please try again.");
-        }
+    if (!canCheckIn(user, slot)) {
+      alert("You don't have permission to undo check-in for this slot.");
+      return;
+    }
+
+    if (confirm("Undo check-in and return to planned status?")) {
+      try {
+        const updates = {
+          status: "planned" as const,
+          checkedInAt: undefined,
+        };
+        await updateSlotFirestore(slot.id, updates);
+        // Real-time listener will update local state automatically
+      } catch (error) {
+        console.error("Error undoing check-in:", error);
+        alert("Failed to undo check-in. Please try again.");
       }
     }
   };
@@ -297,9 +300,9 @@ export default function DayView({ date, onClose }: DayViewProps) {
   const handleSlotLongPress = (e: React.MouseEvent, slot: TimeSlot) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!canCheckIn(user, slot)) return;
-    
+
     setContextMenu({
       isOpen: true,
       position: { x: e.clientX, y: e.clientY },
@@ -307,7 +310,11 @@ export default function DayView({ date, onClose }: DayViewProps) {
     });
   };
 
-  const handleStatusChange = async (status: "sick" | "away", reason: string, duration: string) => {
+  const handleStatusChange = async (
+    status: "sick" | "away",
+    reason: string,
+    duration: string
+  ) => {
     if (!contextMenu.slot) return;
 
     try {
@@ -499,13 +506,13 @@ export default function DayView({ date, onClose }: DayViewProps) {
                       )}
 
                       {/* Actions */}
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gap-2 flex-wrap overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-x-visible sm:pb-0 sm:mx-0 sm:px-0">
                         {/* Check In Button - Mobile Optimized */}
                         {canCheckIn(user, slot) &&
                           slot.status === "planned" && (
                             <button
                               onClick={() => handleCheckIn(slot)}
-                              className="btn-accent text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
+                              className="btn-accent text-xs sm:text-sm py-2 sm:py-1.5 px-3 sm:px-6 touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
                             >
                               ✅ Check In
                             </button>
@@ -516,7 +523,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                           slot.status === "checked-in" && (
                             <button
                               onClick={() => handleUndoCheckIn(slot)}
-                              className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                              className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2 sm:py-1.5 px-3 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
                             >
                               ↩️ Undo Check-In
                             </button>
@@ -524,7 +531,8 @@ export default function DayView({ date, onClose }: DayViewProps) {
 
                         {/* Mark Sick/Away Button - Mobile Optimized */}
                         {canCheckIn(user, slot) &&
-                          (slot.status === "planned" || slot.status === "checked-in") && (
+                          (slot.status === "planned" ||
+                            slot.status === "checked-in") && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -534,7 +542,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                                   slot,
                                 });
                               }}
-                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium py-2 sm:py-1.5 px-3 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
                             >
                               🏥 Mark Sick/Away
                             </button>
@@ -545,7 +553,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                           slot.status === "checked-in" && (
                             <button
                               onClick={() => handleConfirm(slot)}
-                              className="btn-primary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 sm:px-6 touch-manipulation min-h-[44px] sm:min-h-auto"
+                              className="btn-primary text-xs sm:text-sm py-2 sm:py-1.5 px-3 sm:px-6 touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
                             >
                               🔒 Confirm
                             </button>
@@ -556,7 +564,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                           slot.status === "confirmed" && (
                             <button
                               onClick={() => handleUndoConfirmation(slot)}
-                              className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
+                              className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2 sm:py-1.5 px-3 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
                             >
                               ↩️ Undo
                             </button>

@@ -155,13 +155,31 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
     }
   };
 
+  const handleQuickUndoCheckIn = async (slot: TimeSlot) => {
+    if (!canCheckIn(user, slot)) {
+      alert("You don't have permission to undo check-in for this slot.");
+      return;
+    }
+
+    try {
+      const updates = {
+        status: "planned" as const,
+        checkedInAt: undefined,
+      };
+      await updateSlotFirestore(slot.id, updates);
+    } catch (error) {
+      console.error("Error undoing check-in:", error);
+      alert("Failed to undo check-in. Please try again.");
+    }
+  };
+
   // Context menu handlers
   const handleSlotLongPress = (e: React.MouseEvent, slot: TimeSlot) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!canCheckIn(user, slot)) return;
-    
+
     setContextMenu({
       isOpen: true,
       position: { x: e.clientX, y: e.clientY },
@@ -169,7 +187,11 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
     });
   };
 
-  const handleStatusChange = async (status: "sick" | "away", reason: string, duration: string) => {
+  const handleStatusChange = async (
+    status: "sick" | "away",
+    reason: string,
+    duration: string
+  ) => {
     if (!contextMenu.slot) return;
 
     try {
@@ -368,20 +390,37 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
                       </div>
 
                       {/* Quick Actions */}
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gap-2 flex-wrap overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-x-visible sm:pb-0 sm:mx-0 sm:px-0">
                         {canCheckIn(user, slot) &&
                           slot.status === "planned" && (
                             <button
                               onClick={(e) => handleQuickCheckIn(slot, e)}
-                              className="btn-accent text-xs py-2 px-4 touch-manipulation"
+                              className="btn-accent text-xs py-2 px-3 touch-manipulation whitespace-nowrap"
                             >
                               ✅ Check In
                             </button>
                           )}
 
+                        {/* Undo Check-In Button */}
+                        {canCheckIn(user, slot) &&
+                          slot.status === "checked-in" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm("Undo check-in and return to planned status?")) {
+                                  handleQuickUndoCheckIn(slot);
+                                }
+                              }}
+                              className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium text-xs py-2 px-3 rounded-full transition-colors touch-manipulation whitespace-nowrap"
+                            >
+                              ↩️ Undo Check-In
+                            </button>
+                          )}
+
                         {/* Mark Sick/Away Button */}
                         {canCheckIn(user, slot) &&
-                          (slot.status === "planned" || slot.status === "checked-in") && (
+                          (slot.status === "planned" ||
+                            slot.status === "checked-in") && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -391,7 +430,7 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
                                   slot,
                                 });
                               }}
-                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium text-xs py-2 px-4 rounded-full transition-colors touch-manipulation"
+                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium text-xs py-2 px-3 rounded-full transition-colors touch-manipulation whitespace-nowrap"
                             >
                               🏥 Mark Sick/Away
                             </button>
