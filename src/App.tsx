@@ -64,6 +64,16 @@ function App() {
 
           setUser(userProfile);
 
+          // Load user workspaces immediately to ensure they're available on first render
+          try {
+            console.log("🏢 Loading initial workspaces for user:", firebaseUser.uid);
+            const userWorkspaces = await getUserWorkspaces(firebaseUser.uid);
+            console.log("✅ Initial workspaces loaded:", userWorkspaces.length);
+            setWorkspaces(userWorkspaces);
+          } catch (error) {
+            console.error("❌ Error loading initial workspaces:", error);
+          }
+
           // Check if user has a workspace selected from localStorage
           const lastWorkspaceId = localStorage.getItem("lastWorkspaceId");
           if (lastWorkspaceId) {
@@ -96,7 +106,7 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [setUser, setCurrentWorkspace]);
+  }, [setUser, setCurrentWorkspace, setWorkspaces]);
 
   // Load workspace data when workspace is selected
   useEffect(() => {
@@ -234,7 +244,7 @@ function App() {
           }
 
           if (isActive) {
-            console.log("✅ Setting workspaces:", workspaces.length);
+            console.log("✅ Setting workspaces from subscription:", workspaces.length);
             setWorkspaces(workspaces);
           }
         } catch (error) {

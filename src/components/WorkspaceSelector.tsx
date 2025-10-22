@@ -20,7 +20,7 @@ export default function WorkspaceSelector({
 }: WorkspaceSelectorProps) {
   const { user, setCurrentWorkspace, workspaces, setWorkspaces, resetStore } =
     useStore();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
@@ -33,12 +33,24 @@ export default function WorkspaceSelector({
 
   useEffect(() => {
     if (user) {
-      loadWorkspaces();
+      // Workspaces are loaded by App.tsx subscription, just load deleted workspace views
+      loadDeletedWorkspaceViews();
     } else {
       // Clear workspaces when user logs out
       setWorkspaces([]);
     }
   }, [user]);
+
+  const loadDeletedWorkspaceViews = async () => {
+    if (!user) return;
+
+    try {
+      const deletedViews = await getDeletedWorkspaceViews(user.id);
+      setDeletedWorkspaceViews(deletedViews);
+    } catch (error) {
+      console.error("Error loading deleted workspace views:", error);
+    }
+  };
 
   const loadWorkspaces = async () => {
     if (!user) return;
@@ -186,8 +198,8 @@ export default function WorkspaceSelector({
           </button>
         </div>
 
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading...</div>
+        {(loading || (user && workspaces.length === 0)) ? (
+          <div className="text-center py-8 text-gray-500">Loading workspaces...</div>
         ) : (
           <>
             {/* Existing Workspaces */}

@@ -407,7 +407,11 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (confirm("Undo check-in and return to planned status?")) {
+                                if (
+                                  confirm(
+                                    "Undo check-in and return to planned status?"
+                                  )
+                                ) {
                                   handleQuickUndoCheckIn(slot);
                                 }
                               }}
