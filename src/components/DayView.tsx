@@ -22,6 +22,8 @@ import {
 import { getUserName } from "../utils/userUtils";
 import SlotModal from "./SlotModal";
 import StatusContextMenu from "./StatusContextMenu";
+import MobileActionSheet from "./MobileActionSheet";
+import MobileStatusModal from "./MobileStatusModal";
 
 interface DayViewProps {
   date: Date;
@@ -46,6 +48,24 @@ export default function DayView({ date, onClose }: DayViewProps) {
   }>({
     isOpen: false,
     position: { x: 0, y: 0 },
+    slot: null,
+  });
+
+  // Mobile action sheet state
+  const [mobileActionSheet, setMobileActionSheet] = useState<{
+    isOpen: boolean;
+    slot: TimeSlot | null;
+  }>({
+    isOpen: false,
+    slot: null,
+  });
+
+  // Mobile status modal state
+  const [mobileStatusModal, setMobileStatusModal] = useState<{
+    isOpen: boolean;
+    slot: TimeSlot | null;
+  }>({
+    isOpen: false,
     slot: null,
   });
 
@@ -340,6 +360,35 @@ export default function DayView({ date, onClose }: DayViewProps) {
     });
   };
 
+  // Mobile action sheet handlers
+  const handleSlotPress = (slot: TimeSlot) => {
+    setMobileActionSheet({
+      isOpen: true,
+      slot,
+    });
+  };
+
+  const closeMobileActionSheet = () => {
+    setMobileActionSheet({
+      isOpen: false,
+      slot: null,
+    });
+  };
+
+  const handleMarkSickAway = (slot: TimeSlot) => {
+    setMobileStatusModal({
+      isOpen: true,
+      slot,
+    });
+  };
+
+  const closeMobileStatusModal = () => {
+    setMobileStatusModal({
+      isOpen: false,
+      slot: null,
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
       <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden">
@@ -505,90 +554,17 @@ export default function DayView({ date, onClose }: DayViewProps) {
                         </div>
                       )}
 
-                      {/* Actions */}
-                      <div className="flex gap-2 flex-wrap overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-x-visible sm:pb-0 sm:mx-0 sm:px-0">
-                        {/* Check In Button - Mobile Optimized */}
-                        {canCheckIn(user, slot) &&
-                          slot.status === "planned" && (
-                            <button
-                              onClick={() => handleCheckIn(slot)}
-                              className="btn-accent text-xs sm:text-sm py-2 sm:py-1.5 px-3 sm:px-6 touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
-                            >
-                              ✅ Check In
-                            </button>
-                          )}
-
-                        {/* Undo Check-In Button - Mobile Optimized */}
-                        {canCheckIn(user, slot) &&
-                          slot.status === "checked-in" && (
-                            <button
-                              onClick={() => handleUndoCheckIn(slot)}
-                              className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium py-2 sm:py-1.5 px-3 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
-                            >
-                              ↩️ Undo Check-In
-                            </button>
-                          )}
-
-                        {/* Mark Sick/Away Button - Mobile Optimized */}
-                        {canCheckIn(user, slot) &&
-                          (slot.status === "planned" ||
-                            slot.status === "checked-in") && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setContextMenu({
-                                  isOpen: true,
-                                  position: { x: e.clientX, y: e.clientY },
-                                  slot,
-                                });
-                              }}
-                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium py-2 sm:py-1.5 px-3 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
-                            >
-                              🏥 Mark Sick/Away
-                            </button>
-                          )}
-
-                        {/* Confirm Attendance - Mobile Optimized */}
-                        {canVerify(user, slot) &&
-                          slot.status === "checked-in" && (
-                            <button
-                              onClick={() => handleConfirm(slot)}
-                              className="btn-primary text-xs sm:text-sm py-2 sm:py-1.5 px-3 sm:px-6 touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
-                            >
-                              🔒 Confirm
-                            </button>
-                          )}
-
-                        {/* Undo Confirmation - Mobile Optimized */}
-                        {canVerify(user, slot) &&
-                          slot.status === "confirmed" && (
-                            <button
-                              onClick={() => handleUndoConfirmation(slot)}
-                              className="bg-green-50 hover:bg-green-100 active:bg-green-200 text-green-700 font-medium py-2 sm:py-1.5 px-3 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[40px] sm:min-h-auto whitespace-nowrap"
-                            >
-                              ↩️ Undo
-                            </button>
-                          )}
-
-                        {/* Edit Button - Mobile Optimized */}
-                        {canEditSlot(user, slot, userRole) && (
-                          <button
-                            onClick={() => setEditingSlot(slot)}
-                            className="btn-secondary text-xs sm:text-sm py-2.5 sm:py-1.5 px-4 touch-manipulation min-h-[44px] sm:min-h-auto"
-                          >
-                            ✏️ Edit
-                          </button>
-                        )}
-
-                        {/* Delete Button - Mobile Optimized */}
-                        {canDeleteSlot(user, slot, userRole) && (
-                          <button
-                            onClick={() => handleDelete(slot)}
-                            className="bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 font-medium py-2.5 sm:py-1.5 px-4 rounded-full transition-colors text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-auto"
-                          >
-                            🗑️ {slot.isRecurring ? "Delete Series" : "Delete"}
-                          </button>
-                        )}
+                      {/* Mobile-First Actions */}
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => handleSlotPress(slot)}
+                          className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 active:from-blue-700 active:to-blue-800 text-white font-bold py-3 px-6 rounded-xl transition-all touch-manipulation shadow-lg hover:shadow-xl"
+                        >
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-lg">⚡</span>
+                            <span>Actions</span>
+                          </div>
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -645,6 +621,31 @@ export default function DayView({ date, onClose }: DayViewProps) {
           onStatusChange={handleStatusChange}
         />
       )}
+
+      {/* Mobile Action Sheet */}
+      <MobileActionSheet
+        slot={mobileActionSheet.slot}
+        isOpen={mobileActionSheet.isOpen}
+        onClose={closeMobileActionSheet}
+        onCheckIn={handleCheckIn}
+        onUndoCheckIn={handleUndoCheckIn}
+        onConfirm={handleConfirm}
+        onUndoConfirm={handleUndoConfirmation}
+        onEdit={setEditingSlot}
+        onDelete={handleDelete}
+        onMarkSickAway={handleMarkSickAway}
+        user={user}
+        userRole={userRole}
+        workspaceMembers={workspaceMembers}
+      />
+
+      {/* Mobile Status Modal */}
+      <MobileStatusModal
+        slot={mobileStatusModal.slot}
+        isOpen={mobileStatusModal.isOpen}
+        onClose={closeMobileStatusModal}
+        onStatusChange={handleStatusChange}
+      />
     </div>
   );
 }

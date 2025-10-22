@@ -13,6 +13,8 @@ import { formatStatusText, getStatusBadgeClasses } from "../utils/slotUtils";
 import { getUserName } from "../utils/userUtils";
 import { getWorkspaceColorClasses } from "../utils/workspaceUtils";
 import StatusContextMenu from "./StatusContextMenu";
+import MobileActionSheet from "./MobileActionSheet";
+import MobileStatusModal from "./MobileStatusModal";
 
 interface MyAgendaViewProps {
   onSlotClick: (slot: TimeSlot, workspace: Workspace) => void;
@@ -36,6 +38,24 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
   }>({
     isOpen: false,
     position: { x: 0, y: 0 },
+    slot: null,
+  });
+
+  // Mobile action sheet state
+  const [mobileActionSheet, setMobileActionSheet] = useState<{
+    isOpen: boolean;
+    slot: TimeSlot | null;
+  }>({
+    isOpen: false,
+    slot: null,
+  });
+
+  // Mobile status modal state
+  const [mobileStatusModal, setMobileStatusModal] = useState<{
+    isOpen: boolean;
+    slot: TimeSlot | null;
+  }>({
+    isOpen: false,
     slot: null,
   });
 
@@ -217,6 +237,35 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
     });
   };
 
+  // Mobile action sheet handlers
+  const handleSlotPress = (slot: TimeSlot) => {
+    setMobileActionSheet({
+      isOpen: true,
+      slot,
+    });
+  };
+
+  const closeMobileActionSheet = () => {
+    setMobileActionSheet({
+      isOpen: false,
+      slot: null,
+    });
+  };
+
+  const handleMarkSickAway = (slot: TimeSlot) => {
+    setMobileStatusModal({
+      isOpen: true,
+      slot,
+    });
+  };
+
+  const closeMobileStatusModal = () => {
+    setMobileStatusModal({
+      isOpen: false,
+      slot: null,
+    });
+  };
+
   return (
     <div className="card">
       {/* Header */}
@@ -389,75 +438,31 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
                         </div>
                       </div>
 
-                      {/* Quick Actions */}
-                      <div className="flex gap-2 flex-wrap overflow-x-auto pb-2 -mx-2 px-2 sm:overflow-x-visible sm:pb-0 sm:mx-0 sm:px-0">
-                        {canCheckIn(user, slot) &&
-                          slot.status === "planned" && (
-                            <button
-                              onClick={(e) => handleQuickCheckIn(slot, e)}
-                              className="btn-accent text-xs py-2 px-3 touch-manipulation whitespace-nowrap"
-                            >
-                              ✅ Check In
-                            </button>
-                          )}
-
-                        {/* Undo Check-In Button */}
-                        {canCheckIn(user, slot) &&
-                          slot.status === "checked-in" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (
-                                  confirm(
-                                    "Undo check-in and return to planned status?"
-                                  )
-                                ) {
-                                  handleQuickUndoCheckIn(slot);
-                                }
-                              }}
-                              className="bg-yellow-50 hover:bg-yellow-100 active:bg-yellow-200 text-yellow-700 font-medium text-xs py-2 px-3 rounded-full transition-colors touch-manipulation whitespace-nowrap"
-                            >
-                              ↩️ Undo Check-In
-                            </button>
-                          )}
-
-                        {/* Mark Sick/Away Button */}
-                        {canCheckIn(user, slot) &&
-                          (slot.status === "planned" ||
-                            slot.status === "checked-in") && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setContextMenu({
-                                  isOpen: true,
-                                  position: { x: e.clientX, y: e.clientY },
-                                  slot,
-                                });
-                              }}
-                              className="bg-orange-50 hover:bg-orange-100 active:bg-orange-200 text-orange-700 font-medium text-xs py-2 px-3 rounded-full transition-colors touch-manipulation whitespace-nowrap"
-                            >
-                              🏥 Mark Sick/Away
-                            </button>
-                          )}
-
-                        {canVerify(user, slot) &&
-                          slot.status === "checked-in" && (
-                            <button
-                              onClick={(e) => handleQuickVerify(slot, e)}
-                              className="btn-primary text-xs py-2 px-4 touch-manipulation"
-                            >
-                              🔒 Confirm
-                            </button>
-                          )}
-
+                      {/* Mobile-First Actions */}
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSlotPress(slot);
+                          }}
+                          className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 active:from-blue-700 active:to-blue-800 text-white font-bold py-3 px-4 rounded-xl transition-all touch-manipulation shadow-lg hover:shadow-xl"
+                        >
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-lg">⚡</span>
+                            <span>Actions</span>
+                          </div>
+                        </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             workspace && onSlotClick(slot, workspace);
                           }}
-                          className="btn-secondary text-xs py-2 px-4 touch-manipulation"
+                          className="bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white font-bold py-3 px-4 rounded-xl transition-all touch-manipulation shadow-lg hover:shadow-xl"
                         >
-                          View in {workspace?.name} →
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-lg">👁️</span>
+                            <span>View</span>
+                          </div>
                         </button>
                       </div>
                     </div>
@@ -501,6 +506,31 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
           onStatusChange={handleStatusChange}
         />
       )}
+
+      {/* Mobile Action Sheet */}
+      <MobileActionSheet
+        slot={mobileActionSheet.slot}
+        isOpen={mobileActionSheet.isOpen}
+        onClose={closeMobileActionSheet}
+        onCheckIn={handleQuickCheckIn}
+        onUndoCheckIn={handleQuickUndoCheckIn}
+        onConfirm={handleQuickVerify}
+        onUndoConfirm={() => {}} // Not implemented in MyAgendaView
+        onEdit={() => {}} // Not implemented in MyAgendaView
+        onDelete={() => {}} // Not implemented in MyAgendaView
+        onMarkSickAway={handleMarkSickAway}
+        user={user}
+        userRole={userRole}
+        workspaceMembers={workspaceMembers}
+      />
+
+      {/* Mobile Status Modal */}
+      <MobileStatusModal
+        slot={mobileStatusModal.slot}
+        isOpen={mobileStatusModal.isOpen}
+        onClose={closeMobileStatusModal}
+        onStatusChange={handleStatusChange}
+      />
     </div>
   );
 }
