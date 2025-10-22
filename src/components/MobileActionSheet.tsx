@@ -1,7 +1,10 @@
-import { useState } from "react";
 import type { TimeSlot } from "../types";
-import { canCheckIn, canVerify, canEditSlot, canDeleteSlot } from "../utils/permissions";
-import { getUserWorkspaceRole } from "../utils/permissions";
+import {
+  canCheckIn,
+  canDeleteSlot,
+  canEditSlot,
+  canVerify,
+} from "../utils/permissions";
 
 interface MobileActionSheetProps {
   slot: TimeSlot | null;
@@ -37,6 +40,10 @@ export default function MobileActionSheet({
   if (!isOpen || !slot) return null;
 
   const actions = [];
+  
+  // Debug logging
+  console.log("MobileActionSheet - Slot status:", slot.status);
+  console.log("MobileActionSheet - User can check in:", canCheckIn(user, slot));
 
   // Check In / Undo Check In
   if (canCheckIn(user, slot)) {
@@ -85,7 +92,10 @@ export default function MobileActionSheet({
   }
 
   // Mark Sick/Away (for planned or checked-in slots)
-  if (canCheckIn(user, slot) && (slot.status === "planned" || slot.status === "checked-in")) {
+  if (
+    canCheckIn(user, slot) &&
+    (slot.status === "planned" || slot.status === "checked-in")
+  ) {
     actions.push({
       id: "sick-away",
       icon: "🏥",
@@ -119,6 +129,9 @@ export default function MobileActionSheet({
       color: "bg-red-500",
     });
   }
+
+  // Debug logging
+  console.log("MobileActionSheet - Generated actions:", actions.map(a => a.id));
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">

@@ -59,8 +59,11 @@ export default function MobileStatusModal({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold">
-                {!selectedStatus ? "Mark Status" : 
-                 selectedStatus === "sick" ? "Mark as Sick" : "Mark as Away"}
+                {!selectedStatus
+                  ? "Mark Status"
+                  : selectedStatus === "sick"
+                  ? "Mark as Sick"
+                  : "Mark as Away"}
               </h2>
               <p className="text-orange-100 mt-1 text-sm">
                 {slot.title} - {slot.startTime}
@@ -91,7 +94,9 @@ export default function MobileStatusModal({
                 <div className="flex items-center gap-4">
                   <span className="text-4xl">🏥</span>
                   <div className="text-left">
-                    <div className="font-bold text-lg text-gray-900">Mark as Sick</div>
+                    <div className="font-bold text-lg text-gray-900">
+                      Mark as Sick
+                    </div>
                     <div className="text-sm text-gray-600">
                       Feeling unwell or have medical issues
                     </div>
@@ -106,7 +111,9 @@ export default function MobileStatusModal({
                 <div className="flex items-center gap-4">
                   <span className="text-4xl">🚫</span>
                   <div className="text-left">
-                    <div className="font-bold text-lg text-gray-900">Mark as Away</div>
+                    <div className="font-bold text-lg text-gray-900">
+                      Mark as Away
+                    </div>
                     <div className="text-sm text-gray-600">
                       Personal reasons or unavailable
                     </div>
@@ -126,10 +133,14 @@ export default function MobileStatusModal({
                 </button>
                 <div>
                   <h3 className="font-bold text-lg text-gray-900">
-                    {selectedStatus === "sick" ? "🏥 Mark as Sick" : "🚫 Mark as Away"}
+                    {selectedStatus === "sick"
+                      ? "🏥 Mark as Sick"
+                      : "🚫 Mark as Away"}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {selectedStatus === "sick" ? "Let your team know you're unwell" : "Let your team know you're unavailable"}
+                    {selectedStatus === "sick"
+                      ? "Let your team know you're unwell"
+                      : "Let your team know you're unavailable"}
                   </p>
                 </div>
               </div>

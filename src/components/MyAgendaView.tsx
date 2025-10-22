@@ -12,9 +12,9 @@ import {
 import { formatStatusText, getStatusBadgeClasses } from "../utils/slotUtils";
 import { getUserName } from "../utils/userUtils";
 import { getWorkspaceColorClasses } from "../utils/workspaceUtils";
-import StatusContextMenu from "./StatusContextMenu";
 import MobileActionSheet from "./MobileActionSheet";
 import MobileStatusModal from "./MobileStatusModal";
+import StatusContextMenu from "./StatusContextMenu";
 
 interface MyAgendaViewProps {
   onSlotClick: (slot: TimeSlot, workspace: Workspace) => void;

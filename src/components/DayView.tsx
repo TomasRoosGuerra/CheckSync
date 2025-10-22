@@ -20,10 +20,10 @@ import {
   groupOverlappingSlots,
 } from "../utils/slotUtils";
 import { getUserName } from "../utils/userUtils";
-import SlotModal from "./SlotModal";
-import StatusContextMenu from "./StatusContextMenu";
 import MobileActionSheet from "./MobileActionSheet";
 import MobileStatusModal from "./MobileStatusModal";
+import SlotModal from "./SlotModal";
+import StatusContextMenu from "./StatusContextMenu";
 
 interface DayViewProps {
   date: Date;
@@ -194,6 +194,9 @@ export default function DayView({ date, onClose }: DayViewProps) {
   };
 
   const handleUndoCheckIn = async (slot: TimeSlot) => {
+    console.log("handleUndoCheckIn called for slot:", slot.id, "status:", slot.status);
+    console.log("User can check in:", canCheckIn(user, slot));
+    
     if (!canCheckIn(user, slot)) {
       alert("You don't have permission to undo check-in for this slot.");
       return;
@@ -205,7 +208,9 @@ export default function DayView({ date, onClose }: DayViewProps) {
           status: "planned" as const,
           checkedInAt: undefined,
         };
+        console.log("Updating slot with:", updates);
         await updateSlotFirestore(slot.id, updates);
+        console.log("Successfully updated slot");
         // Real-time listener will update local state automatically
       } catch (error) {
         console.error("Error undoing check-in:", error);
