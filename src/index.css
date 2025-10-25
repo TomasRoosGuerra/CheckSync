@@ -104,25 +104,41 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Smooth horizontal scrolling */
+  /* Enhanced horizontal scrolling */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
+    scroll-behavior: smooth;
   }
 
   .overflow-x-auto::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
   }
 
-  /* Snap scrolling */
+  /* Hide scrollbars globally */
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  /* Enhanced snap scrolling */
   .snap-x {
     scroll-snap-type: x mandatory;
-    scroll-padding: 0.5rem;
+    scroll-padding: 1rem;
   }
 
   .snap-center {
     scroll-snap-align: center;
+  }
+
+  /* Smooth transitions for better UX */
+  .transition-all {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .status-dot {

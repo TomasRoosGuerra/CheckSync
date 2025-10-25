@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { updateTimeSlot as updateSlotFirestore } from "../services/firestoreService";
 import { useStore } from "../store";
 import type { TimeSlot } from "../types";
 import {
   formatDate,
   getDayName,
-  getExtendedWeekDays,
   getMonthDay,
   getWeekDays,
   getWeekNumber,
@@ -12,9 +12,8 @@ import {
   nextWeek,
   prevWeek,
 } from "../utils/dateUtils";
-import { getOverlapInfo, groupOverlappingSlots } from "../utils/slotUtils";
 import { canCheckIn } from "../utils/permissions";
-import { updateTimeSlot as updateSlotFirestore } from "../services/firestoreService";
+import { getOverlapInfo, groupOverlappingSlots } from "../utils/slotUtils";
 import StatusContextMenu from "./StatusContextMenu";
 
 interface WeekCalendarProps {
@@ -23,7 +22,7 @@ interface WeekCalendarProps {
 
 export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
   const { selectedDate, setSelectedDate, timeSlots, user } = useStore();
-  
+
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean;
@@ -36,16 +35,15 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
   });
 
   const weekDays = getWeekDays(selectedDate);
-  const extendedWeekDays = getExtendedWeekDays(selectedDate);
   const weekNumber = getWeekNumber(selectedDate);
 
   // Context menu handlers
   const handleSlotLongPress = (e: React.MouseEvent, slot: TimeSlot) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!canCheckIn(user, slot)) return;
-    
+
     setContextMenu({
       isOpen: true,
       position: { x: e.clientX, y: e.clientY },
@@ -53,7 +51,11 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
     });
   };
 
-  const handleStatusChange = async (status: "sick" | "away", reason: string, duration: string) => {
+  const handleStatusChange = async (
+    status: "sick" | "away",
+    reason: string,
+    duration: string
+  ) => {
     if (!contextMenu.slot) return;
 
     try {
@@ -127,381 +129,228 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
         </div>
       </div>
 
-      {/* Mobile: Horizontal Scroll | Desktop: Grid */}
+      {/* Enhanced Horizontal Scroll Layout - All Screen Sizes */}
       <div
-        className="overflow-x-auto sm:overflow-x-visible 
-                      flex sm:grid sm:grid-cols-7 gap-3 sm:gap-2 md:gap-3 
-                      pb-2 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0
-                      snap-x snap-mandatory sm:snap-none"
+        className="overflow-x-auto 
+                      flex gap-4 
+                      pb-4 -mx-4 px-4
+                      snap-x snap-mandatory
+                      scrollbar-hide"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
       >
-        {/* Mobile: Extended view with partial days */}
-        <div className="sm:hidden">
-          {extendedWeekDays.map((day, index) => {
-            const daySlotGroups = getDaySlots(day);
-            const isToday = isSameDayAs(day, new Date());
-            const totalSlots = daySlotGroups.flat().length;
-            const isMainWeek = index >= 1 && index <= 7; // Days 1-7 are the main week
+        {/* Enhanced Day Cards with Better Visual Hierarchy */}
+        {weekDays.map((day, index) => {
+          const daySlotGroups = getDaySlots(day);
+          const isToday = isSameDayAs(day, new Date());
+          const totalSlots = daySlotGroups.flat().length;
+          const isWeekend = index === 0 || index === 6; // Sunday or Saturday
 
-            return (
-              <div
-                key={day.toString()}
-                className={`
-                  flex-shrink-0 w-[85vw]
-                  snap-center
-                  rounded-xl border-2 transition-all 
-                  min-h-[240px]
-                  flex flex-col
-                  ${
-                    isMainWeek
-                      ? "border-gray-200"
-                      : "border-gray-100 opacity-60"
-                  }
-                  ${isToday ? "border-primary bg-primary/5 shadow-lg" : ""}
-                `}
-              >
-                {/* Day Header */}
-                <button
-                  onClick={() => onDayClick(day)}
-                  className={`
-                    p-4 text-center rounded-t-xl transition-all touch-manipulation
-                    ${
-                      totalSlots === 0
-                        ? "hover:bg-primary/5 active:bg-primary/10 border-b border-dashed border-primary/30"
-                        : "hover:bg-gray-50/50 active:bg-gray-100"
-                    }
-                  `}
-                >
-                  <div className="text-xs font-medium text-gray-600 mb-1">
-                    {getDayName(day, false)}
-                  </div>
-                  <div
-                    className={`text-2xl font-bold ${
-                      isToday ? "text-primary" : "text-gray-900"
-                    }`}
-                  >
-                    {getMonthDay(day)}
-                  </div>
-                  <div className="text-[10px] text-gray-500 mt-1">
-                    {formatDate(day, "MMM yyyy")}
-                  </div>
-                  {!isMainWeek && (
-                    <div className="text-[8px] text-gray-400 mt-1">
-                      {index === 0 ? "Prev" : "Next"}
-                    </div>
-                  )}
-                </button>
-
-                {/* Time Slot Cards */}
-                <div className="flex-1 p-3 space-y-2 overflow-y-auto">
-                  {isMainWeek ? (
-                    // Show full slots for main week
-                    <>
-                      {daySlotGroups
-                        .slice(0, 5)
-                        .map((slotGroup, groupIndex) => (
-                          <div key={`group-${groupIndex}`} className="relative">
-                            {slotGroup.length > 1 && (
-                              <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold z-10">
-                                {slotGroup.length}
-                              </div>
-                            )}
-                            {slotGroup.map((slot) => {
-                              const overlapInfo = getOverlapInfo(
-                                slot,
-                                slotGroup
-                              );
-                              return (
-                                <button
-                                  key={slot.id}
-                                  onClick={() => onDayClick(day)}
-                                  onContextMenu={(e) => handleSlotLongPress(e, slot)}
-                                  className={`
-                                  w-full text-left px-3 py-2.5 
-                                  rounded-lg text-sm
-                                  transition-all hover:shadow-md active:scale-98
-                                  border-l-3 font-medium
-                                  touch-manipulation min-h-[52px]
-                                  ${slotGroup.length > 1 ? "mb-1" : ""}
-                                  ${
-                                    overlapInfo.offset > 0
-                                      ? "ml-2 opacity-90"
-                                      : ""
-                                  }
-                                  ${
-                                    slot.status === "planned"
-                                      ? "bg-gray-100 border-gray-400 text-gray-700 active:bg-gray-200"
-                                      : ""
-                                  }
-                                  ${
-                                    slot.status === "checked-in"
-                                      ? "bg-yellow-100 border-yellow-400 text-yellow-800 active:bg-yellow-200"
-                                      : ""
-                                  }
-                                  ${
-                                    slot.status === "confirmed"
-                                      ? "bg-green-100 border-green-500 text-green-800 active:bg-green-200"
-                                      : ""
-                                  }
-                                  ${
-                                    slot.status === "missed"
-                                      ? "bg-red-100 border-red-400 text-red-800 active:bg-red-200"
-                                      : ""
-                                  }
-                                  ${
-                                    slot.status === "sick"
-                                      ? "bg-orange-100 border-orange-400 text-orange-800 active:bg-orange-200"
-                                      : ""
-                                  }
-                                  ${
-                                    slot.status === "away"
-                                      ? "bg-orange-100 border-orange-400 text-orange-800 active:bg-orange-200"
-                                      : ""
-                                  }
-                                `}
-                                  style={{
-                                    width:
-                                      slotGroup.length > 1
-                                        ? `${overlapInfo.width}%`
-                                        : "100%",
-                                    marginLeft:
-                                      overlapInfo.offset > 0
-                                        ? `${overlapInfo.offset}px`
-                                        : "0",
-                                  }}
-                                  title={`${slot.title}${
-                                    slotGroup.length > 1
-                                      ? ` (${slotGroup.length} overlapping)`
-                                      : ""
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <div className="font-bold text-sm mb-0.5">
-                                      {slot.startTime}
-                                    </div>
-                                    {slotGroup.length > 1 && (
-                                      <div className="text-xs opacity-60">
-                                        📋
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="truncate text-xs opacity-90">
-                                    {slot.title}
-                                  </div>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      {totalSlots > 5 && (
-                        <button
-                          onClick={() => onDayClick(day)}
-                          className="w-full text-center text-xs text-gray-500 hover:text-primary active:text-primary-dark py-2 font-semibold touch-manipulation"
-                        >
-                          +{totalSlots - 5} more
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    // Show limited slots for partial days
-                    <>
-                      {daySlotGroups.slice(0, 2).map((slotGroup) =>
-                        slotGroup.slice(0, 1).map((slot) => (
-                          <button
-                            key={slot.id}
-                            onClick={() => onDayClick(day)}
-                            className="w-full text-left px-2 py-1 rounded text-xs opacity-75"
-                            title={slot.title}
-                          >
-                            <div className="font-bold text-xs">
-                              {slot.startTime}
-                            </div>
-                            <div className="truncate text-[10px]">
-                              {slot.title}
-                            </div>
-                          </button>
-                        ))
-                      )}
-                      {totalSlots > 2 && (
-                        <div className="text-[10px] text-gray-400 text-center">
-                          +{totalSlots - 2} more
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {totalSlots === 0 && (
-                    <button
-                      onClick={() => onDayClick(day)}
-                      className="w-full text-center text-gray-400 py-4 hover:text-primary active:text-primary-dark transition-colors touch-manipulation"
-                    >
-                      <div className="text-2xl mb-1 opacity-40">➕</div>
-                      <div className="text-[10px] font-medium opacity-60">
-                        Tap to add
-                      </div>
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Desktop: Standard week view */}
-        <div className="hidden sm:contents">
-          {weekDays.map((day) => {
-            const daySlotGroups = getDaySlots(day);
-            const isToday = isSameDayAs(day, new Date());
-            const totalSlots = daySlotGroups.flat().length;
-
-            return (
-              <div
-                key={day.toString()}
-                className={`
-                flex-shrink-0 w-[85vw] sm:w-auto
-                snap-center sm:snap-none
-                rounded-xl border-2 transition-all 
-                min-h-[240px] sm:min-h-[180px] md:min-h-[200px] 
+          return (
+            <div
+              key={day.toString()}
+              className={`
+                flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] lg:w-[400px]
+                snap-center
+                rounded-2xl border-2 transition-all duration-300
+                min-h-[320px] sm:min-h-[360px] md:min-h-[400px]
                 flex flex-col
+                shadow-lg hover:shadow-xl
                 ${
                   isToday
-                    ? "border-primary bg-primary/5 shadow-lg sm:shadow-none"
-                    : "border-gray-200"
+                    ? "border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-primary/20"
+                    : isWeekend
+                    ? "border-gray-200 bg-gradient-to-br from-gray-50/50 to-gray-100/30"
+                    : "border-gray-200 bg-white"
                 }
+                hover:scale-[1.02] hover:border-primary/30
+                group
               `}
-              >
-                {/* Day Header */}
-                <button
-                  onClick={() => onDayClick(day)}
-                  className={`
-                  p-4 sm:p-3 text-center rounded-t-xl transition-all touch-manipulation
+            >
+              {/* Enhanced Day Header */}
+              <button
+                onClick={() => onDayClick(day)}
+                className={`
+                  p-5 sm:p-6 text-center rounded-t-2xl transition-all touch-manipulation
+                  relative overflow-hidden
                   ${
                     totalSlots === 0
-                      ? "hover:bg-primary/5 active:bg-primary/10 border-b border-dashed border-primary/30"
-                      : "hover:bg-gray-50/50 active:bg-gray-100"
+                      ? "hover:bg-primary/10 active:bg-primary/15 border-b-2 border-dashed border-primary/40"
+                      : "hover:bg-gray-50/80 active:bg-gray-100/80"
                   }
                 `}
-                >
-                  <div className="text-xs font-medium text-gray-600 mb-1">
+                aria-label={`View ${getDayName(day)} ${getMonthDay(
+                  day
+                )} schedule`}
+              >
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-transparent"></div>
+                </div>
+
+                <div className="relative z-10">
+                  <div className="text-xs sm:text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                     {getDayName(day, false)}
                   </div>
                   <div
-                    className={`text-2xl sm:text-xl md:text-2xl font-bold ${
+                    className={`text-3xl sm:text-4xl font-bold mb-2 ${
                       isToday ? "text-primary" : "text-gray-900"
                     }`}
                   >
                     {getMonthDay(day)}
                   </div>
-                  <div className="text-[10px] sm:hidden text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 mb-1">
                     {formatDate(day, "MMM yyyy")}
                   </div>
-                </button>
 
-                {/* Time Slot Cards */}
-                <div className="flex-1 p-3 sm:p-2 space-y-2 sm:space-y-1 overflow-y-auto">
-                  {daySlotGroups.slice(0, 5).map((slotGroup, groupIndex) => (
-                    <div key={`group-${groupIndex}`} className="relative">
-                      {slotGroup.length > 1 && (
-                        <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold z-10">
-                          {slotGroup.length}
-                        </div>
-                      )}
-                      {slotGroup.map((slot) => {
-                        const overlapInfo = getOverlapInfo(slot, slotGroup);
-                        return (
-                          <button
-                            key={slot.id}
-                            onClick={() => onDayClick(day)}
-                            className={`
-                            w-full text-left px-3 sm:px-2 py-2.5 sm:py-2 
-                            rounded-lg sm:rounded-md text-sm sm:text-xs
-                            transition-all hover:shadow-md active:scale-98
-                            border-l-3 font-medium
-                            touch-manipulation min-h-[52px] sm:min-h-auto
-                            ${slotGroup.length > 1 ? "mb-1" : ""}
-                            ${overlapInfo.offset > 0 ? "ml-2 opacity-90" : ""}
+                  {/* Event Count Badge */}
+                  {totalSlots > 0 && (
+                    <div
+                      className={`
+                      inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                      ${
+                        isToday
+                          ? "bg-primary text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }
+                    `}
+                    >
+                      <span className="mr-1">📅</span>
+                      {totalSlots} event{totalSlots !== 1 ? "s" : ""}
+                    </div>
+                  )}
+                </div>
+              </button>
+
+              {/* Enhanced Time Slot Cards */}
+              <div className="flex-1 p-4 sm:p-5 space-y-3 overflow-y-auto">
+                {daySlotGroups.slice(0, 6).map((slotGroup, groupIndex) => (
+                  <div key={`group-${groupIndex}`} className="relative">
+                    {slotGroup.length > 1 && (
+                      <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold z-10 shadow-lg">
+                        {slotGroup.length}
+                      </div>
+                    )}
+                    {slotGroup.map((slot) => {
+                      const overlapInfo = getOverlapInfo(slot, slotGroup);
+                      return (
+                        <button
+                          key={slot.id}
+                          onClick={() => onDayClick(day)}
+                          onContextMenu={(e) => handleSlotLongPress(e, slot)}
+                          className={`
+                            w-full text-left px-4 py-3 
+                            rounded-xl text-sm
+                            transition-all duration-200 hover:shadow-lg active:scale-[0.98]
+                            border-l-4 font-medium
+                            touch-manipulation min-h-[60px]
+                            ${slotGroup.length > 1 ? "mb-2" : ""}
+                            ${overlapInfo.offset > 0 ? "ml-3 opacity-90" : ""}
                             ${
                               slot.status === "planned"
-                                ? "bg-gray-100 border-gray-400 text-gray-700 active:bg-gray-200"
+                                ? "bg-gray-100 border-gray-400 text-gray-700 hover:bg-gray-200 active:bg-gray-300"
                                 : ""
                             }
                             ${
                               slot.status === "checked-in"
-                                ? "bg-yellow-100 border-yellow-400 text-yellow-800 active:bg-yellow-200"
+                                ? "bg-yellow-100 border-yellow-400 text-yellow-800 hover:bg-yellow-200 active:bg-yellow-300"
                                 : ""
                             }
                             ${
                               slot.status === "confirmed"
-                                ? "bg-green-100 border-green-500 text-green-800 active:bg-green-200"
+                                ? "bg-green-100 border-green-500 text-green-800 hover:bg-green-200 active:bg-green-300"
                                 : ""
                             }
                             ${
                               slot.status === "missed"
-                                ? "bg-red-100 border-red-400 text-red-800 active:bg-red-200"
+                                ? "bg-red-100 border-red-400 text-red-800 hover:bg-red-200 active:bg-red-300"
+                                : ""
+                            }
+                            ${
+                              slot.status === "sick"
+                                ? "bg-orange-100 border-orange-400 text-orange-800 hover:bg-orange-200 active:bg-orange-300"
+                                : ""
+                            }
+                            ${
+                              slot.status === "away"
+                                ? "bg-orange-100 border-orange-400 text-orange-800 hover:bg-orange-200 active:bg-orange-300"
                                 : ""
                             }
                           `}
-                            style={{
-                              width:
-                                slotGroup.length > 1
-                                  ? `${overlapInfo.width}%`
-                                  : "100%",
-                              marginLeft:
-                                overlapInfo.offset > 0
-                                  ? `${overlapInfo.offset}px`
-                                  : "0",
-                            }}
-                            title={`${slot.title}${
+                          style={{
+                            width:
                               slotGroup.length > 1
-                                ? ` (${slotGroup.length} overlapping)`
-                                : ""
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="font-bold text-sm sm:text-xs mb-0.5">
-                                {slot.startTime}
-                              </div>
-                              {slotGroup.length > 1 && (
-                                <div className="text-xs opacity-60">📋</div>
-                              )}
+                                ? `${overlapInfo.width}%`
+                                : "100%",
+                            marginLeft:
+                              overlapInfo.offset > 0
+                                ? `${overlapInfo.offset}px`
+                                : "0",
+                          }}
+                          title={`${slot.title}${
+                            slotGroup.length > 1
+                              ? ` (${slotGroup.length} overlapping)`
+                              : ""
+                          }`}
+                          aria-label={`${slot.title} at ${slot.startTime}`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="font-bold text-sm">
+                              {slot.startTime}
                             </div>
-                            <div className="truncate text-xs sm:text-[10px] opacity-90">
-                              {slot.title}
+                            {slotGroup.length > 1 && (
+                              <div className="text-xs opacity-60">📋</div>
+                            )}
+                          </div>
+                          <div className="truncate text-sm font-medium opacity-90">
+                            {slot.title}
+                          </div>
+                          {slot.notes && (
+                            <div className="text-xs text-gray-600 mt-1 truncate">
+                              {slot.notes}
                             </div>
-                          </button>
-                        );
-                      })}
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+
+                {totalSlots > 6 && (
+                  <button
+                    onClick={() => onDayClick(day)}
+                    className="w-full text-center text-sm text-gray-500 hover:text-primary active:text-primary-dark py-3 font-semibold touch-manipulation bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    +{totalSlots - 6} more events
+                  </button>
+                )}
+
+                {totalSlots === 0 && (
+                  <button
+                    onClick={() => onDayClick(day)}
+                    className="w-full text-center text-gray-400 py-8 hover:text-primary active:text-primary-dark transition-colors touch-manipulation rounded-xl hover:bg-gray-50"
+                  >
+                    <div className="text-4xl mb-3 opacity-40">➕</div>
+                    <div className="text-sm font-medium opacity-60">
+                      Tap to add event
                     </div>
-                  ))}
-                  {totalSlots > 5 && (
-                    <button
-                      onClick={() => onDayClick(day)}
-                      className="w-full text-center text-xs sm:text-xs text-gray-500 hover:text-primary active:text-primary-dark py-2 font-semibold touch-manipulation"
-                    >
-                      +{totalSlots - 5} more
-                    </button>
-                  )}
-                  {totalSlots === 0 && (
-                    <button
-                      onClick={() => onDayClick(day)}
-                      className="w-full text-center text-gray-400 py-4 sm:py-3 hover:text-primary active:text-primary-dark transition-colors touch-manipulation"
-                    >
-                      <div className="text-2xl sm:text-xl mb-1 opacity-40">
-                        ➕
-                      </div>
-                      <div className="text-[10px] sm:text-[9px] font-medium opacity-60">
-                        Tap to add
-                      </div>
-                    </button>
-                  )}
-                </div>
+                  </button>
+                )}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Mobile Swipe Indicator */}
-      <div className="sm:hidden text-center mt-3 text-xs text-gray-400">
-        ← Swipe to see all days →
+      {/* Universal Swipe Indicator */}
+      <div className="text-center mt-4 text-sm text-gray-500">
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-lg">👆</span>
+          <span>Swipe or scroll to see all days</span>
+          <span className="text-lg">👆</span>
+        </div>
       </div>
 
       {/* Add Time Slot CTA */}
