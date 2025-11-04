@@ -460,11 +460,7 @@ export default function DayView({ date, onClose }: DayViewProps) {
                                 {slot.subtitle}
                               </p>
                             )}
-                            {slot.isRecurring && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                🔁 Recurring
-                              </span>
-                            )}
+                            {/* Recurring label removed per UX */}
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500 ml-0 sm:ml-[4.5rem]">
                             Ends at {slot.endTime}
@@ -503,63 +499,61 @@ export default function DayView({ date, onClose }: DayViewProps) {
                         </div>
                       </div>
 
-                      {/* Bulk Operations for Recurring Slots */}
+                      {/* Recurring actions moved into overflow menu */}
                       {slot.isRecurring && slot.recurringGroupId && (
-                        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-medium text-blue-800">
-                              🔁 Recurring Series (
-                              {getRecurringSlots(slot.recurringGroupId).length}{" "}
-                              slots)
-                            </span>
-                          </div>
-                          <div className="flex gap-1 flex-wrap">
-                            {canEditSlot(user, slot, userRole) && (
-                              <button
-                                onClick={() =>
-                                  handleBulkEdit(slot.recurringGroupId!)
-                                }
-                                className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition-colors"
-                              >
-                                ✏️ Edit All
-                              </button>
-                            )}
-                            {canPerformBulkOperations(user, userRole) && (
-                              <>
-                                <button
-                                  onClick={() =>
-                                    handleBulkStatusChange(
-                                      slot.recurringGroupId!,
-                                      "checked-in"
-                                    )
-                                  }
-                                  className="text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded transition-colors"
-                                >
-                                  ✅ Check In All
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleBulkStatusChange(
-                                      slot.recurringGroupId!,
-                                      "confirmed"
-                                    )
-                                  }
-                                  className="text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded transition-colors"
-                                >
-                                  🔒 Confirm All
-                                </button>
-                              </>
-                            )}
-                            {canDeleteSlot(user, slot, userRole) && (
-                              <button
-                                onClick={() =>
-                                  handleBulkDelete(slot.recurringGroupId!)
-                                }
-                                className="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded transition-colors"
-                              >
-                                🗑️ Delete All
-                              </button>
-                            )}
+                        <div className="mb-3">
+                          <div className="relative">
+                            <details className="inline-block">
+                              <summary className="cursor-pointer select-none text-sm text-gray-700 flex items-center gap-1">
+                                ⋯ More ({getRecurringSlots(slot.recurringGroupId).length})
+                              </summary>
+                              <div className="absolute mt-2 z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[200px]">
+                                <div className="flex flex-col gap-1">
+                                  {canEditSlot(user, slot, userRole) && (
+                                    <button
+                                      onClick={() => handleBulkEdit(slot.recurringGroupId!)}
+                                      className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-900"
+                                    >
+                                      ✏️ Edit All ({getRecurringSlots(slot.recurringGroupId).length})
+                                    </button>
+                                  )}
+                                  {canPerformBulkOperations(user, userRole) && (
+                                    <>
+                                      <button
+                                        onClick={() =>
+                                          handleBulkStatusChange(
+                                            slot.recurringGroupId!,
+                                            "checked-in"
+                                          )
+                                        }
+                                        className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-900"
+                                      >
+                                        ✅ Check In All ({getRecurringSlots(slot.recurringGroupId).length})
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleBulkStatusChange(
+                                            slot.recurringGroupId!,
+                                            "confirmed"
+                                          )
+                                        }
+                                        className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-900"
+                                      >
+                                        🔒 Confirm All ({getRecurringSlots(slot.recurringGroupId).length})
+                                      </button>
+                                    </>
+                                  )}
+                                  {canDeleteSlot(user, slot, userRole) && (
+                                    <button
+                                      onClick={() => handleBulkDelete(slot.recurringGroupId!)}
+                                      className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-red-700"
+                                    >
+                                      🗑️ Delete All ({getRecurringSlots(slot.recurringGroupId).length})
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </details>
                           </div>
                         </div>
                       )}
