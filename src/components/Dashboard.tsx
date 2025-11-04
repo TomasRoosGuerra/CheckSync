@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { subscribeToNotifications } from "../services/requestService";
+import { subscribeToNotifications, createNotification } from "../services/requestService";
 import { useStore } from "../store";
 import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
@@ -25,6 +25,7 @@ export default function Dashboard() {
     detectedConflicts,
     setCurrentWorkspace,
     setNotifications,
+    allUserTimeSlots,
   } = useStore();
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [showExport, setShowExport] = useState(false);
@@ -43,6 +44,72 @@ export default function Dashboard() {
     const unsubscribe = subscribeToNotifications(user.id, setNotifications);
     return () => unsubscribe();
   }, [user, setNotifications]);
+
+  // Missed check-in notifications (client-side best effort)
+  useEffect(() => {
+    if (!user) return;
+
+    let intervalId: number | undefined;
+
+    const ensurePermission = async () => {
+      try {
+        if ("Notification" in window && Notification.permission === "default") {
+          await Notification.requestPermission();
+        }
+      } catch {}
+    };
+
+    const maybeNotify = async () => {
+      const now = new Date();
+      for (const slot of allUserTimeSlots) {
+        // Only for participant, planned, and not already notified
+        if (!slot.participantIds.includes(user.id)) continue;
+        if (slot.status !== "planned") continue;
+        if (slot.missedNotifiedAt) continue;
+
+        // Compute slot start datetime
+        const start = new Date(`${slot.date}T${slot.startTime}:00`);
+        if (start <= now) {
+          try {
+            // Create in-app notification
+            await createNotification(
+              user.id,
+              "missed_checkin",
+              "Missed check-in",
+              `${slot.title} started at ${slot.startTime}. Tap to open and check in.",
+              slot.workspaceId
+            );
+
+            // Mark slot to avoid duplicate notifications
+            try {
+              const { updateTimeSlot } = await import("../services/firestoreService");
+              await updateTimeSlot(slot.id, { missedNotifiedAt: Date.now() });
+            } catch {}
+
+            // Browser notification (if permitted)
+            if ("Notification" in window && Notification.permission === "granted") {
+              try {
+                new Notification("Missed check-in", {
+                  body: `${slot.title} started at ${slot.startTime}`,
+                });
+              } catch {}
+            }
+          } catch (e) {
+            console.warn("Failed to create missed check-in notification", e);
+          }
+        }
+      }
+    };
+
+    ensurePermission();
+    // Run immediately and then every minute
+    maybeNotify();
+    intervalId = window.setInterval(maybeNotify, 60 * 1000);
+
+    return () => {
+      if (intervalId) window.clearInterval(intervalId);
+    };
+  }, [user, allUserTimeSlots]);
 
   // Get user's role in current workspace
   const userRole =

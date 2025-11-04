@@ -40,14 +40,14 @@ export default function MobileActionSheet({
   if (!isOpen || !slot) return null;
 
   const actions = [];
-  
+
   // Debug logging
   console.log("MobileActionSheet - Slot status:", slot.status);
   console.log("MobileActionSheet - User can check in:", canCheckIn(user, slot));
 
   // Check In / Undo Check In
-  if (canCheckIn(user, slot)) {
-    if (slot.status === "planned") {
+  if (slot.status === "planned") {
+    if (canCheckIn(user, slot)) {
       actions.push({
         id: "checkin",
         icon: "✅",
@@ -56,16 +56,16 @@ export default function MobileActionSheet({
         action: () => onCheckIn(slot),
         color: "bg-yellow-500",
       });
-    } else if (slot.status === "checked-in") {
-      actions.push({
-        id: "undo-checkin",
-        icon: "↩️",
-        title: "Undo Check In",
-        subtitle: "Return to planned status",
-        action: () => onUndoCheckIn(slot),
-        color: "bg-yellow-500",
-      });
     }
+  } else if (slot.status === "checked-in") {
+    actions.push({
+      id: "undo-checkin",
+      icon: "↩️",
+      title: "Undo Check In",
+      subtitle: "Return to planned status",
+      action: () => onUndoCheckIn(slot),
+      color: "bg-yellow-500",
+    });
   }
 
   // Confirm / Undo Confirm
@@ -131,7 +131,10 @@ export default function MobileActionSheet({
   }
 
   // Debug logging
-  console.log("MobileActionSheet - Generated actions:", actions.map(a => a.id));
+  console.log(
+    "MobileActionSheet - Generated actions:",
+    actions.map((a) => a.id)
+  );
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">

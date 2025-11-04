@@ -81,9 +81,12 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
                           {slot.endTime}
                         </span>
                       </div>
-                      <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-0.5">
                         {slot.title}
                       </h3>
+                      {slot.subtitle && (
+                        <p className="text-sm text-gray-700">{slot.subtitle}</p>
+                      )}
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusBadgeClasses(

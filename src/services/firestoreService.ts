@@ -200,6 +200,11 @@ export const updateTimeSlot = async (
         ? Timestamp.fromMillis(updates.sickAwayAt)
         : null;
     }
+    if (updates.missedNotifiedAt !== undefined) {
+      firestoreUpdates.missedNotifiedAt = updates.missedNotifiedAt
+        ? Timestamp.fromMillis(updates.missedNotifiedAt)
+        : null;
+    }
 
     console.log("Updating slot in Firestore:", slotId, firestoreUpdates);
     await updateDoc(doc(db, SLOTS_COLLECTION, slotId), firestoreUpdates);
@@ -249,6 +254,9 @@ export const subscribeToWorkspaceTimeSlots = (
           checkedInAt: convertOptionalFirestoreTimestamp(data.checkedInAt),
           confirmedAt: convertOptionalFirestoreTimestamp(data.confirmedAt),
           sickAwayAt: convertOptionalFirestoreTimestamp(data.sickAwayAt),
+          missedNotifiedAt: convertOptionalFirestoreTimestamp(
+            data.missedNotifiedAt
+          ),
         } as TimeSlot);
       });
 

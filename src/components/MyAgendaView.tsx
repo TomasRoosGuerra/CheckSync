@@ -176,13 +176,13 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
   };
 
   const handleQuickUndoCheckIn = async (slot: TimeSlot) => {
-    console.log("handleQuickUndoCheckIn called for slot:", slot.id, "status:", slot.status);
-    console.log("User can check in:", canCheckIn(user, slot));
-    
-    if (!canCheckIn(user, slot)) {
-      alert("You don't have permission to undo check-in for this slot.");
-      return;
-    }
+    console.log(
+      "handleQuickUndoCheckIn called for slot:",
+      slot.id,
+      "status:",
+      slot.status
+    );
+    // Undo should always be possible
 
     try {
       const updates = {
@@ -415,6 +415,11 @@ export default function MyAgendaView({ onSlotClick }: MyAgendaViewProps) {
                           <h3 className="font-semibold text-lg text-gray-900">
                             {slot.title}
                           </h3>
+                          {slot.subtitle && (
+                            <p className="text-sm text-gray-700 mt-1">
+                              {slot.subtitle}
+                            </p>
+                          )}
                           {slot.notes && (
                             <p className="text-sm text-gray-600 mt-1">
                               {slot.notes}

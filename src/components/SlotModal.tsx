@@ -27,6 +27,7 @@ export default function SlotModal({
   const { user, users, currentWorkspace, labels } = useStore();
 
   const [title, setTitle] = useState(slot?.title || "");
+  const [subtitle, setSubtitle] = useState(slot?.subtitle || "");
   const [startTime, setStartTime] = useState(slot?.startTime || "09:00");
   const [endTime, setEndTime] = useState(slot?.endTime || "10:00");
 
@@ -91,6 +92,7 @@ export default function SlotModal({
   useEffect(() => {
     if (slot) {
       setTitle(slot.title);
+      setSubtitle(slot.subtitle || "");
       setStartTime(slot.startTime);
       setEndTime(slot.endTime);
       setParticipantIds(slot.participantIds);
@@ -155,6 +157,7 @@ export default function SlotModal({
         console.log("📝 Updating existing slot:", slot.id);
         const updateData: any = {
           title,
+          subtitle,
           date: customDate,
           startTime,
           endTime,
@@ -203,6 +206,7 @@ export default function SlotModal({
         > = {
           workspaceId: currentWorkspace.id,
           title,
+          subtitle,
           startTime,
           endTime,
           participantIds,
@@ -314,6 +318,19 @@ export default function SlotModal({
                 className="input-field text-base"
                 placeholder="e.g., Team Meeting"
                 required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subtitle (optional)
+              </label>
+              <input
+                type="text"
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                className="input-field text-base"
+                placeholder="e.g., Court 2 · 09:00–10:00"
               />
             </div>
 

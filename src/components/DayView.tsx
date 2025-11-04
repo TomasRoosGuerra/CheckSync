@@ -194,13 +194,13 @@ export default function DayView({ date, onClose }: DayViewProps) {
   };
 
   const handleUndoCheckIn = async (slot: TimeSlot) => {
-    console.log("handleUndoCheckIn called for slot:", slot.id, "status:", slot.status);
-    console.log("User can check in:", canCheckIn(user, slot));
-    
-    if (!canCheckIn(user, slot)) {
-      alert("You don't have permission to undo check-in for this slot.");
-      return;
-    }
+    console.log(
+      "handleUndoCheckIn called for slot:",
+      slot.id,
+      "status:",
+      slot.status
+    );
+    // Undo should always be possible
 
     if (confirm("Undo check-in and return to planned status?")) {
       try {
@@ -455,6 +455,11 @@ export default function DayView({ date, onClose }: DayViewProps) {
                             <h3 className="font-semibold text-base sm:text-lg text-gray-900">
                               {slot.title}
                             </h3>
+                            {slot.subtitle && (
+                              <p className="text-sm text-gray-700">
+                                {slot.subtitle}
+                              </p>
+                            )}
                             {slot.isRecurring && (
                               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
                                 🔁 Recurring

@@ -1,6 +1,12 @@
 export type UserRole = "participant" | "verifier" | "manager" | "admin";
 
-export type SlotStatus = "planned" | "checked-in" | "confirmed" | "missed" | "sick" | "away";
+export type SlotStatus =
+  | "planned"
+  | "checked-in"
+  | "confirmed"
+  | "missed"
+  | "sick"
+  | "away";
 
 export interface User {
   id: string;
@@ -59,7 +65,8 @@ export interface Notification {
     | "join_request"
     | "request_approved"
     | "request_rejected"
-    | "workspace_invite";
+    | "workspace_invite"
+    | "missed_checkin";
   title: string;
   message: string;
   workspaceId?: string;
@@ -86,6 +93,7 @@ export interface TimeSlot {
   id: string;
   workspaceId: string; // Belongs to a workspace
   title: string;
+  subtitle?: string;
   date: string; // ISO date string
   startTime: string; // HH:mm
   endTime: string; // HH:mm
@@ -107,6 +115,7 @@ export interface TimeSlot {
   labelProperties?: Record<string, string | number>; // Values for label properties
   timezone?: string; // IANA timezone (e.g., "America/New_York")
   allDay?: boolean; // For all-day events
+  missedNotifiedAt?: number; // timestamp when missed check-in notification was sent
 }
 
 export interface AttendanceRecord {

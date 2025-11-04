@@ -91,7 +91,10 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
       setActiveTab("members");
       // State will update via subscription in App.tsx
     } catch (error: unknown) {
-      if (error instanceof Error && error.message.includes("already a member")) {
+      if (
+        error instanceof Error &&
+        error.message.includes("already a member")
+      ) {
         alert("⚠️ This user is already a member of this workspace.");
       } else {
         alert("Failed to add member.");
@@ -231,7 +234,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
               style={{
-                color: activeTab === "members" ? "white" : "#374151"
+                color: activeTab === "members" ? "white" : "#374151",
               }}
             >
               👥 Members ({currentWorkspaceUsers.length})
@@ -371,7 +374,9 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                                   <option value="admin">👑 Admin</option>
                                 </select>
                                 <button
-                                  onClick={() => handleRemoveMember(member.id, member.name)}
+                                  onClick={() =>
+                                    handleRemoveMember(member.id, member.name)
+                                  }
                                   disabled={updating === member.id}
                                   className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
@@ -419,29 +424,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
           </div>
         )}
 
-        {/* DEBUG: Always show leave button for testing */}
-        {user && currentWorkspace && (
-          <div className="border-t border-gray-200 p-4 sm:p-6 bg-yellow-50">
-            <div className="text-xs text-gray-600 mb-2">DEBUG INFO:</div>
-            <div className="text-xs text-gray-600 mb-2">
-              User: {user.name} ({user.id})
-            </div>
-            <div className="text-xs text-gray-600 mb-2">
-              Workspace: {currentWorkspace.name} (Owner:{" "}
-              {currentWorkspace.ownerId})
-            </div>
-            <div className="text-xs text-gray-600 mb-2">
-              Can Leave:{" "}
-              {canLeaveWorkspace(user, currentWorkspace) ? "YES" : "NO"}
-            </div>
-            <button
-              onClick={handleLeaveWorkspace}
-              className="w-full bg-orange-50 hover:bg-orange-100 text-orange-700 font-medium py-2 px-4 rounded-lg transition-colors border border-orange-200 text-sm"
-            >
-              🚪 DEBUG: Force Leave Workspace
-            </button>
-          </div>
-        )}
+        {/* Debug block removed in production */}
       </div>
 
       {/* Enhanced Member Adder Modal */}
