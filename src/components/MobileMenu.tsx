@@ -3,7 +3,7 @@ import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 
 interface MobileMenuProps {
   onClose: () => void;
-  onViewModeChange: (mode: "week" | "agenda" | "my-agenda") => void;
+  onViewModeChange: (mode: "week" | "agenda") => void;
   onNotificationsClick: () => void;
   onTeamPanelClick: () => void;
   onExportClick: () => void;
@@ -46,14 +46,6 @@ export default function MobileMenu({
       icon: "📋",
       label: "Workspace Agenda",
       action: () => onViewModeChange("agenda"),
-    },
-    {
-      id: "my-agenda",
-      icon: "✨",
-      label: "My Agenda",
-      action: () => onViewModeChange("my-agenda"),
-      badge:
-        detectedConflicts.length > 0 ? detectedConflicts.length : undefined,
     },
     {
       id: "notifications",

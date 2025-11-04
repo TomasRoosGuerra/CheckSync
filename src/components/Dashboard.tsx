@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { subscribeToNotifications, createNotification } from "../services/requestService";
+import {
+  createNotification,
+  subscribeToNotifications,
+} from "../services/requestService";
 import { useStore } from "../store";
 import { canExportData, getUserWorkspaceRole } from "../utils/permissions";
 import AgendaView from "./AgendaView";
 import DayView from "./DayView";
 import Export from "./Export";
 import MobileMenu from "./MobileMenu";
-import MyAgendaView from "./MyAgendaView";
 import NotificationsPanel from "./NotificationsPanel";
 import Settings from "./Settings";
 import TeamPanel from "./TeamPanel";
@@ -22,7 +24,6 @@ export default function Dashboard() {
     notifications,
     viewMode,
     setViewMode,
-    detectedConflicts,
     setCurrentWorkspace,
     setNotifications,
     allUserTimeSlots,
@@ -82,12 +83,17 @@ export default function Dashboard() {
 
             // Mark slot to avoid duplicate notifications
             try {
-              const { updateTimeSlot } = await import("../services/firestoreService");
+              const { updateTimeSlot } = await import(
+                "../services/firestoreService"
+              );
               await updateTimeSlot(slot.id, { missedNotifiedAt: Date.now() });
             } catch {}
 
             // Browser notification (if permitted)
-            if ("Notification" in window && Notification.permission === "granted") {
+            if (
+              "Notification" in window &&
+              Notification.permission === "granted"
+            ) {
               try {
                 new Notification("Missed check-in", {
                   body: `${slot.title} started at ${slot.startTime}`,
@@ -169,7 +175,7 @@ export default function Dashboard() {
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   style={{
-                    color: viewMode === "week" ? "white" : "#111827"
+                    color: viewMode === "week" ? "white" : "#111827",
                   }}
                   title="Week View"
                 >
@@ -183,47 +189,15 @@ export default function Dashboard() {
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   style={{
-                    color: viewMode === "agenda" ? "white" : "#111827"
+                    color: viewMode === "agenda" ? "white" : "#111827",
                   }}
                   title="Workspace Agenda"
                 >
                   📋 Agenda
                 </button>
-                <button
-                  onClick={() => setViewMode("my-agenda")}
-                  className={`py-2 px-3 text-sm font-medium touch-manipulation rounded-full relative ${
-                    viewMode === "my-agenda"
-                      ? "bg-primary shadow-md"
-                      : "bg-gray-100 hover:bg-gray-200"
-                  }`}
-                  style={{
-                    color: viewMode === "my-agenda" ? "white" : "#111827"
-                  }}
-                  title="My Agenda"
-                >
-                  ✨ My Agenda
-                  {detectedConflicts.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                      {detectedConflicts.length}
-                    </span>
-                  )}
-                </button>
               </div>
 
               {/* Action Buttons */}
-              <button
-                onClick={() => setShowNotifications(true)}
-                className="btn-secondary py-2 px-3 text-sm touch-manipulation relative"
-                title="Notifications"
-              >
-                <span className="text-base">🔔</span>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-
               <button
                 onClick={() => setShowTeamPanel(true)}
                 className="btn-secondary py-2 px-3 text-sm touch-manipulation"
@@ -278,6 +252,20 @@ export default function Dashboard() {
                   />
                 </svg>
               </button>
+
+              {/* Notifications - always furthest right */}
+              <button
+                onClick={() => setShowNotifications(true)}
+                className="btn-secondary py-2 px-3 text-sm touch-manipulation relative"
+                title="Notifications"
+              >
+                <span className="text-base">🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Mobile Navigation */}
@@ -287,7 +275,7 @@ export default function Dashboard() {
                 <span className="text-sm font-medium text-gray-700">
                   {viewMode === "week" && "📅 Week"}
                   {viewMode === "agenda" && "📋 Agenda"}
-                  {viewMode === "my-agenda" && "✨ My Agenda"}
+                  
                 </span>
               </div>
 
@@ -347,15 +335,7 @@ export default function Dashboard() {
             </div>
             <AgendaView onSlotClick={setSelectedDay} />
           </div>
-        ) : (
-          <MyAgendaView
-            onSlotClick={(slot, workspace) => {
-              // Switch to workspace and open day view
-              setCurrentWorkspace(workspace);
-              setSelectedDay(new Date(slot.date + "T00:00:00"));
-            }}
-          />
-        )}
+        ) : null}
       </main>
 
       {/* Modals */}
