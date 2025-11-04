@@ -13,6 +13,7 @@ import {
   isWorkspaceOwner,
 } from "../utils/permissions";
 import EnhancedMemberAdder from "./EnhancedMemberAdder";
+import Avatar from "./Avatar";
 
 interface TeamPanelProps {
   onClose: () => void;
@@ -321,19 +322,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                           }`}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            {member.photoURL ? (
-                              <img
-                                src={member.photoURL}
-                                alt={member.name}
-                                className="w-12 h-12 rounded-full flex-shrink-0"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0">
-                                <span className="text-white font-bold text-lg">
-                                  {member.name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                            )}
+                            <Avatar name={member.name} photoURL={member.photoURL} size={48} />
                             <div className="min-w-0 flex-1">
                               <h4 className="font-semibold text-gray-900 truncate">
                                 {member.name}

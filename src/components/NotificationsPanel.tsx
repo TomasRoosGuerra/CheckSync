@@ -118,7 +118,7 @@ export default function NotificationsPanel({
               <h2 className="text-2xl font-bold text-gray-900">
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="ml-2 bg-red-500 text-white text-sm font-medium px-2 py-1 rounded-full">
+                  <span className="ml-2 bg-red-500 text-gray-900 text-sm font-medium px-2 py-1 rounded-full">
                     {unreadCount}
                   </span>
                 )}
@@ -169,7 +169,7 @@ export default function NotificationsPanel({
                     {/* Icon */}
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-                        <span className="text-white text-lg">
+                        <span className="text-gray-900 text-lg">
                           {notification.type === "join_request"
                             ? "🙋"
                             : notification.type === "request_approved"

@@ -109,7 +109,7 @@ export default function MobileMenu({
                   </span>
                 </div>
                 {item.badge && (
-                  <span className="bg-red-500 text-white text-sm font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                  <span className="bg-red-500 text-gray-900 text_sm font-bold w-6 h-6 rounded-full flex items-center justify-center">
                     {item.badge}
                   </span>
                 )}

@@ -265,7 +265,7 @@ function App() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">✓</span>
+            <span className="text-gray-900 font-bold text-2xl">✓</span>
           </div>
           <div className="text-xl font-semibold text-gray-900">CheckSync</div>
           <div className="text-gray-600 mt-2">Loading...</div>

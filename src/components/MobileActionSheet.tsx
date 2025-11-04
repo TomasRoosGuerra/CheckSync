@@ -143,8 +143,8 @@ export default function MobileActionSheet({
         <div className="bg-gradient-to-r from-gray-700 to-gray-900 text-white p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold">Slot Actions</h2>
-              <p className="text-gray-300 mt-1 text-sm">
+              <h2 className="text-xl font-bold text-gray-900">Slot Actions</h2>
+              <p className="text-gray-200 mt-1 text-sm">
                 {slot.title} - {slot.startTime}
               </p>
             </div>
@@ -167,7 +167,7 @@ export default function MobileActionSheet({
                   action.action();
                   onClose();
                 }}
-                className={`w-full p-4 rounded-2xl ${action.color} text-white hover:opacity-90 active:opacity-80 transition-opacity touch-manipulation`}
+                className={`w-full p-4 rounded-2xl ${action.color} text-gray-900 hover:opacity-90 active:opacity-80 transition-opacity touch-manipulation`}
               >
                 <div className="flex items-center gap-4">
                   <span className="text-2xl">{action.icon}</span>

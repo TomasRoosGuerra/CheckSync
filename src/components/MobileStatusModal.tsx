@@ -58,7 +58,7 @@ export default function MobileStatusModal({
         <div className="bg-gradient-to-r from-orange-400 to-orange-600 text-white p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-xl font-bold text-gray-900">
                 {!selectedStatus
                   ? "Mark Status"
                   : selectedStatus === "sick"
@@ -185,7 +185,7 @@ export default function MobileStatusModal({
                 <button
                   onClick={handleSubmit}
                   disabled={!reason.trim()}
-                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 px-6 rounded-xl font-bold text-lg transition-colors touch-manipulation"
+                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg_gray-300 disabled:cursor-not-allowed text-gray-900 py-4 px-6 rounded-xl font-bold text-lg transition-colors touch-manipulation"
                 >
                   Mark as {selectedStatus === "sick" ? "Sick" : "Away"}
                 </button>

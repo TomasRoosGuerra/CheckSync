@@ -212,7 +212,7 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                       inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                       ${
                         isToday
-                          ? "bg-primary text-white"
+                          ? "bg-primary text-gray-900"
                           : "bg-gray-200 text-gray-700"
                       }
                     `}
@@ -229,7 +229,7 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
                 {daySlotGroups.slice(0, 6).map((slotGroup, groupIndex) => (
                   <div key={`group-${groupIndex}`} className="relative">
                     {slotGroup.length > 1 && (
-                      <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold z-10 shadow-lg">
+                      <div className="absolute -top-2 -right-2 bg-blue-500 text-gray-900 text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold z-10 shadow-lg">
                         {slotGroup.length}
                       </div>
                     )}

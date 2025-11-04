@@ -153,7 +153,7 @@ export default function StatusContextMenu({
               <button
                 onClick={handleSubmit}
                 disabled={!reason.trim()}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-gray-900 py-2 px-4 rounded-lg font-medium transition-colors"
               >
                 Mark as {selectedStatus === "sick" ? "Sick" : "Away"}
               </button>

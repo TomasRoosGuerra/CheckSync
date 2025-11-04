@@ -47,7 +47,7 @@ export default function AgendaView({ onSlotClick }: AgendaViewProps) {
                 px-4 py-2 rounded-lg mb-2
                 ${
                   isToday
-                    ? "bg-primary text-white"
+                    ? "bg-primary text-gray-900"
                     : "bg-gray-100 text-gray-900"
                 }
               `}
