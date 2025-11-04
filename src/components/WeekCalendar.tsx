@@ -111,18 +111,21 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
           <button
             onClick={handlePrevWeek}
             className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm min-w-[44px]"
+            aria-label="Previous week"
           >
             ←
           </button>
           <button
             onClick={handleToday}
             className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm"
+            aria-label="Go to today"
           >
             Today
           </button>
           <button
             onClick={handleNextWeek}
             className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm min-w-[44px]"
+            aria-label="Next week"
           >
             →
           </button>

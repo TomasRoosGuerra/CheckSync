@@ -505,16 +505,28 @@ export default function DayView({ date, onClose }: DayViewProps) {
                           <div className="relative">
                             <details className="inline-block">
                               <summary className="cursor-pointer select-none text-sm text-gray-700 flex items-center gap-1">
-                                ⋯ More ({getRecurringSlots(slot.recurringGroupId).length})
+                                ⋯ More (
+                                {
+                                  getRecurringSlots(slot.recurringGroupId)
+                                    .length
+                                }
+                                )
                               </summary>
                               <div className="absolute mt-2 z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[200px]">
                                 <div className="flex flex-col gap-1">
                                   {canEditSlot(user, slot, userRole) && (
                                     <button
-                                      onClick={() => handleBulkEdit(slot.recurringGroupId!)}
+                                      onClick={() =>
+                                        handleBulkEdit(slot.recurringGroupId!)
+                                      }
                                       className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-900"
                                     >
-                                      ✏️ Edit All ({getRecurringSlots(slot.recurringGroupId).length})
+                                      ✏️ Edit All (
+                                      {
+                                        getRecurringSlots(slot.recurringGroupId)
+                                          .length
+                                      }
+                                      )
                                     </button>
                                   )}
                                   {canPerformBulkOperations(user, userRole) && (
@@ -528,7 +540,13 @@ export default function DayView({ date, onClose }: DayViewProps) {
                                         }
                                         className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-900"
                                       >
-                                        ✅ Check In All ({getRecurringSlots(slot.recurringGroupId).length})
+                                        ✅ Check In All (
+                                        {
+                                          getRecurringSlots(
+                                            slot.recurringGroupId
+                                          ).length
+                                        }
+                                        )
                                       </button>
                                       <button
                                         onClick={() =>
@@ -539,16 +557,29 @@ export default function DayView({ date, onClose }: DayViewProps) {
                                         }
                                         className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-900"
                                       >
-                                        🔒 Confirm All ({getRecurringSlots(slot.recurringGroupId).length})
+                                        🔒 Confirm All (
+                                        {
+                                          getRecurringSlots(
+                                            slot.recurringGroupId
+                                          ).length
+                                        }
+                                        )
                                       </button>
                                     </>
                                   )}
                                   {canDeleteSlot(user, slot, userRole) && (
                                     <button
-                                      onClick={() => handleBulkDelete(slot.recurringGroupId!)}
+                                      onClick={() =>
+                                        handleBulkDelete(slot.recurringGroupId!)
+                                      }
                                       className="text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-red-700"
                                     >
-                                      🗑️ Delete All ({getRecurringSlots(slot.recurringGroupId).length})
+                                      🗑️ Delete All (
+                                      {
+                                        getRecurringSlots(slot.recurringGroupId)
+                                          .length
+                                      }
+                                      )
                                     </button>
                                   )}
                                 </div>

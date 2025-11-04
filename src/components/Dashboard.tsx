@@ -142,6 +142,7 @@ export default function Dashboard() {
               <button
                 onClick={() => setShowWorkspaceSwitcher(true)}
                 className="text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+                aria-label="Switch workspace"
               >
                 <h1 className="text-base sm:text-xl font-bold text-gray-900 flex items-center gap-2">
                   {currentWorkspace?.name || "CheckSync"}
@@ -202,6 +203,7 @@ export default function Dashboard() {
                 onClick={() => setShowTeamPanel(true)}
                 className="btn-secondary py-2 px-3 text-sm touch-manipulation"
                 title="Manage Team & Workspaces"
+                aria-label="Manage team and workspaces"
               >
                 👥 Team
               </button>
@@ -210,6 +212,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => setShowExport(true)}
                   className="btn-secondary flex items-center gap-2 py-2 px-4 text-base"
+                  aria-label="Export data"
                 >
                   <svg
                     className="w-5 h-5"
@@ -231,6 +234,7 @@ export default function Dashboard() {
               <button
                 onClick={() => setShowSettings(true)}
                 className="btn-secondary py-2 px-3 min-w-[44px]"
+                aria-label="Open settings"
               >
                 <svg
                   className="w-5 h-5"
@@ -258,6 +262,7 @@ export default function Dashboard() {
                 onClick={() => setShowNotifications(true)}
                 className="btn-secondary py-2 px-3 text-sm touch-manipulation relative"
                 title="Notifications"
+                aria-label="Open notifications"
               >
                 <span className="text-base">🔔</span>
                 {unreadCount > 0 && (
@@ -283,6 +288,7 @@ export default function Dashboard() {
                 onClick={() => setShowMobileMenu(true)}
                 className="btn-secondary py-2 px-3 min-w-[44px]"
                 title="Menu"
+                aria-label="Open menu"
               >
                 <svg
                   className="w-5 h-5"
@@ -304,6 +310,7 @@ export default function Dashboard() {
                 onClick={() => setShowNotifications(true)}
                 className="btn-secondary py-2 px-3 min-w-[44px] relative"
                 title="Notifications"
+                aria-label="Open notifications"
               >
                 <span className="text-base">🔔</span>
                 {unreadCount > 0 && (
