@@ -198,8 +198,10 @@ export default function WorkspaceSelector({
           </button>
         </div>
 
-        {(loading || (user && workspaces.length === 0)) ? (
-          <div className="text-center py-8 text-gray-500">Loading workspaces...</div>
+        {loading || (user && workspaces.length === 0) ? (
+          <div className="text-center py-8 text-gray-500">
+            Loading workspaces...
+          </div>
         ) : (
           <>
             {/* Existing Workspaces */}

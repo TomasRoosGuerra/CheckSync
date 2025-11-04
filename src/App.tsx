@@ -1,24 +1,23 @@
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import WorkspaceSelector from "./components/WorkspaceSelector";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
 import {
   createUserProfile,
   getUserProfile,
   subscribeToWorkspaceTimeSlots,
 } from "./services/firestoreService";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "./firebase";
 import {
   detectTimeConflicts,
   subscribeToAllUserTimeSlots,
 } from "./services/unifiedAgendaService";
 import {
   getUserWorkspaces,
-  subscribeToWorkspaceMembers,
   subscribeToUserWorkspaceMemberships,
+  subscribeToWorkspaceMembers,
 } from "./services/workspaceService";
 import { useStore } from "./store";
 import type { User, Workspace } from "./types";
@@ -66,7 +65,10 @@ function App() {
 
           // Load user workspaces immediately to ensure they're available on first render
           try {
-            console.log("🏢 Loading initial workspaces for user:", firebaseUser.uid);
+            console.log(
+              "🏢 Loading initial workspaces for user:",
+              firebaseUser.uid
+            );
             const userWorkspaces = await getUserWorkspaces(firebaseUser.uid);
             console.log("✅ Initial workspaces loaded:", userWorkspaces.length);
             setWorkspaces(userWorkspaces);
@@ -201,27 +203,32 @@ function App() {
   useEffect(() => {
     if (!user) return;
 
-    console.log("🔗 Setting up workspace membership subscription for user:", user.id);
-    
+    console.log(
+      "🔗 Setting up workspace membership subscription for user:",
+      user.id
+    );
+
     let isActive = true; // Flag to prevent state updates after component unmounts
-    
+
     const unsubscribe = subscribeToUserWorkspaceMemberships(
       user.id,
       async (memberships) => {
         if (!isActive) return; // Don't update state if component has unmounted
-        
+
         try {
           console.log("📋 Workspace memberships updated:", memberships.length);
-          
+
           // Get workspace details for each membership
-          const workspaceIds = memberships.map(m => m.workspaceId);
+          const workspaceIds = memberships.map((m) => m.workspaceId);
           const workspaces: Workspace[] = [];
 
           for (const workspaceId of workspaceIds) {
             if (!isActive) break; // Stop processing if component unmounted
-            
+
             try {
-              const workspaceDoc = await getDoc(doc(db, "workspaces", workspaceId));
+              const workspaceDoc = await getDoc(
+                doc(db, "workspaces", workspaceId)
+              );
               if (workspaceDoc.exists()) {
                 const workspaceData = workspaceDoc.data();
                 // Filter out deleted workspaces
@@ -229,8 +236,10 @@ function App() {
                   workspaces.push({
                     id: workspaceDoc.id,
                     ...workspaceData,
-                    createdAt: workspaceData.createdAt?.toMillis() || Date.now(),
-                    updatedAt: workspaceData.updatedAt?.toMillis() || Date.now(),
+                    createdAt:
+                      workspaceData.createdAt?.toMillis() || Date.now(),
+                    updatedAt:
+                      workspaceData.updatedAt?.toMillis() || Date.now(),
                   } as Workspace);
                 } else {
                   console.log("🗑️ Skipping deleted workspace:", workspaceId);
@@ -244,7 +253,10 @@ function App() {
           }
 
           if (isActive) {
-            console.log("✅ Setting workspaces from subscription:", workspaces.length);
+            console.log(
+              "✅ Setting workspaces from subscription:",
+              workspaces.length
+            );
             setWorkspaces(workspaces);
           }
         } catch (error) {

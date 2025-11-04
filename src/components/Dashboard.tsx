@@ -175,7 +175,7 @@ export default function Dashboard() {
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   style={{
-                    color: viewMode === "week" ? "white" : "#111827",
+                    color: "#111827",
                   }}
                   title="Week View"
                 >
@@ -189,7 +189,7 @@ export default function Dashboard() {
                       : "bg-gray-100 hover:bg-gray-200"
                   }`}
                   style={{
-                    color: viewMode === "agenda" ? "white" : "#111827",
+                    color: "#111827",
                   }}
                   title="Workspace Agenda"
                 >

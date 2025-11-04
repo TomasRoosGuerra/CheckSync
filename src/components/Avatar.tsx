@@ -7,7 +7,12 @@ interface AvatarProps {
   rounded?: boolean;
 }
 
-export default function Avatar({ name, photoURL, size = 40, rounded = true }: AvatarProps) {
+export default function Avatar({
+  name,
+  photoURL,
+  size = 40,
+  rounded = true,
+}: AvatarProps) {
   const initials = (name || "?")
     .trim()
     .split(/\s+/)
@@ -39,11 +44,12 @@ export default function Avatar({ name, photoURL, size = 40, rounded = true }: Av
       aria-label={name}
       title={name}
     >
-      <span className="font-bold text-gray-900" style={{ fontSize: Math.max(12, size * 0.4) }}>
+      <span
+        className="font-bold text-gray-900"
+        style={{ fontSize: Math.max(12, size * 0.4) }}
+      >
         {initials}
       </span>
     </div>
   );
 }
-
-

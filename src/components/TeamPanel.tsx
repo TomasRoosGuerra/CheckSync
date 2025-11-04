@@ -12,8 +12,8 @@ import {
   getUserWorkspaceRole,
   isWorkspaceOwner,
 } from "../utils/permissions";
-import EnhancedMemberAdder from "./EnhancedMemberAdder";
 import Avatar from "./Avatar";
+import EnhancedMemberAdder from "./EnhancedMemberAdder";
 
 interface TeamPanelProps {
   onClose: () => void;
@@ -235,7 +235,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
               style={{
-                color: activeTab === "members" ? "white" : "#374151",
+                color: "#374151",
               }}
             >
               👥 Members ({currentWorkspaceUsers.length})
@@ -244,7 +244,7 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
               <button
                 onClick={() => setShowEnhancedAdder(true)}
                 className="px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap bg-primary hover:bg-primary-dark"
-                style={{ color: "white" }}
+                style={{ color: "#374151" }}
               >
                 ➕ Add Members
               </button>
@@ -322,7 +322,11 @@ export default function TeamPanel({ onClose }: TeamPanelProps) {
                           }`}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <Avatar name={member.name} photoURL={member.photoURL} size={48} />
+                            <Avatar
+                              name={member.name}
+                              photoURL={member.photoURL}
+                              size={48}
+                            />
                             <div className="min-w-0 flex-1">
                               <h4 className="font-semibold text-gray-900 truncate">
                                 {member.name}
