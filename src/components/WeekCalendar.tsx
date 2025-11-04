@@ -110,21 +110,21 @@ export default function WeekCalendar({ onDayClick }: WeekCalendarProps) {
         <div className="flex gap-2 justify-center sm:justify-end">
           <button
             onClick={handlePrevWeek}
-            className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm min-w-[44px]"
+            className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label="Previous week"
           >
             ←
           </button>
           <button
             onClick={handleToday}
-            className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm"
+            className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label="Go to today"
           >
             Today
           </button>
           <button
             onClick={handleNextWeek}
-            className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm min-w-[44px]"
+            className="btn-secondary py-2 px-4 sm:py-1.5 text-base sm:text-sm min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label="Next week"
           >
             →

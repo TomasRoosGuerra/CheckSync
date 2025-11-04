@@ -86,7 +86,7 @@ export default function MobileMenu({
             <h2 className="text-2xl font-bold text-gray-900">Menu</h2>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center transition-colors touch-manipulation"
+              className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               aria-label="Close menu"
             >
               <span className="text-lg">✕</span>
@@ -101,7 +101,7 @@ export default function MobileMenu({
                   item.action();
                   onClose();
                 }}
-                className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+                className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label={item.label}
               >
                 <div className="flex items-center gap-4">

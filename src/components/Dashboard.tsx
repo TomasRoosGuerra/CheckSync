@@ -141,7 +141,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => setShowWorkspaceSwitcher(true)}
-                className="text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+                className="text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="Switch workspace"
               >
                 <h1 className="text-base sm:text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -201,7 +201,7 @@ export default function Dashboard() {
               {/* Action Buttons */}
               <button
                 onClick={() => setShowTeamPanel(true)}
-                className="btn-secondary py-2 px-3 text-sm touch-manipulation"
+                className="btn-secondary py-2 px-3 text-sm touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 title="Manage Team & Workspaces"
                 aria-label="Manage team and workspaces"
               >
@@ -211,7 +211,7 @@ export default function Dashboard() {
               {canExportData(user, userRole) && (
                 <button
                   onClick={() => setShowExport(true)}
-                  className="btn-secondary flex items-center gap-2 py-2 px-4 text-base"
+                  className="btn-secondary flex items-center gap-2 py-2 px-4 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   aria-label="Export data"
                 >
                   <svg
@@ -233,7 +233,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => setShowSettings(true)}
-                className="btn-secondary py-2 px-3 min-w-[44px]"
+                className="btn-secondary py-2 px-3 min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 aria-label="Open settings"
               >
                 <svg
@@ -260,7 +260,7 @@ export default function Dashboard() {
               {/* Notifications - always furthest right */}
               <button
                 onClick={() => setShowNotifications(true)}
-                className="btn-secondary py-2 px-3 text-sm touch-manipulation relative"
+                className="btn-secondary py-2 px-3 text-sm touch-manipulation relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 title="Notifications"
                 aria-label="Open notifications"
               >
@@ -286,7 +286,7 @@ export default function Dashboard() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setShowMobileMenu(true)}
-                className="btn-secondary py-2 px-3 min-w-[44px]"
+                className="btn-secondary py-2 px-3 min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 title="Menu"
                 aria-label="Open menu"
               >
@@ -308,7 +308,7 @@ export default function Dashboard() {
               {/* Notifications Button (always visible) */}
               <button
                 onClick={() => setShowNotifications(true)}
-                className="btn-secondary py-2 px-3 min-w-[44px] relative"
+                className="btn-secondary py-2 px-3 min-w-[44px] relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 title="Notifications"
                 aria-label="Open notifications"
               >

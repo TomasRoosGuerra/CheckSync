@@ -2,9 +2,9 @@ import { signOut } from "firebase/auth";
 import { useState } from "react";
 import { auth } from "../firebase";
 import { useStore } from "../store";
+import Avatar from "./Avatar";
 import LabelManagement from "./LabelManagement";
 import WorkspaceSettings from "./WorkspaceSettings";
-import Avatar from "./Avatar";
 
 interface SettingsProps {
   onClose: () => void;
@@ -46,7 +46,11 @@ export default function Settings({ onClose }: SettingsProps) {
                 Profile
               </h3>
               <div className="card flex items-center gap-4">
-                <Avatar name={user?.name || "?"} photoURL={user?.photoURL} size={64} />
+                <Avatar
+                  name={user?.name || "?"}
+                  photoURL={user?.photoURL}
+                  size={64}
+                />
                 <div className="flex-1">
                   <div className="font-semibold text-gray-900">
                     {user?.name}
