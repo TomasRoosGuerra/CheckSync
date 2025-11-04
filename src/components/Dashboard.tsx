@@ -76,7 +76,7 @@ export default function Dashboard() {
               user.id,
               "missed_checkin",
               "Missed check-in",
-              `${slot.title} started at ${slot.startTime}. Tap to open and check in.",
+              `${slot.title} started at ${slot.startTime}. Tap to open and check in.`,
               slot.workspaceId
             );
 
